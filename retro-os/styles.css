@@ -1,0 +1,420 @@
+/* ============================================================
+   RetroOS — Design Tokens & Foundation
+   A retro-OS portfolio component kit.
+   Tokens live on :root and [data-theme]; everything composes
+   from them. No component hard-codes a raw color.
+   ============================================================ */
+
+/* ---------- Fonts ---------- */
+/* Chrome/display: Pixelify Sans · Mono/terminal: VT323 · Body: Hanken Grotesk */
+
+:root {
+  /* type */
+  --font-chrome: "Pixelify Sans", "Hanken Grotesk", system-ui, sans-serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+  --font-mono: "VT323", "Courier New", monospace;
+
+  /* radius (0 in 95-mode, themeable) */
+  --radius: 0px;
+  --radius-lg: 0px;
+
+  /* spacing scale (4px base) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* bevel widths */
+  --bevel: 2px;
+
+  /* z layers */
+  --z-desktop: 0;
+  --z-window: 100;
+  --z-taskbar: 9000;
+  --z-startmenu: 9500;
+  --z-menu: 9800;
+  --z-palette: 9900;
+  --z-modal: 9950;
+  --z-crt: 10000;
+  --z-boot: 10050;
+}
+
+/* ---------- LIGHT / VAPORWAVE "DAY" THEME ----------
+   Chunky beveled chrome, recolored to a dusk-lavender system
+   with the signature magenta→cyan title bars. Accent (neon,
+   user-chosen) drives selection / meters / highlights and is
+   swappable via Tweaks. --magenta / --cyan are the era anchors. */
+:root,
+[data-theme="light"] {
+  /* era anchors */
+  --magenta: #e83fb0;
+  --cyan: #1fb6d6;
+
+  /* accent (tweakable) — default = neon green/cyan */
+  --accent: #12c596;
+  --accent-2: #1fb6d6;
+  --accent-soft: #2ad6c4;
+
+  --surface: #cfc7e6;          /* dusk-lavender system face */
+  --surface-2: #e4ddf4;        /* lighter inset fields */
+  --surface-3: #faf6ff;        /* near-white fields */
+  --surface-deep: #a89bc8;
+
+  --bevel-light: #fdfaff;
+  --bevel-hilite: #e7dffa;
+  --bevel-shadow: #9484b5;
+  --bevel-dark: #4a3d6b;
+
+  --text: #281a47;
+  --text-dim: #6b5a8c;
+  --text-inverse: #ffffff;
+  --text-disabled: #9b8fb8;
+
+  --title-active-from: var(--magenta);
+  --title-active-to: var(--cyan);
+  --title-active-text: #ffffff;
+  --title-inactive-from: #9484b5;
+  --title-inactive-to: #b8acd2;
+  --title-inactive-text: #e7dffa;
+
+  --desktop-bg: #2a1a4a;
+  --desktop-text: #ffffff;
+
+  --selection-bg: var(--accent);
+  --selection-text: #04231b;
+
+  --win-shadow: 4px 4px 0 rgba(40, 20, 70, 0.35),
+    0 0 22px rgba(232, 63, 176, 0.12);
+  --field-glow: none;
+
+  --link: #b32fa0;
+  --ok: #0e9e74;
+  --warn: #c2790c;
+  --err: #d42e6b;
+}
+
+/* ---------- DARK / VAPORWAVE "NIGHT" CRT THEME ----------
+   Deep indigo-black surfaces, neon glow, same magenta/cyan/green
+   hue family lifted to full neon. */
+[data-theme="dark"] {
+  --magenta: #ff5fd2;
+  --cyan: #36e0e0;
+
+  --accent: #2de0a6;
+  --accent-2: #36e0e0;
+  --accent-soft: #1fb88a;
+
+  --surface: #221a38;
+  --surface-2: #160f28;
+  --surface-3: #0c081a;
+  --surface-deep: #0a0716;
+
+  --bevel-light: #4a3a72;
+  --bevel-hilite: #342654;
+  --bevel-shadow: #120c24;
+  --bevel-dark: #050310;
+
+  --text: #e6d9ff;
+  --text-dim: #9d8ac4;
+  --text-inverse: #0c081a;
+  --text-disabled: #5a4d7a;
+
+  --title-active-from: #c026a8;
+  --title-active-to: #1c8fa8;
+  --title-active-text: #ffffff;
+  --title-inactive-from: #1c1430;
+  --title-inactive-to: #2a1f48;
+  --title-inactive-text: #6a5a92;
+
+  --desktop-bg: #0a0618;
+  --desktop-text: #f0e6ff;
+
+  --selection-bg: var(--accent);
+  --selection-text: #04150c;
+
+  --win-shadow: 0 0 0 1px #000, 0 10px 30px rgba(0, 0, 0, 0.7),
+    0 0 26px rgba(255, 95, 210, 0.18);
+  --field-glow: 0 0 6px rgba(54, 224, 224, 0.3);
+
+  --link: #6fd0ff;
+  --ok: #2de0a6;
+  --warn: #ffcf5f;
+  --err: #ff6f9d;
+}
+
+/* ============================================================
+   Reset / base
+   ============================================================ */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: #000;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: var(--selection-bg); color: var(--selection-text); }
+
+button { font-family: inherit; }
+
+/* image-rendering crisp for pixel sprites */
+.pixelated { image-rendering: pixelated; }
+
+/* ============================================================
+   Bevels — the core retro primitive.
+   .bevel-out  = raised (buttons, window face, panels)
+   .bevel-in   = sunk   (fields, wells, pressed)
+   .bevel-out-thin / .bevel-in-thin = single-step group boxes
+   ============================================================ */
+.bevel-out {
+  border-style: solid;
+  border-width: var(--bevel);
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark)
+    var(--bevel-light);
+  box-shadow: inset 1px 1px 0 var(--bevel-hilite),
+    inset -1px -1px 0 var(--bevel-shadow);
+}
+.bevel-in {
+  border-style: solid;
+  border-width: var(--bevel);
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light)
+    var(--bevel-dark);
+  box-shadow: inset 1px 1px 0 var(--bevel-shadow),
+    inset -1px -1px 0 var(--bevel-hilite);
+}
+.bevel-out-thin {
+  border: 1px solid;
+  border-color: var(--bevel-light) var(--bevel-shadow) var(--bevel-shadow)
+    var(--bevel-light);
+}
+.bevel-in-thin {
+  border: 1px solid;
+  border-color: var(--bevel-shadow) var(--bevel-light) var(--bevel-light)
+    var(--bevel-shadow);
+}
+
+/* pressed state for raised things */
+.bevel-pressed {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light)
+    var(--bevel-dark) !important;
+  box-shadow: inset 1px 1px 0 var(--bevel-shadow) !important;
+}
+
+/* focus ring — dotted, period-correct */
+.focus-ring:focus-visible {
+  outline: 1px dotted var(--text);
+  outline-offset: -4px;
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes win-open {
+  from { transform: scale(0.96) translateY(6px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes win-minimize {
+  to { transform: scale(0.4) translateY(60vh); opacity: 0; }
+}
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes caret-blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
+@keyframes scan-roll { from { background-position-y: 0; } to { background-position-y: 6px; } }
+@keyframes flicker {
+  0%,100% { opacity: 0.97; }
+  50% { opacity: 1; }
+}
+@keyframes boot-cursor { 50% { opacity: 0; } }
+@keyframes dock-bounce {
+  0%,100% { transform: translateY(0); }
+  30% { transform: translateY(-10px); }
+}
+@keyframes pop-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ============================================================
+   CRT effect layer (toggle via [data-crt])
+   ============================================================ */
+.crt-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-crt);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+[data-crt="subtle"] .crt-layer,
+[data-crt="full"] .crt-layer { opacity: 1; }
+
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.16) 0px,
+    rgba(0, 0, 0, 0.16) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: multiply;
+}
+[data-crt="full"] .crt-scanlines { animation: scan-roll 0.5s steps(3) infinite; }
+
+.crt-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 55%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+}
+[data-crt="subtle"] .crt-vignette { opacity: 0.4; }
+
+.crt-glow {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+[data-crt="full"] .crt-glow {
+  display: block;
+  background: rgba(60, 255, 160, 0.025);
+  animation: flicker 0.15s infinite;
+}
+.crt-noise {
+  position: absolute;
+  inset: -50%;
+  display: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+[data-crt="full"] .crt-noise { display: block; }
+
+/* ============================================================
+   Scrollbars — chunky retro
+   ============================================================ */
+.retro-scroll { scrollbar-width: auto; }
+.retro-scroll::-webkit-scrollbar { width: 16px; height: 16px; }
+.retro-scroll::-webkit-scrollbar-track {
+  background: var(--surface-2);
+  box-shadow: inset 1px 1px 0 var(--bevel-shadow);
+}
+.retro-scroll::-webkit-scrollbar-thumb {
+  background: var(--surface);
+  border: 1px solid;
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark)
+    var(--bevel-light);
+}
+.retro-scroll::-webkit-scrollbar-corner { background: var(--surface); }
+
+/* striped image placeholder */
+.img-placeholder {
+  background: var(--surface-2);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--bevel-shadow) 0,
+    var(--bevel-shadow) 1px,
+    transparent 1px,
+    transparent 9px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   Vaporwave wallpaper — gradient sky + neon sun + perspective grid
+   ============================================================ */
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(#2a1150 0%, #5a1f6e 38%, #b5327e 62%, #e85a86 78%, #f59f5a 92%);
+}
+[data-theme="dark"] .wallpaper {
+  background: linear-gradient(#06030f 0%, #1a0a35 45%, #3a1152 70%, #6a1a6e 88%, #962a78 100%);
+}
+.wallpaper-sun {
+  position: absolute;
+  left: 50%;
+  bottom: 30%;
+  width: 340px;
+  height: 340px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: linear-gradient(#fff4cf, #ffd34d 30%, #ff7eb0 60%, #d63f9e 100%);
+  -webkit-mask-image: repeating-linear-gradient(to bottom, #000 0 12px, transparent 12px 16px),
+    linear-gradient(to bottom, transparent 0 42%, #000 42%);
+  mask-image: repeating-linear-gradient(to bottom, #000 0 12px, transparent 12px 16px),
+    linear-gradient(to bottom, transparent 0 42%, #000 42%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  filter: drop-shadow(0 0 40px rgba(255, 126, 176, 0.6));
+}
+[data-theme="dark"] .wallpaper-sun {
+  background: linear-gradient(#a6f0ff, #36e0e0 40%, #ff5fd2 100%);
+  filter: drop-shadow(0 0 44px rgba(54, 224, 224, 0.55));
+}
+.wallpaper-grid {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  bottom: 0;
+  height: 46%;
+  background-image:
+    repeating-linear-gradient(to right, rgba(54, 224, 224, 0.55) 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(to bottom, rgba(54, 224, 224, 0.55) 0 2px, transparent 2px 52px);
+  transform: perspective(340px) rotateX(68deg);
+  transform-origin: bottom center;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 40%);
+  mask-image: linear-gradient(to bottom, transparent, #000 40%);
+  animation: grid-scroll 4s linear infinite;
+}
+[data-theme="dark"] .wallpaper-grid {
+  background-image:
+    repeating-linear-gradient(to right, rgba(255, 95, 210, 0.6) 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(to bottom, rgba(255, 95, 210, 0.6) 0 2px, transparent 2px 52px);
+}
+@keyframes grid-scroll {
+  from { background-position-y: 0, 0; }
+  to { background-position-y: 0, 52px; }
+}
+.wallpaper-haze {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 70%, rgba(255, 126, 176, 0.18), transparent 60%);
+  pointer-events: none;
+}
+/* solid-color fallback when grid disabled via tweak */
+.wallpaper.flat { background: var(--desktop-bg); }
+.wallpaper.flat .wallpaper-sun,
+.wallpaper.flat .wallpaper-grid,
+.wallpaper.flat .wallpaper-haze { display: none; }
+
+/* utility */
+.mono { font-family: var(--font-mono); }
+.chrome { font-family: var(--font-chrome); }
+.nowrap { white-space: nowrap; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.no-select { user-select: none; -webkit-user-select: none; }
