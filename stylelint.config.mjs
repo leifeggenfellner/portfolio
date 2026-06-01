@@ -7,14 +7,7 @@
  */
 export default {
   extends: ["stylelint-config-standard"],
-  ignoreFiles: [
-    "dist/**",
-    ".astro/**",
-    "node_modules/**",
-    "retro-os/**",
-    "coverage/**",
-    "playwright-report/**",
-  ],
+  ignoreFiles: ["dist/**", ".astro/**", "node_modules/**", "retro-os/**", "coverage/**", "playwright-report/**"],
   rules: {
     // Tailwind v4 directives + custom at-rules
     "at-rule-no-unknown": [
@@ -55,21 +48,11 @@ export default {
     {
       // Token files own the raw colors; everywhere else is forbidden.
       files: ["src/**/*.css"],
-      ignoreFiles: [
-        "src/styles/tokens.css",
-        "src/styles/globals.css",
-        "src/styles/effects.css",
-      ],
+      ignoreFiles: ["src/styles/tokens.css", "src/styles/globals.css", "src/styles/effects.css"],
       rules: {
         "color-no-hex": true,
         "declaration-property-value-disallowed-list": {
-          "/.*/": [
-            "/^rgb\\(/",
-            "/^rgba\\(/",
-            "/^hsl\\(/",
-            "/^hsla\\(/",
-            "/^oklch\\(/",
-          ],
+          "/.*/": ["/^rgb\\(/", "/^rgba\\(/", "/^hsl\\(/", "/^hsla\\(/", "/^oklch\\(/"],
         },
       },
     },

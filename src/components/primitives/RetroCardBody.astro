@@ -1,0 +1,16 @@
+---
+/**
+ * RetroCardBody — padded content section for RetroCard.
+ */
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props as Props;
+const bodyClass = ["p-3", className].filter(Boolean).join(" ");
+---
+
+<div class={bodyClass}>
+  <slot />
+</div>

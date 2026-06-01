@@ -6,8 +6,6 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -18,16 +16,15 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@primitives/*": ["src/components/primitives/*"],
-      "@shell/*": ["src/components/shell/*"],
-      "@apps/*": ["src/components/apps/*"],
-      "@effects/*": ["src/components/effects/*"],
-      "@lib/*": ["src/lib/*"],
-      "@styles/*": ["src/styles/*"],
-      "@content/*": ["src/content/*"]
+      "@/*": ["./src/*"],
+      "@primitives/*": ["./src/components/primitives/*"],
+      "@shell/*": ["./src/components/shell/*"],
+      "@apps/*": ["./src/components/apps/*"],
+      "@effects/*": ["./src/components/effects/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@content/*": ["./src/content/*"]
     }
   }
 }

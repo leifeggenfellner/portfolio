@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <defs>
+    <linearGradient id="skillsGrad" x1="2" y1="1" x2="13" y2="15" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e06cb8"/>
+      <stop offset="50%" stop-color="#a86cc8"/>
+      <stop offset="100%" stop-color="#42d4d4"/>
+    </linearGradient>
+  </defs>
+  <path d="M2 2H14V14H2V2Z" fill="url(#skillsGrad)"/>
+  <path d="M3 3H13V13H3V3Z" fill="#ffffff" fill-opacity="0.13"/>
+  <path d="M4 11H5V12H4V11Z" fill="#ffffff" fill-opacity="0.55"/>
+  <path d="M6 9H7V12H6V9Z" fill="#ffffff" fill-opacity="0.55"/>
+  <path d="M8 7H9V12H8V7Z" fill="#ffffff" fill-opacity="0.55"/>
+  <path d="M10 5H11V12H10V5Z" fill="#ffffff" fill-opacity="0.55"/>
+  <path d="M4 8.5L6.2 7L8.1 7.4L11.2 4.8" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,15 @@
+---
+/**
+ * CrtLayer — the always-on-top vaporwave CRT effect layer.
+ * Toggle intensity by setting [data-crt="off|subtle|full"] on
+ * <html>. This component is purely presentational and inert
+ * (pointer-events: none). Disabled when reduced-motion is set.
+ */
+---
+
+<div class="crt-layer" aria-hidden>
+  <div class="crt-scanlines"></div>
+  <div class="crt-glow"></div>
+  <div class="crt-noise"></div>
+  <div class="crt-vignette"></div>
+</div>

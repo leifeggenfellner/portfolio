@@ -5,8 +5,11 @@
  *  - presentational only, zero portfolio content
  *  - depends only on @lib + tokens (never on apps/shell)
  *  - variant- or compound-driven, props stay narrow
+ *
+ * Note: RetroCard is an Astro component — import it directly
+ * in .astro files via `../primitives/RetroCard.astro`.
  */
-export { RetroButton, type RetroButtonProps } from "./RetroButton";
-export { RetroCard } from "./RetroCard";
-export { WindowHeader, type WindowHeaderProps } from "./WindowHeader";
-export { RetroWindow, type RetroWindowProps } from "./RetroWindow";
+export { default as RetroButton } from "./RetroButton.svelte";
+export { default as ContextMenu } from "./ContextMenu.svelte";
+export { default as WindowHeader } from "./WindowHeader.svelte";
+export { default as RetroWindow } from "./RetroWindow.svelte";

@@ -37,6 +37,11 @@
   --color-err: var(--err);
   --color-link: var(--link);
   --color-desktop: var(--desktop-bg);
+  --color-terminal-bg: var(--terminal-bg);
+  --color-terminal-fg: var(--terminal-fg);
+  --color-boot-bg: var(--boot-bg);
+  --color-boot-fg: var(--boot-fg);
+  --color-boot-muted: var(--boot-muted);
 
   /* ---- fonts ---- */
   --font-chrome: var(--font-chrome);
@@ -111,7 +116,7 @@ body {
 body {
   font-family: var(--font-body);
   color: var(--text);
-  background: #000;
+  background: var(--desktop-bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden; /* the desktop owns the viewport */

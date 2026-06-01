@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <defs>
+    <linearGradient id="pkgBody" x1="2" y1="5.25" x2="8" y2="15" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e06cb8"/>
+      <stop offset="50%" stop-color="#a86cc8"/>
+      <stop offset="100%" stop-color="#42d4d4"/>
+    </linearGradient>
+    <linearGradient id="pkgLid" x1="2" y1="2" x2="14" y2="8.5" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e06cb8"/>
+      <stop offset="50%" stop-color="#a86cc8"/>
+      <stop offset="100%" stop-color="#42d4d4"/>
+    </linearGradient>
+  </defs>
+  <path d="M2 5.25L8 2L14 5.25V11.75L8 15L2 11.75V5.25Z" fill="url(#pkgBody)"/>
+  <path d="M8 2L14 5.25L8 8.5L2 5.25L8 2Z" fill="url(#pkgLid)"/>
+  <path d="M8 8.5V15" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>
+  <path d="M2 5.25L8 8.5L14 5.25" stroke="#ffffff" stroke-opacity="0.45" stroke-width="1"/>
+  <path d="M2 5.25V11.75L8 15L14 11.75V5.25" stroke="#0e0b1c" stroke-opacity="0.24" stroke-width="1"/>
+</svg>

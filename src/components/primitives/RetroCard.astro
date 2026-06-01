@@ -1,0 +1,22 @@
+---
+/**
+ * RetroCard — shell container used with RetroCardTitle + RetroCardBody.
+ *
+ * A neutral container with raised or sunk bevels. Composition over
+ * props: title is opt-in via the named "title" slot.
+ */
+
+interface Props {
+  raised?: boolean;
+  class?: string;
+  style?: string;
+}
+
+const { raised = true, class: className = "", style } = Astro.props as Props;
+const cardClass = [raised ? "bevel-out" : "bevel-in", "bg-surface", className].filter(Boolean).join(" ");
+---
+
+<div class={cardClass} style={style}>
+  <slot name="title" />
+  <slot />
+</div>
