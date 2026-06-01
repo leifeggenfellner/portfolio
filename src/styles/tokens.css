@@ -1,0 +1,179 @@
+/* =============================================================
+   tokens.css — design token primitives (CSS custom properties)
+   =============================================================
+   These are the SINGLE source of truth for the entire system.
+   - Defaults live on :root (light/"day" vaporwave).
+   - [data-theme="dark"] overrides for the CRT night theme.
+   - [data-crt="off|subtle|full"] toggles the effect layer.
+   - [data-accent="*"] swaps accent hue without touching surfaces.
+   Tailwind reads many of these via `globals.css` `@theme inline`.
+   ============================================================= */
+
+:root,
+[data-theme="light"] {
+  /* ---- typography ---- */
+  --font-chrome: "Pixelify Sans", "Hanken Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", "Hanken Grotesk", system-ui, sans-serif;
+  --font-mono: "VT323", "JetBrains Mono", "Courier New", monospace;
+
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-15: 0.9375rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-24: 1.5rem;
+  --fs-32: 2rem;
+  --fs-48: 3rem;
+
+  /* ---- spacing (4px base) ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  /* ---- radii (era-correct: 0) ---- */
+  --radius-0: 0px;
+  --radius-1: 2px;
+  --radius-2: 4px;
+
+  /* ---- bevels ---- */
+  --bevel: 2px;
+
+  /* ---- z-index system ---- */
+  --z-desktop: 0;
+  --z-window: 100;
+  --z-window-active: 500;
+  --z-taskbar: 9000;
+  --z-startmenu: 9500;
+  --z-menu: 9800;
+  --z-palette: 9900;
+  --z-modal: 9950;
+  --z-crt: 10000;
+  --z-boot: 10050;
+
+  /* ---- era anchors (vaporwave) ---- */
+  --magenta: #e83fb0;
+  --cyan: #1fb6d6;
+
+  /* ---- accent (swap via [data-accent="*"]) ---- */
+  --accent: #12c596;
+  --accent-2: #1fb6d6;
+  --accent-soft: #2ad6c4;
+
+  /* ---- surfaces ---- */
+  --surface: #cfc7e6;
+  --surface-2: #e4ddf4;
+  --surface-3: #faf6ff;
+  --surface-deep: #a89bc8;
+
+  /* ---- bevel palette ---- */
+  --bevel-light: #fdfaff;
+  --bevel-hilite: #e7dffa;
+  --bevel-shadow: #9484b5;
+  --bevel-dark: #4a3d6b;
+
+  /* ---- text ---- */
+  --text: #281a47;
+  --text-dim: #6b5a8c;
+  --text-inverse: #ffffff;
+  --text-disabled: #9b8fb8;
+
+  /* ---- title bars ---- */
+  --title-active-from: var(--magenta);
+  --title-active-to: var(--cyan);
+  --title-active-text: #ffffff;
+  --title-inactive-from: #9484b5;
+  --title-inactive-to: #b8acd2;
+  --title-inactive-text: #e7dffa;
+
+  /* ---- desktop ---- */
+  --desktop-bg: #2a1a4a;
+  --desktop-text: #ffffff;
+
+  /* ---- selection / status ---- */
+  --selection-bg: var(--accent);
+  --selection-text: #04231b;
+  --link: #b32fa0;
+  --ok: #0e9e74;
+  --warn: #c2790c;
+  --err: #d42e6b;
+
+  /* ---- shadows ---- */
+  --win-shadow: 4px 4px 0 rgba(40, 20, 70, 0.35), 0 0 22px rgba(232, 63, 176, 0.12);
+  --field-glow: none;
+
+  /* ---- motion ---- */
+  --ease-snap: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 80ms;
+  --dur-2: 160ms;
+  --dur-3: 240ms;
+  --dur-4: 400ms;
+  --dur-boot: 4000ms;
+}
+
+[data-theme="dark"] {
+  --magenta: #ff5fd2;
+  --cyan: #36e0e0;
+
+  --accent: #2de0a6;
+  --accent-2: #36e0e0;
+  --accent-soft: #1fb88a;
+
+  --surface: #221a38;
+  --surface-2: #160f28;
+  --surface-3: #0c081a;
+  --surface-deep: #0a0716;
+
+  --bevel-light: #4a3a72;
+  --bevel-hilite: #342654;
+  --bevel-shadow: #120c24;
+  --bevel-dark: #050310;
+
+  --text: #e6d9ff;
+  --text-dim: #9d8ac4;
+  --text-inverse: #0c081a;
+  --text-disabled: #5a4d7a;
+
+  --title-active-from: #c026a8;
+  --title-active-to: #1c8fa8;
+  --title-inactive-from: #1c1430;
+  --title-inactive-to: #2a1f48;
+  --title-inactive-text: #6a5a92;
+
+  --desktop-bg: #0a0618;
+  --desktop-text: #f0e6ff;
+
+  --selection-bg: var(--accent);
+  --selection-text: #04150c;
+
+  --win-shadow: 0 0 0 1px #000, 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 26px rgba(255, 95, 210, 0.18);
+  --field-glow: 0 0 6px rgba(54, 224, 224, 0.3);
+
+  --link: #6fd0ff;
+  --ok: #2de0a6;
+  --warn: #ffcf5f;
+  --err: #ff6f9d;
+}
+
+/* ---- accent variants (swap chroma without touching surfaces) ---- */
+[data-accent="magenta"] {
+  --accent: #ff5fd2;
+  --accent-2: #c026a8;
+  --accent-soft: #ff8fe0;
+}
+[data-accent="cyan"] {
+  --accent: #36e0e0;
+  --accent-2: #1c8fa8;
+  --accent-soft: #7af0f0;
+}
+[data-accent="amber"] {
+  --accent: #ffbf3f;
+  --accent-2: #c2790c;
+  --accent-soft: #ffd97a;
+}

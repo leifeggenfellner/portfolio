@@ -1,0 +1,214 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Single place to bump the cache generation.
+  CACHE_VERSION: v1
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Lint — fast, parallel-safe, cached per tool.
+  # ──────────────────────────────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Restore lint caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/eslint
+            .cache/stylelint
+            .cache/prettier
+          key: lint-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'eslint.config.js', 'stylelint.config.mjs', '.prettierrc.json') }}-${{ github.sha }}
+          restore-keys: |
+            lint-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'eslint.config.js', 'stylelint.config.mjs', '.prettierrc.json') }}-
+            lint-${{ env.CACHE_VERSION }}-${{ runner.os }}-
+
+      - name: ESLint
+        run: pnpm exec eslint . --cache --cache-location=.cache/eslint --max-warnings=0
+
+      - name: Stylelint
+        run: pnpm exec stylelint "src/**/*.css" --cache --cache-location=.cache/stylelint
+
+      - name: Markdownlint
+        run: pnpm lint:md
+
+      - name: Prettier
+        run: pnpm exec prettier --check --cache --cache-location=.cache/prettier .
+
+      - name: actionlint
+        uses: raven-actions/actionlint@v2
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Typecheck — astro check + tsc, cached against .astro/.
+  # ──────────────────────────────────────────────────────────────────────────
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore Astro/TS cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .astro
+            node_modules/.cache/tsc
+          key: tsc-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig.json', 'astro.config.ts') }}-${{ github.sha }}
+          restore-keys: |
+            tsc-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'tsconfig.json', 'astro.config.ts') }}-
+            tsc-${{ env.CACHE_VERSION }}-${{ runner.os }}-
+
+      - run: pnpm typecheck
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Unit tests — Vitest with coverage, cached.
+  # ──────────────────────────────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore Vitest cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.vitest
+          key: vitest-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'vitest.config.ts') }}-${{ github.sha }}
+          restore-keys: |
+            vitest-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'vitest.config.ts') }}-
+            vitest-${{ env.CACHE_VERSION }}-${{ runner.os }}-
+
+      - run: pnpm test:cov
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Build — Astro + Vite, cached.
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore Astro/Vite build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .astro
+            node_modules/.astro
+            node_modules/.vite
+          key: build-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'astro.config.ts', 'tsconfig.json') }}-${{ github.sha }}
+          restore-keys: |
+            build-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'astro.config.ts', 'tsconfig.json') }}-
+            build-${{ env.CACHE_VERSION }}-${{ runner.os }}-
+
+      - run: pnpm build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # E2E — Playwright with browser binary cache.
+  # ──────────────────────────────────────────────────────────────────────────
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Pin Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ env.CACHE_VERSION }}-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium webkit
+
+      - name: Install system deps (cache hit path)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium webkit
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - run: pnpm e2e
+
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/

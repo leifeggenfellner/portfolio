@@ -1,0 +1,82 @@
+# Lefthook — Git hooks runner. Cross-platform, fast, no Node required.
+# Installed by `pnpm install` via the `prepare` script, or manually with
+# `lefthook install`. Skip a hook ad-hoc with `LEFTHOOK=0 git commit ...`.
+#
+# Hooks run in parallel where safe and only on STAGED files so commits stay
+# snappy. Heavier checks (typecheck, tests, build) run on pre-push instead.
+
+# Refuse to run hooks if these files were touched without re-checking.
+# Forces a re-`lefthook install` if the config itself changes.
+skip_output:
+  - meta
+  - skips
+
+pre-commit:
+  parallel: true
+  commands:
+    # ---- formatting / autofixers (run first so lints see formatted code) ----
+    prettier:
+      glob: "*.{ts,tsx,astro,css,md,mdx,json,jsonc,yml,yaml,html}"
+      run: pnpm exec prettier --write --ignore-unknown --cache --cache-location=.cache/prettier {staged_files}
+      stage_fixed: true
+
+    eslint:
+      glob: "*.{ts,tsx,astro,js,mjs,cjs}"
+      run: pnpm exec eslint --cache --cache-location=.cache/eslint --fix --max-warnings=0 {staged_files}
+      stage_fixed: true
+
+    stylelint:
+      glob: "*.css"
+      run: pnpm exec stylelint --cache --cache-location=.cache/stylelint --fix {staged_files}
+      stage_fixed: true
+
+    # ---- non-fixing validators ----
+    markdownlint:
+      glob: "*.{md,mdx}"
+      run: pnpm exec markdownlint-cli2 {staged_files}
+
+    # Reject leftover conflict markers.
+    no-merge-markers:
+      run: |
+        if git diff --cached --check; then
+          exit 0
+        else
+          echo "✗ merge conflict markers or whitespace errors in staged changes"
+          exit 1
+        fi
+
+    # Reject committing files > 1 MB (use git-lfs instead).
+    no-large-files:
+      run: |
+        big=$(git diff --cached --name-only --diff-filter=ACM | xargs -I{} -r find {} -type f -size +1M 2>/dev/null)
+        if [ -n "$big" ]; then
+          echo "✗ files larger than 1 MB cannot be committed:"
+          echo "$big"
+          exit 1
+        fi
+
+    # Lightweight secret scan — catches the obvious shapes.
+    no-secrets:
+      run: |
+        if git diff --cached -U0 | \
+           grep -E '(AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|xox[baprs]-[A-Za-z0-9-]+|-----BEGIN (RSA|OPENSSH|EC|DSA|PGP) PRIVATE KEY-----)' \
+           >/dev/null; then
+          echo "✗ possible secret detected in staged diff"
+          exit 1
+        fi
+
+pre-push:
+  parallel: false
+  commands:
+    typecheck:
+      run: pnpm typecheck
+    test:
+      run: pnpm test
+    actionlint:
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: actionlint
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}

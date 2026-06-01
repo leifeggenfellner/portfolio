@@ -1,0 +1,10 @@
+.claude/
+.github/
+.direnv/
+retro-os/
+dist/
+.astro/
+node_modules/
+coverage/
+playwright-report/
+CHANGELOG.md

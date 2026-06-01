@@ -1,0 +1,13 @@
+---
+/**
+ * Home — the desktop IS the hero. We hydrate the Desktop island
+ * with `client:load` because the boot animation and interactivity
+ * are immediate; everything else (apps) is React-lazy inside.
+ */
+import RootLayout from "@/layouts/RootLayout.astro";
+import { Desktop } from "@shell/Desktop";
+---
+
+<RootLayout>
+  <Desktop client:load />
+</RootLayout>

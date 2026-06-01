@@ -1,0 +1,172 @@
+/* =============================================================
+   globals.css — Tailwind v4 entry + @theme mapping
+   =============================================================
+   Tailwind v4 generates utilities directly from CSS variables
+   declared inside `@theme`. We use `@theme inline` so utilities
+   resolve to live `var(--token)` references, which means the
+   `[data-theme]` / `[data-accent]` toggles change the whole UI
+   at runtime without rebuilding.
+   ============================================================= */
+
+@import "tailwindcss";
+
+@import "./tokens.css";
+@import "./effects.css";
+
+@theme inline {
+  /* ---- colors ---- */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-deep: var(--surface-deep);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-text-inverse: var(--text-inverse);
+  --color-text-disabled: var(--text-disabled);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --color-magenta: var(--magenta);
+  --color-cyan: var(--cyan);
+  --color-bevel-light: var(--bevel-light);
+  --color-bevel-hilite: var(--bevel-hilite);
+  --color-bevel-shadow: var(--bevel-shadow);
+  --color-bevel-dark: var(--bevel-dark);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-err: var(--err);
+  --color-link: var(--link);
+  --color-desktop: var(--desktop-bg);
+
+  /* ---- fonts ---- */
+  --font-chrome: var(--font-chrome);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  /* ---- font sizes ---- */
+  --text-12: var(--fs-12);
+  --text-13: var(--fs-13);
+  --text-14: var(--fs-14);
+  --text-15: var(--fs-15);
+  --text-16: var(--fs-16);
+  --text-18: var(--fs-18);
+  --text-24: var(--fs-24);
+  --text-32: var(--fs-32);
+  --text-48: var(--fs-48);
+
+  /* ---- spacing ---- */
+  --spacing-1: var(--sp-1);
+  --spacing-2: var(--sp-2);
+  --spacing-3: var(--sp-3);
+  --spacing-4: var(--sp-4);
+  --spacing-5: var(--sp-5);
+  --spacing-6: var(--sp-6);
+  --spacing-7: var(--sp-7);
+  --spacing-8: var(--sp-8);
+
+  /* ---- radii ---- */
+  --radius-0: var(--radius-0);
+  --radius-1: var(--radius-1);
+  --radius-2: var(--radius-2);
+
+  /* ---- shadows ---- */
+  --shadow-window: var(--win-shadow);
+  --shadow-field: var(--field-glow);
+
+  /* ---- z-index ---- */
+  --z-desktop: var(--z-desktop);
+  --z-window: var(--z-window);
+  --z-window-active: var(--z-window-active);
+  --z-taskbar: var(--z-taskbar);
+  --z-startmenu: var(--z-startmenu);
+  --z-menu: var(--z-menu);
+  --z-palette: var(--z-palette);
+  --z-modal: var(--z-modal);
+  --z-crt: var(--z-crt);
+  --z-boot: var(--z-boot);
+
+  /* ---- motion ---- */
+  --ease-snap: var(--ease-snap);
+  --ease-out: var(--ease-out);
+  --duration-1: var(--dur-1);
+  --duration-2: var(--dur-2);
+  --duration-3: var(--dur-3);
+  --duration-4: var(--dur-4);
+}
+
+/* ---- dark-mode variant: `dark:` triggers on [data-theme="dark"] ---- */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---- base reset / globals ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden; /* the desktop owns the viewport */
+}
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+button {
+  font-family: inherit;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+}
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* ---- bevels (the core retro primitive) ---- */
+.bevel-out {
+  border-style: solid;
+  border-width: var(--bevel);
+  border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-hilite),
+    inset -1px -1px 0 var(--bevel-shadow);
+}
+.bevel-in {
+  border-style: solid;
+  border-width: var(--bevel);
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark);
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-shadow),
+    inset -1px -1px 0 var(--bevel-hilite);
+}
+.bevel-out-thin {
+  border: 1px solid;
+  border-color: var(--bevel-light) var(--bevel-shadow) var(--bevel-shadow) var(--bevel-light);
+}
+.bevel-in-thin {
+  border: 1px solid;
+  border-color: var(--bevel-shadow) var(--bevel-light) var(--bevel-light) var(--bevel-shadow);
+}
+.bevel-pressed {
+  border-color: var(--bevel-dark) var(--bevel-light) var(--bevel-light) var(--bevel-dark) !important;
+  box-shadow: inset 1px 1px 0 var(--bevel-shadow) !important;
+}
+
+/* ---- focus ring (period-correct dotted) ---- */
+.focus-ring:focus-visible {
+  outline: 1px dotted var(--text);
+  outline-offset: -4px;
+}

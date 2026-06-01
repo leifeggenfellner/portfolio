@@ -1,0 +1,50 @@
+---
+/**
+ * Root layout. Renders the desktop chrome around any page slot.
+ * Loads global tokens + Tailwind once; sets HTML data attributes
+ * for theme/CRT/accent that the entire token system reads from.
+ */
+import "@styles/globals.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  theme?: "light" | "dark";
+  crt?: "off" | "subtle" | "full";
+  accent?: "default" | "magenta" | "cyan" | "amber";
+}
+
+const {
+  title = "Retro — a portfolio OS",
+  description = "A retro-OS-inspired portfolio. Drag the windows.",
+  theme = "light",
+  crt = "full",
+  accent = "default",
+} = Astro.props;
+---
+
+<!doctype html>
+<html
+  lang="en"
+  data-theme={theme}
+  data-crt={crt}
+  data-accent={accent === "default" ? undefined : accent}
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pixelify+Sans:wght@400;600&family=VT323&display=swap"
+    />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

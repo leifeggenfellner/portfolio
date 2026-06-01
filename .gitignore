@@ -56,6 +56,9 @@ web_modules/
 # Optional stylelint cache
 .stylelintcache
 
+# Tooling caches (eslint / stylelint / prettier / vitest)
+.cache/
+
 # Optional REPL history
 .node_repl_history
 
@@ -141,3 +144,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Astro generated
+.astro/
+
+# Nix / direnv
+.direnv/
+result
+result-*

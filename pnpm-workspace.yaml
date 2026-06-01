@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - astro@6.4.2

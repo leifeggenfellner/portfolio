@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "retro-os",
+  "name": "Retro",
+  "tagline": "A portfolio that is also an operating system.",
+  "year": 2026,
+  "role": "Design + engineering",
+  "tech": ["Astro", "React", "TypeScript", "Tailwind v4"],
+  "featured": true,
+  "summary": "Vaporwave desktop environment with a real window manager, terminal, and command palette — built as a production-grade static site."
+}
