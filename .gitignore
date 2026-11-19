@@ -153,3 +153,6 @@ vite.config.ts.timestamp-*
 .direnv/
 result
 result-*
+
+# Local planning notes
+*-plan.org
