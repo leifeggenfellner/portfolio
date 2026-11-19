@@ -6,22 +6,6 @@
    ============================================================= */
 
 /* ---- keyframes ---- */
-@keyframes win-open {
-  from {
-    transform: scale(0.96) translateY(6px);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1) translateY(0);
-    opacity: 1;
-  }
-}
-@keyframes win-minimize {
-  to {
-    transform: scale(0.4) translateY(60vh);
-    opacity: 0;
-  }
-}
 @keyframes blink {
   50% {
     opacity: 0;
@@ -380,6 +364,15 @@
   background: var(--desktop-icon-label-bg);
   box-shadow: 1px 1px 0 var(--desktop-icon-label-shadow);
   color: var(--desktop-text);
+}
+.icon-label[data-selected="true"] span {
+  border-color: var(--desktop-icon-label-border);
+  background: var(--selection-bg);
+  color: var(--selection-text);
+  text-shadow: none;
+}
+.icon-label[data-selected="true"] img {
+  filter: drop-shadow(0 0 0 var(--selection-bg)) drop-shadow(1px 1px 0 var(--selection-bg));
 }
 .loading-bar {
   animation: loading-slide 1.4s var(--ease-snap) infinite;

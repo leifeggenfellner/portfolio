@@ -1,9 +1,14 @@
 <script lang="ts">
   import { cx } from "@lib/cx";
+  import { durationMs, easing, prefersReducedMotion } from "@lib/motion";
+  import { tick } from "svelte";
+  import { expoOut } from "svelte/easing";
   import WindowHeader from "./WindowHeader.svelte";
   import type { Snippet } from "svelte";
+  import type { TransitionConfig } from "svelte/transition";
 
   interface Props {
+    id: string;
     title: string;
     icon?: string;
     children: Snippet;
@@ -18,6 +23,10 @@
     resizable?: boolean;
     noChrome?: boolean;
     statusbar?: Snippet;
+    /** Where the window should grow from when it appears (launching icon, taskbar button). */
+    originFor?: () => DOMRect | null;
+    /** Where the window should shrink to when minimised (its taskbar button). */
+    minimizeTargetFor?: () => DOMRect | null;
     onFocus?: () => void;
     onMove?: (x: number, y: number) => void;
     onResize?: (w: number, h: number) => void;
@@ -27,6 +36,7 @@
   }
 
   let {
+    id,
     title,
     icon,
     children,
@@ -41,6 +51,8 @@
     resizable = true,
     noChrome,
     statusbar,
+    originFor,
+    minimizeTargetFor,
     onFocus,
     onMove,
     onResize,
@@ -115,14 +127,87 @@
     window.addEventListener("pointerup", stopResize, { once: true });
   }
 
-  const outerClass = [
-    "bevel-out absolute flex flex-col p-0.75 bg-surface",
-    "[animation:win-open_var(--duration-2)_var(--ease-out)]",
-  ].join(" ");
+  // -------------------------
+  // Motion
+  // -------------------------
+  // Offset and scale that map this window's box onto another rect, measured
+  // from the window centre (the default transform-origin).
+  function towards(node: Element, rect: DOMRect | null | undefined) {
+    const box = node.getBoundingClientRect();
+    if (!rect || box.width === 0) return { dx: 0, dy: 6, scale: 0.96 };
+    return {
+      dx: rect.x + rect.width / 2 - (box.x + box.width / 2),
+      dy: rect.y + rect.height / 2 - (box.y + box.height / 2),
+      scale: Math.min(0.9, Math.max(0.3, rect.width / box.width)),
+    };
+  }
+
+  // Grow out of the icon or taskbar button that opened the window.
+  function windowIn(node: Element): TransitionConfig {
+    if (prefersReducedMotion()) return { duration: 0 };
+    const { dx, dy, scale } = towards(node, originFor?.());
+    return {
+      duration: durationMs("--dur-3", 240),
+      easing: expoOut,
+      css: (t, u) =>
+        `transform: translate(${dx * u}px, ${dy * u}px) scale(${scale + (1 - scale) * t}); opacity: ${Math.min(1, t * 2)};`,
+    };
+  }
+
+  // Exits are faster than entrances: shrink into the taskbar when minimised,
+  // otherwise a short fade and settle.
+  function windowOut(node: Element): TransitionConfig {
+    if (prefersReducedMotion()) return { duration: 0 };
+    const toTaskbar = minimized ? minimizeTargetFor?.() : null;
+    const { dx, dy, scale } = toTaskbar ? towards(node, toTaskbar) : { dx: 0, dy: 0, scale: 0.97 };
+    return {
+      duration: durationMs("--dur-2", 160),
+      easing: expoOut,
+      css: (t, u) => `transform: translate(${dx * u}px, ${dy * u}px) scale(${scale + (1 - scale) * t}); opacity: ${t};`,
+    };
+  }
+
+  // Maximise and restore animate the frame from its old box to its new one
+  // (FLIP), so the layout change itself stays a single style update.
+  let lastMaximized: boolean | undefined;
+  $effect.pre(() => {
+    const next = Boolean(maximized);
+    if (lastMaximized === undefined || lastMaximized === next) {
+      lastMaximized = next;
+      return;
+    }
+    lastMaximized = next;
+    if (!winRef || prefersReducedMotion()) return;
+    const node = winRef;
+    const first = node.getBoundingClientRect();
+    void tick().then(() => {
+      const last = node.getBoundingClientRect();
+      if (!last.width || !last.height) return;
+      node.animate(
+        [
+          {
+            transformOrigin: "top left",
+            transform: `translate(${first.left - last.left}px, ${first.top - last.top}px) scale(${first.width / last.width}, ${first.height / last.height})`,
+          },
+          { transformOrigin: "top left", transform: "none" },
+        ],
+        { duration: durationMs("--dur-3", 240), easing: easing("--ease-out") },
+      );
+    });
+  });
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape" && !e.defaultPrevented && onClose) {
+      e.preventDefault();
+      onClose();
+    }
+  }
+
+  const outerClass = "bevel-out focus-ring absolute flex flex-col p-0.75 bg-surface";
 
   const frameStyle = $derived(
     maximized
-      ? `left:0;top:0;width:100%;height:calc(100% - 2px);z-index:${z};`
+      ? `left:0;top:0;width:100%;height:calc(100% - var(--taskbar-height));z-index:${z};`
       : `left:${x}px;top:${y}px;width:${w}px;${h ? `height:${h}px;` : ""}z-index:${z};`,
   );
 
@@ -134,10 +219,14 @@
     bind:this={winRef}
     role="dialog"
     aria-label={title}
+    data-window-id={id}
     class={cx(outerClass, shadowClass)}
     style={frameStyle}
     tabindex="-1"
     onpointerdown={() => onFocus?.()}
+    onkeydown={handleKeydown}
+    in:windowIn|global
+    out:windowOut|global
   >
     {#if !noChrome}
       <WindowHeader {icon} {title} {active} {maximized} onPointerDown={startDrag} {onMin} {onMax} {onClose} />
