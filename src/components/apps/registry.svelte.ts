@@ -5,6 +5,7 @@ import projectsIcon from "@/assets/icons/apps/pixel/projects.svg?url";
 import settingsIcon from "@/assets/icons/apps/pixel/settings.svg?url";
 import skillsIcon from "@/assets/icons/apps/pixel/skills.svg?url";
 import terminalIcon from "@/assets/icons/apps/pixel/terminal.svg?url";
+import type { AppProps } from "@lib/app-shell";
 import type { Component } from "svelte";
 
 interface AppCommon {
@@ -22,7 +23,7 @@ export interface StaticApp extends AppCommon {
 /** Interactive app — Svelte component, dynamic-imported on first open. */
 export interface SvelteApp extends AppCommon {
   kind: "svelte";
-  load: () => Promise<{ default: Component }>;
+  load: () => Promise<{ default: Component<AppProps> }>;
 }
 
 export type AppManifest = StaticApp | SvelteApp;
@@ -36,11 +37,12 @@ export const APPS: AppManifest[] = [
     defaults: { x: 80, y: 70, w: 460, h: 360 },
   },
   {
-    kind: "static",
+    kind: "svelte",
     id: "projects",
     title: "Projects",
     icon: projectsIcon,
     defaults: { x: 180, y: 110, w: 620, h: 420 },
+    load: () => import("@apps/ProjectsExplorer.svelte"),
   },
   {
     kind: "svelte",
@@ -70,7 +72,7 @@ export const APPS: AppManifest[] = [
     id: "minigame",
     title: "Minesweeper",
     icon: minigameIcon,
-    defaults: { x: 500, y: 80, w: 320, h: 360 },
+    defaults: { x: 500, y: 60, w: 300, h: 470 },
     load: () => import("@apps/MiniGame.svelte"),
   },
   {

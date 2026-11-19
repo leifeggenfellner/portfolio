@@ -6,6 +6,7 @@
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
+  import type { AppProps, AppShell } from "@lib/app-shell";
   import { FIRST_SPLASH_MS, hasVisited, markVisited, RETURN_SPLASH_MS } from "@lib/boot";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
@@ -61,7 +62,7 @@
   const origins = new Map<string, DOMRect>();
 
   let wmState = $state(windowManager.get());
-  let svelteComponents = $state<Record<string, Component>>({});
+  let svelteComponents = $state<Record<string, Component<AppProps>>>({});
   let staticHtml = $state<Record<string, string>>({});
 
   // Context menu state
@@ -145,7 +146,7 @@
     return html;
   }
 
-  async function ensureSvelteLoaded(appId: string, load: () => Promise<{ default: Component }>) {
+  async function ensureSvelteLoaded(appId: string, load: () => Promise<{ default: Component<AppProps> }>) {
     const cached = svelteComponents[appId];
     if (cached) return cached;
     try {
@@ -175,6 +176,22 @@
       icon: app.icon,
       ...app.defaults,
     });
+  }
+
+  // One shell per window, so apps receive a stable prop.
+  const APP_LIST = APPS.map((a) => ({ id: a.id, title: a.title, icon: a.icon }));
+  const shells = new Map<string, AppShell>();
+  function shellFor(windowId: string): AppShell {
+    let shell = shells.get(windowId);
+    if (!shell) {
+      shell = {
+        apps: APP_LIST,
+        open: (appId) => void launch(appId),
+        close: () => windowManager.close(windowId),
+      };
+      shells.set(windowId, shell);
+    }
+    return shell;
   }
 
   // A mouse click selects and a double-click opens, as on a period desktop.
@@ -405,7 +422,7 @@
             {@html staticHtml[w.appId] ?? ""}
           {:else if svelteComponents[w.appId]}
             {@const AppComp = svelteComponents[w.appId]}
-            <AppComp />
+            <AppComp shell={shellFor(w.id)} />
           {/if}
         </RetroWindow>
       {/if}

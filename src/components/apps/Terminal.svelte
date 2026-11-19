@@ -1,3 +1,244 @@
-<pre class="bg-terminal-bg p-3 font-mono text-[15px] text-terminal-fg">{`retro@os:~$ help
-available: help ls cat open theme crt neofetch
-retro@os:~$ █`}</pre>
+<script lang="ts">
+  import { PROFILE } from "@content/profile";
+  import { PROJECTS } from "@content/projects";
+  import { SKILL_GROUPS } from "@content/skills";
+  import type { AppProps } from "@lib/app-shell";
+  import { settings } from "@lib/store/settings";
+  import { dir, file } from "@lib/terminal/fs";
+  import type { FsNode } from "@lib/terminal/fs";
+  import { complete, execute, prompt } from "@lib/terminal/shell";
+  import type { Line, ShellContext } from "@lib/terminal/shell";
+  import { onMount, tick } from "svelte";
+
+  let { shell }: AppProps = $props();
+
+  const HOST = "retro";
+  const HOME = ["home", PROFILE.handle];
+  const BOOTED_AT = Date.now();
+
+  interface Entry extends Line {
+    id: number;
+  }
+
+  function aboutLines(): string[] {
+    return [
+      PROFILE.name,
+      PROFILE.role + (PROFILE.location ? `, ${PROFILE.location}` : ""),
+      "",
+      ...PROFILE.bio.paragraphs,
+    ];
+  }
+
+  function buildFs() {
+    const projects: Record<string, FsNode> = {};
+    for (const p of PROJECTS) {
+      projects[`${p.slug}.prj`] = file(
+        [
+          `${p.name} (${p.year})`,
+          p.tagline,
+          "",
+          p.summary,
+          "",
+          `role: ${p.role}`,
+          `tech: ${p.tech.join(", ")}`,
+          ...(p.url ? [`live: ${p.url}`] : []),
+          ...(p.repo ? [`repo: ${p.repo}`] : []),
+        ],
+        "projects",
+      );
+    }
+    const skills = SKILL_GROUPS.flatMap((group) => [
+      `[${group.name}]`,
+      ...group.skills.map((s) => `  ${s.name.padEnd(22)}${s.evidence}`),
+    ]);
+    const contact = [
+      ...(PROFILE.email ? [`mail: ${PROFILE.email}`] : []),
+      ...PROFILE.links.map((link) => `${link.label.toLowerCase()}: ${link.url}`),
+    ];
+    return dir({
+      home: dir({
+        [PROFILE.handle]: dir({
+          "about.txt": file(aboutLines(), "about"),
+          "skills.txt": file(skills, "skills"),
+          "contact.txt": file(contact, "contact"),
+          projects: dir(projects),
+          games: dir({ "minesweeper.exe": file(["MZ\u0090 binary. try: open minesweeper.exe"], "minigame") }),
+        }),
+      }),
+      etc: dir({ motd: file(["welcome to retro//os. nothing here is fake."]) }),
+    });
+  }
+
+  const root = buildFs();
+
+  let nextId = 0;
+  let entries = $state<Entry[]>([]);
+  let cwd = $state<string[]>([...HOME]);
+  let input = $state("");
+  let history = $state<string[]>([]);
+  // Position while walking history with the arrow keys; history.length means "the line being typed".
+  let historyIndex = $state(0);
+  let draft = "";
+  let inputEl = $state<HTMLInputElement>();
+  let scroller = $state<HTMLElement>();
+
+  const promptText = $derived(prompt({ user: PROFILE.handle, host: HOST, cwd, home: HOME }));
+
+  function print(lines: Line[]) {
+    entries = [...entries, ...lines.map((line) => ({ ...line, id: nextId++ }))].slice(-500);
+  }
+
+  function uptime(): string {
+    const minutes = Math.floor((Date.now() - BOOTED_AT) / 60_000);
+    return minutes < 1 ? "less than a minute" : `${minutes} min`;
+  }
+
+  function context(): ShellContext {
+    const prefs = settings.get();
+    return {
+      root,
+      home: HOME,
+      cwd,
+      user: PROFILE.handle,
+      host: HOST,
+      history,
+      apps: shell.apps,
+      whoami: [`${PROFILE.name}: ${PROFILE.role.toLowerCase()}`],
+      neofetch: [
+        ["OS", "RetroOS (static, GitHub Pages)"],
+        ["Shell", "retro-sh"],
+        ["WM", "BevelWM"],
+        ["Theme", `${prefs.theme}, crt ${prefs.crt}`],
+        ["Screen", `${window.innerWidth}x${window.innerHeight}`],
+        ["Uptime", uptime()],
+        ["Stack", "Astro, Svelte 5, TypeScript"],
+      ],
+      actions: {
+        open: (appId) => shell.open(appId),
+        setTheme: (theme) => settings.set("theme", theme),
+        setCrt: (mode) => settings.set("crt", mode),
+        setGridSpeed: (speed) => settings.set("gridSpeed", speed),
+        exit: () => shell.close(),
+      },
+      now: () => new Date(),
+    };
+  }
+
+  async function scrollToEnd() {
+    await tick();
+    scroller?.scrollTo({ top: scroller.scrollHeight });
+  }
+
+  function submit() {
+    const line = input;
+    print([{ text: `${promptText} ${line}`, tone: "prompt" }]);
+    if (line.trim()) history = [...history, line].slice(-100);
+    historyIndex = history.length;
+    input = "";
+    const result = execute(line, context());
+    if (result.clear) entries = [];
+    if (result.cwd) cwd = result.cwd;
+    print(result.lines);
+    void scrollToEnd();
+  }
+
+  function walkHistory(step: number) {
+    if (!history.length) return;
+    if (historyIndex === history.length) draft = input;
+    historyIndex = Math.max(0, Math.min(history.length, historyIndex + step));
+    input = historyIndex === history.length ? draft : (history[historyIndex] ?? "");
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      walkHistory(e.key === "ArrowUp" ? -1 : 1);
+    } else if (e.key === "Tab" && !e.shiftKey && input.trim()) {
+      // An empty line lets Tab move focus on, so the terminal never traps the keyboard.
+      e.preventDefault();
+      const result = complete(input, context());
+      input = result.input;
+      if (result.options.length) {
+        print([
+          { text: `${promptText} ${input}`, tone: "prompt" },
+          { text: result.options.join("  "), tone: "dim" },
+        ]);
+        void scrollToEnd();
+      }
+    } else if (e.ctrlKey && e.key.toLowerCase() === "l") {
+      e.preventDefault();
+      entries = [];
+    } else if (e.ctrlKey && e.key.toLowerCase() === "c" && !hasSelection()) {
+      e.preventDefault();
+      print([{ text: `${promptText} ${input}^C`, tone: "prompt" }]);
+      input = "";
+      historyIndex = history.length;
+      void scrollToEnd();
+    }
+  }
+
+  /** Ctrl+C copies when text is selected and cancels the line otherwise. */
+  function hasSelection(): boolean {
+    const inField = inputEl && inputEl.selectionStart !== inputEl.selectionEnd;
+    return Boolean(inField || window.getSelection()?.toString());
+  }
+
+  // Clicking the screen types into the prompt, unless the click was a text selection.
+  function focusInput() {
+    if (window.getSelection()?.toString()) return;
+    inputEl?.focus({ preventScroll: true });
+  }
+
+  const TONE_CLASS: Record<NonNullable<Line["tone"]> | "out", string> = {
+    out: "",
+    dim: "text-terminal-dim",
+    err: "text-terminal-err",
+    accent: "text-terminal-accent",
+    prompt: "text-terminal-prompt",
+  };
+
+  onMount(() => {
+    print([
+      { text: "RETRO//OS terminal. retro-sh, read-only filesystem.", tone: "accent" },
+      { text: "type 'help' to list commands, or try 'cat about.txt'.", tone: "dim" },
+    ]);
+    inputEl?.focus({ preventScroll: true });
+  });
+</script>
+
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+<div
+  class="bg-terminal-bg text-terminal-fg font-mono text-18 flex h-full min-h-0 cursor-text flex-col leading-tight [text-shadow:0_0_6px_var(--terminal-glow)] selection:bg-terminal-fg selection:text-terminal-bg"
+  onclick={focusInput}
+>
+  <div bind:this={scroller} class="retro-scroll min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-1">
+    <div role="log" aria-label="Terminal output" aria-live="polite">
+      {#each entries as entry (entry.id)}
+        <p class={["break-words whitespace-pre-wrap", TONE_CLASS[entry.tone ?? "out"]]}>{entry.text || " "}</p>
+      {/each}
+    </div>
+    <form
+      class="has-[:focus-visible]:outline-terminal-dim mb-2 flex items-baseline gap-2 outline-offset-2 has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-dashed"
+      onsubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      <label for="terminal-input" class="text-terminal-prompt shrink-0">{promptText}</label>
+      <input
+        bind:this={inputEl}
+        bind:value={input}
+        id="terminal-input"
+        class="caret-terminal-fg min-w-0 flex-1 border-0 bg-transparent p-0 text-inherit outline-none [font:inherit] [text-shadow:inherit]"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="send"
+        onkeydown={handleKeydown}
+      />
+    </form>
+  </div>
+</div>

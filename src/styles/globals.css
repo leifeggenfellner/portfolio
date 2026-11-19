@@ -39,6 +39,12 @@
   --color-desktop: var(--desktop-bg);
   --color-terminal-bg: var(--terminal-bg);
   --color-terminal-fg: var(--terminal-fg);
+  --color-terminal-dim: var(--terminal-dim);
+  --color-terminal-prompt: var(--terminal-prompt);
+  --color-terminal-accent: var(--terminal-accent);
+  --color-terminal-err: var(--terminal-err);
+  --color-led-bg: var(--led-bg);
+  --color-led-fg: var(--led-fg);
   --color-boot-bg: var(--boot-bg);
   --color-boot-fg: var(--boot-fg);
   --color-boot-muted: var(--boot-muted);
