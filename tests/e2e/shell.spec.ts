@@ -1,31 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { openDesktop } from "./helpers";
 import type { Page } from "@playwright/test";
-
-const SETTINGS_KEY = "retro-os:settings";
-const HELP_NOTE_KEY = "retro-os:help-note";
-
-/**
- * Skip the boot and, unless asked, the help note, so each test starts on a
- * quiet desktop. Parallel headless WebKit starves Web Animations, which can
- * stall Svelte exit transitions for seconds, so WebKit runs without motion;
- * Chromium covers the motion path.
- */
-async function openDesktop(page: Page, { withNote = false } = {}) {
-  if (page.context().browser()?.browserType().name() === "webkit") {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-  }
-  await page.addInitScript(
-    ({ settingsKey, noteKey, dismissNote }) => {
-      if (sessionStorage.getItem("shell-seeded") === "true") return;
-      sessionStorage.setItem("shell-seeded", "true");
-      localStorage.setItem(settingsKey, JSON.stringify({ bootAnimation: false }));
-      if (dismissNote) localStorage.setItem(noteKey, "dismissed");
-    },
-    { settingsKey: SETTINGS_KEY, noteKey: HELP_NOTE_KEY, dismissNote: !withNote },
-  );
-  await page.goto("/");
-  await expect(page.getByRole("navigation", { name: "Taskbar" })).toBeVisible();
-}
 
 const icon = (page: Page, name: string) => page.locator("main ul").getByRole("button", { name });
 const taskbar = (page: Page) => page.getByRole("navigation", { name: "Taskbar" });

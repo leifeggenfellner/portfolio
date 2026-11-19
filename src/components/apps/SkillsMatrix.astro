@@ -1,1 +1,42 @@
-<div class="text-14 text-text-dim p-4">Skills matrix placeholder - render bars form src/conent/skills.ts.</div>
+---
+/**
+ * Skills Matrix: no self-ratings. Each skill names where it can be seen, so
+ * the claim can be checked. Rendered at build time from `@content/skills`.
+ */
+import { SKILL_GROUPS } from "@content/skills";
+---
+
+<!-- tabindex: the list can outgrow the window, and keyboard users need to scroll it. -->
+<div
+  class="text-text retro-scroll focus-ring flex h-full flex-col gap-3 overflow-y-auto p-4"
+  role="region"
+  aria-label="Skills"
+  tabindex="0"
+>
+  <p class="text-14 max-w-[60ch] text-pretty">No percentages here. Each skill points to where it shows on this site.</p>
+  {
+    SKILL_GROUPS.map((group) => (
+      <table class="border-bevel-shadow text-14 w-full border">
+        <caption class="text-13 bg-surface border-bevel-shadow border border-b-0 px-2 py-1 text-left font-semibold">
+          {group.name}
+        </caption>
+        <thead class="sr-only">
+          <tr>
+            <th scope="col">Skill</th>
+            <th scope="col">Where to see it</th>
+          </tr>
+        </thead>
+        <tbody>
+          {group.skills.map((skill) => (
+            <tr class="border-bevel-shadow border-t first:border-t-0">
+              <th scope="row" class="w-[45%] px-2 py-1.5 text-left align-top font-semibold">
+                {skill.name}
+              </th>
+              <td class="text-text-dim px-2 py-1.5">{skill.evidence}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ))
+  }
+</div>

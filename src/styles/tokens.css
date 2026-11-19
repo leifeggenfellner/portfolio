@@ -105,6 +105,12 @@
   --desktop-icon-glow: rgba(10, 6, 24, 0.8);
   --terminal-bg: #0a0618;
   --terminal-fg: #3cff9c;
+  /* The terminal is a dark phosphor screen in both themes; these stay put. */
+  --terminal-dim: #2fa36d;
+  --terminal-prompt: #9fffce;
+  --terminal-accent: #36e0e0;
+  --terminal-err: #ff6b9a;
+  --terminal-glow: color-mix(in srgb, var(--terminal-fg) 40%, transparent);
   --boot-bg: var(--terminal-bg);
   --boot-fg: var(--terminal-fg);
   --boot-muted: #9d8ac4;
@@ -156,6 +162,21 @@
   --note-text: #3a2e08;
   --note-tape: color-mix(in srgb, var(--surface-3) 55%, transparent);
   --note-shadow: 3px 3px 0 rgba(10, 6, 24, 0.45);
+
+  /* Minesweeper: one colour per neighbour count, plus the red LED counters. */
+  --mine-1: #2348c9;
+  --mine-2: #0f6b33;
+  --mine-3: #b51d3a;
+  --mine-4: #3a1f8f;
+  --mine-5: #8f1d3a;
+  --mine-6: #0b6470;
+  --mine-7: var(--text);
+  --mine-8: #5f5378;
+  --led-bg: #1a0508;
+  --led-fg: #ff3b3b;
+  --led-ghost: color-mix(in srgb, var(--led-fg) 14%, transparent);
+  --face-fill: #ffd23f;
+  --face-ink: #281a47;
 }
 
 @media (max-width: 768px) {
@@ -179,6 +200,14 @@
   --note-text: #2a2105;
   --note-tape: color-mix(in srgb, var(--text) 30%, transparent);
   --note-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+
+  --mine-1: #6f9bff;
+  --mine-2: #4fe08a;
+  --mine-3: #ff6b8a;
+  --mine-4: #b69bff;
+  --mine-5: #ff9a6b;
+  --mine-6: #36e0e0;
+  --mine-8: #9d8ac4;
   --grid-horizon-shadow:
     0 0 8px color-mix(in srgb, var(--magenta) 80%, transparent),
     0 0 20px color-mix(in srgb, var(--cyan) 65%, transparent), 0 0 40px color-mix(in srgb, var(--cyan) 45%, transparent);

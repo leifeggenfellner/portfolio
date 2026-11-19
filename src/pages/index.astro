@@ -10,7 +10,6 @@
  * Svelte components (see registry.svelte.ts).
  */
 import About from "@apps/About.astro";
-import ProjectsExplorer from "@apps/ProjectsExplorer.astro";
 import SkillsMatrix from "@apps/SkillsMatrix.astro";
 import Desktop from "@shell/Desktop.svelte";
 import RootLayout from "@/layouts/RootLayout.astro";
@@ -20,6 +19,5 @@ import RootLayout from "@/layouts/RootLayout.astro";
   <Desktop client:load />
 
   <template data-static-app="about"><About /></template>
-  <template data-static-app="projects"><ProjectsExplorer /></template>
   <template data-static-app="skills"><SkillsMatrix /></template>
 </RootLayout>

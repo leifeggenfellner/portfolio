@@ -1,7 +1,11 @@
 <script lang="ts">
   import { CRT_MODES, GRID_SPEEDS, ICON_SIZES, THEMES } from "@lib/settings";
   import { settings } from "@lib/store/settings";
+  import type { AppProps } from "@lib/app-shell";
   import RetroButton from "@primitives/RetroButton.svelte";
+
+  // Settings needs nothing from the shell.
+  let { shell: _shell }: AppProps = $props();
 
   const OPTION_LABELS = {
     theme: { light: "Light", dark: "Dark" },
