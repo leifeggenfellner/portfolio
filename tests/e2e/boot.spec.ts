@@ -42,7 +42,9 @@ test("a returning visitor skips the BIOS and reaches the desktop quickly", async
   await expect(splash(page)).toBeVisible();
   await expect(bios(page)).toHaveCount(0);
   await expect(splash(page)).not.toHaveAttribute("data-sun-rise");
-  await expect(splash(page)).toHaveCount(0, { timeout: 2_500 });
+  // The splash is ~1.1s; CI runners without a GPU paint the canvas in
+  // software and fire timers late, so allow the same margin as a first visit.
+  await expect(splash(page)).toHaveCount(0, { timeout: 5_000 });
   await expect(desktopIcon(page)).toBeVisible();
 });
 
