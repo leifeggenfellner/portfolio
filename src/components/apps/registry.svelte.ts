@@ -1,10 +1,10 @@
-import minigameIcon from "@/assets/icons/apps/16/gnome-mines.svg?url";
-import contactIcon from "@/assets/icons/apps/16/mail.svg?url";
-import aboutIcon from "@/assets/icons/apps/16/notepad.svg?url";
-import projectsIcon from "@/assets/icons/apps/16/package.svg?url";
-import settingsIcon from "@/assets/icons/apps/16/settings.svg?url";
-import skillsIcon from "@/assets/icons/apps/16/skills-chart.svg?url";
-import terminalIcon from "@/assets/icons/apps/16/terminal.svg?url";
+import aboutIcon from "@/assets/icons/apps/pixel/about.svg?url";
+import contactIcon from "@/assets/icons/apps/pixel/contact.svg?url";
+import minigameIcon from "@/assets/icons/apps/pixel/minesweeper.svg?url";
+import projectsIcon from "@/assets/icons/apps/pixel/projects.svg?url";
+import settingsIcon from "@/assets/icons/apps/pixel/settings.svg?url";
+import skillsIcon from "@/assets/icons/apps/pixel/skills.svg?url";
+import terminalIcon from "@/assets/icons/apps/pixel/terminal.svg?url";
 import type { Component } from "svelte";
 
 interface AppCommon {

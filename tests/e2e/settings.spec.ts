@@ -99,8 +99,8 @@ test("grid speed and icon size preferences control desktop layout", async ({ pag
     expect(await icon.isVisible()).toBe(true);
     expect(await icon.evaluate((element) => element.tabIndex)).toBe(0);
     const box = await icon.locator("img").boundingBox();
-    expect(box?.width).toBe(40);
-    expect(box?.height).toBe(40);
+    expect(box?.width).toBe(48);
+    expect(box?.height).toBe(48);
   }
 
   await page.locator("main ul").getByRole("button", { name: "Settings" }).dblclick();

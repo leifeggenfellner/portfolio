@@ -362,8 +362,8 @@
               alt=""
               aria-hidden="true"
               class={ICON_IMG_CLASS}
-              width="24"
-              height="24"
+              width="32"
+              height="32"
               decoding="async"
             />
             <span>{a.title.split(" ")[0]}</span>
