@@ -142,7 +142,8 @@
     0 0 8px color-mix(in srgb, var(--cyan) 75%, transparent),
     0 0 18px color-mix(in srgb, var(--magenta) 60%, transparent),
     0 0 36px color-mix(in srgb, var(--magenta) 40%, transparent);
-  --desktop-icon-size: 24px;
+  /* Icons are 16px pixel art: keep sizes at whole multiples so pixels stay crisp. */
+  --desktop-icon-size: 32px;
   --sun-face: color-mix(in srgb, var(--surface-3) 90%, var(--magenta) 10%);
   --sun-band: color-mix(in srgb, var(--magenta) 65%, var(--cyan) 35%);
 
@@ -265,5 +266,5 @@
 }
 
 [data-icon-size="large"] {
-  --desktop-icon-size: 40px;
+  --desktop-icon-size: 48px;
 }
