@@ -125,6 +125,8 @@
   /* ---- motion ---- */
   --ease-snap: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* For movement across the screen (the sunrise), not for entrances. */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-1: 80ms;
   --dur-2: 160ms;
   --dur-3: 240ms;

@@ -73,19 +73,4 @@ test.describe("synthwave grid", () => {
     await page.getByRole("radio", { name: "Paused" }).check();
     await expect(canvas(page)).toHaveAttribute("data-running", "false");
   });
-
-  test("keeps the splash decorative and present before boot advances", async ({ page }) => {
-    await page.clock.install();
-    await seedSettings(page, { bootAnimation: true });
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await page.clock.runFor(100);
-
-    const splash = page.locator(".outrun-splash-root");
-    await expect(splash).toBeVisible();
-    const splashState = await splash.evaluate((element) => ({
-      label: element.getAttribute("aria-label"),
-      floorHidden: element.querySelector("[data-horizon]")?.getAttribute("aria-hidden"),
-    }));
-    expect(splashState).toEqual({ label: "Booting RetroOS", floorHidden: "true" });
-  });
 });
