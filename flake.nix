@@ -77,6 +77,10 @@
             corepack enable --install-directory "$COREPACK_HOME/bin" >/dev/null 2>&1 || true
             export PATH="$COREPACK_HOME/bin:$PWD/node_modules/.bin:$PATH"
 
+            # Tools that launch Chrome directly (Playwright MCP, design-skill
+            # scripts) look for CHROME_PATH; point them at the Nix Chromium.
+            export CHROME_PATH="$(ls -d ${playwrightBrowsers}/chromium-*/chrome-linux64/chrome | head -n 1)"
+
             echo ""
             echo "  retro dev shell"
             echo "  ───────────────"

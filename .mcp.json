@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "exec npx -y @playwright/mcp@0.0.83 --headless --isolated --output-dir .playwright-mcp --executable-path \"$CHROME_PATH\""
+      ]
+    }
+  }
+}
