@@ -457,6 +457,14 @@
     opacity: 0;
   }
 }
+@keyframes outrun-sun-rise {
+  from {
+    transform: translate(-50%, 55%);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
 @keyframes outrun-progress {
   from {
     transform: scaleX(0);
@@ -472,6 +480,11 @@
   z-index: var(--z-boot);
   overflow: hidden;
   background: var(--boot-bg);
+}
+.outrun-splash-root[data-leaving] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-3) var(--ease-out);
 }
 
 .outrun-sky {
@@ -503,6 +516,11 @@
   border-radius: 9999px;
   background: repeating-linear-gradient(to bottom, var(--sun-face) 0 14px, var(--sun-band) 14px 20px);
   mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 88%);
+}
+
+/* First visit: the sun climbs out from behind the mountains. */
+[data-sun-rise] .outrun-sun-wrap {
+  animation: outrun-sun-rise var(--splash-ms) var(--ease-in-out) both;
 }
 
 /* The glow is painted once on its own layer; only its opacity pulses, so the
@@ -668,7 +686,7 @@
   transform: scaleX(0);
   background: linear-gradient(to right, var(--magenta), var(--cyan));
   box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 55%, transparent);
-  animation: outrun-progress 800ms var(--ease-out) forwards;
+  animation: outrun-progress var(--splash-ms, 800ms) var(--ease-out) forwards;
 }
 
 .outrun-hint {

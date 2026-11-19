@@ -6,6 +6,8 @@
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
+  import { FIRST_SPLASH_MS, hasVisited, markVisited, RETURN_SPLASH_MS } from "@lib/boot";
+  import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import { applySettingsToRoot } from "@lib/settings";
   import type { Settings } from "@lib/settings";
@@ -21,7 +23,6 @@
   import Taskbar from "./Taskbar.svelte";
 
   const MOBILE_QUERY = "(max-width: 768px)";
-  const MIN_LOADING_MS = 800;
   const FALLBACK_TASKBAR_HEIGHT = 36;
 
   const MAIN_CLASS = "relative h-screen w-screen overflow-hidden bg-desktop";
@@ -39,8 +40,11 @@
     "[text-shadow:0_0_14px_color-mix(in_srgb,var(--magenta)_60%,transparent)]",
   ].join(" ");
 
-  let ready = $state(false);
-  let booted = $state(false);
+  // pending: server render and pre-hydration (a dark power-on screen)
+  // bios → splash → leaving → desktop on a first visit; splash onward when returning.
+  type BootPhase = "pending" | "bios" | "splash" | "leaving" | "desktop";
+  let phase = $state<BootPhase>("pending");
+  let returning = $state(false);
   let isMobile = $state(false);
   let prefs = $state<Settings>(settings.get());
   let settingsReady = $state(false);
@@ -263,7 +267,20 @@
     applySettingsToRoot(document.documentElement, prefs);
   });
 
-  // Minimum splash duration, then show boot sequence.
+  function finishBoot() {
+    markVisited();
+    phase = "desktop";
+  }
+
+  // The splash fades over the already-mounted desktop. Removal is timed, not
+  // tied to the fade finishing, so a starved animation can never leave the
+  // boot screen covering the desktop.
+  function leaveSplash() {
+    if (phase !== "splash") return;
+    phase = "leaving";
+    window.setTimeout(finishBoot, prefersReducedMotion() ? 0 : durationMs("--dur-3", 240));
+  }
+
   onMount(() => {
     settings.hydrate();
     prefs = settings.get();
@@ -271,38 +288,47 @@
     helpNoteOpen = !isHelpNoteDismissed();
 
     if (!settings.get().bootAnimation) {
-      ready = true;
-      booted = true;
+      finishBoot();
       return;
     }
+    returning = hasVisited();
+    phase = returning ? "splash" : "bios";
 
-    const t = window.setTimeout(() => {
-      ready = true;
-    }, MIN_LOADING_MS);
-
-    // BootSequence owns skipping once it mounts; a skip key pressed during
-    // the splash would otherwise be lost and the full boot would still play.
-    const onSplashKey = (e: KeyboardEvent) => {
-      if (ready || !["Escape", "Enter", " "].includes(e.key)) return;
-      window.clearTimeout(t);
-      ready = true;
-      booted = true;
+    // One skip handler for every boot phase, so a key pressed at any point
+    // lands on the desktop instead of advancing to the next phase.
+    const onSkipKey = (e: KeyboardEvent) => {
+      if (phase === "desktop" || !["Escape", "Enter", " "].includes(e.key)) return;
+      e.preventDefault();
+      finishBoot();
     };
-    window.addEventListener("keydown", onSplashKey);
-
-    return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("keydown", onSplashKey);
-    };
+    window.addEventListener("keydown", onSkipKey);
+    return () => window.removeEventListener("keydown", onSkipKey);
   });
 </script>
 
-{#if !ready}
-  <LoadingSplash />
-{:else if !booted}
-  <BootSequence onDone={() => (booted = true)} />
-{:else}
-  <main class={MAIN_CLASS} oncontextmenu={handleDesktopContext} onpointerdown={handleDesktopPointerDown}>
+{#if phase === "pending"}
+  <div class="bg-boot-bg fixed inset-0 z-(--z-boot)" aria-hidden="true"></div>
+{:else if phase === "bios"}
+  <BootSequence onDone={() => (phase = "splash")} onSkip={finishBoot} />
+{/if}
+
+{#if phase === "splash" || phase === "leaving"}
+  <LoadingSplash
+    durationMs={returning ? RETURN_SPLASH_MS : FIRST_SPLASH_MS}
+    sunRise={!returning}
+    leaving={phase === "leaving"}
+    onDone={leaveSplash}
+  />
+{/if}
+
+<!-- The desktop mounts under the splash so the splash can dissolve into it. -->
+{#if phase === "splash" || phase === "leaving" || phase === "desktop"}
+  <main
+    class={MAIN_CLASS}
+    inert={phase !== "desktop"}
+    oncontextmenu={handleDesktopContext}
+    onpointerdown={handleDesktopPointerDown}
+  >
     <Wallpaper />
     {#if !isMobile}
       <aside class={SYS_BADGE_CLASS} aria-label="System information">
@@ -398,12 +424,14 @@
     {/if}
   </main>
 
-  <Taskbar
-    windows={wmState.windows}
-    activeId={wmState.activeId}
-    menuItems={START_MENU_ITEMS}
-    mobile={isMobile}
-    onToggleWindow={handleTaskbarToggle}
-    onMenuSelect={handleStartSelect}
-  />
+  <div class="contents" inert={phase !== "desktop"}>
+    <Taskbar
+      windows={wmState.windows}
+      activeId={wmState.activeId}
+      menuItems={START_MENU_ITEMS}
+      mobile={isMobile}
+      onToggleWindow={handleTaskbarToggle}
+      onMenuSelect={handleStartSelect}
+    />
+  </div>
 {/if}
