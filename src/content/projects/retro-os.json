@@ -5,7 +5,8 @@
   "tagline": "A portfolio that is also an operating system.",
   "year": 2026,
   "role": "Design + engineering",
-  "tech": ["Astro", "React", "TypeScript", "Tailwind v4"],
+  "tech": ["Astro", "Svelte 5", "TypeScript", "Tailwind v4", "Canvas 2D"],
+  "repo": "https://github.com/leifeggenfellner/portfolio",
   "featured": true,
-  "summary": "Vaporwave desktop environment with a real window manager, terminal, and command palette — built as a production-grade static site."
+  "summary": "A vaporwave desktop with a real window manager, a working shell over a virtual filesystem, Minesweeper and a canvas horizon, built as a static site with strict types, design tokens and end-to-end tests."
 }

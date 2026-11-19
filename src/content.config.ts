@@ -8,21 +8,11 @@
 import { glob } from "astro/loaders";
 import { defineCollection } from "astro:content";
 import { z } from "zod";
+import { projectSchema } from "./content/schema";
 
 const projects = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/content/projects" }),
-  schema: z.object({
-    slug: z.string(),
-    name: z.string(),
-    tagline: z.string(),
-    year: z.number(),
-    role: z.string(),
-    tech: z.array(z.string()),
-    repo: z.url().optional(),
-    url: z.url().optional(),
-    featured: z.boolean().default(false),
-    summary: z.string(),
-  }),
+  schema: projectSchema,
 });
 
 const posts = defineCollection({
