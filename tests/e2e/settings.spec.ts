@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { skipBoot } from "./helpers";
 import type { Page } from "@playwright/test";
 
 const STORAGE_KEY = "retro-os:settings";
@@ -152,7 +153,7 @@ test("malformed storage falls back safely and Settings has no axe violations", a
     sessionStorage.setItem("settings-seeded", "true");
   }, STORAGE_KEY);
   await page.goto("/");
-  await page.keyboard.press("Escape");
+  await skipBoot(page);
   await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 

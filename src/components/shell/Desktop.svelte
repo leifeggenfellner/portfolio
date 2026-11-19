@@ -176,8 +176,19 @@
       ready = true;
     }, MIN_LOADING_MS);
 
+    // BootSequence owns skipping once it mounts; a skip key pressed during
+    // the splash would otherwise be lost and the full boot would still play.
+    const onSplashKey = (e: KeyboardEvent) => {
+      if (ready || !["Escape", "Enter", " "].includes(e.key)) return;
+      window.clearTimeout(t);
+      ready = true;
+      booted = true;
+    };
+    window.addEventListener("keydown", onSplashKey);
+
     return () => {
       window.clearTimeout(t);
+      window.removeEventListener("keydown", onSplashKey);
     };
   });
 </script>
