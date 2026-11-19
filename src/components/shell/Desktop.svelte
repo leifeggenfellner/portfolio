@@ -5,13 +5,16 @@
   import BootSequence from "@effects/BootSequence.svelte";
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
+  import Screensaver from "@effects/Screensaver.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
   import type { AppProps, AppShell } from "@lib/app-shell";
   import { APP_VERSION, BUILD_DATE } from "@lib/build-info";
   import { FIRST_SPLASH_MS, hasVisited, markVisited, RETURN_SPLASH_MS } from "@lib/boot";
+  import { degauss } from "@lib/degauss";
+  import { isDrafting, watchIdle } from "@lib/idle";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
-  import { applySettingsToRoot } from "@lib/settings";
+  import { applySettingsToRoot, screensaverDelayMs } from "@lib/settings";
   import type { Settings } from "@lib/settings";
   import { settings } from "@lib/store/settings";
   import { windowManager } from "@lib/store/window-manager";
@@ -57,6 +60,10 @@
   let helpNoteOpen = $state(false);
   let helpNote = $state<ReturnType<typeof HelpNote>>();
   let iconList = $state<HTMLElement>();
+  let mainEl = $state<HTMLElement>();
+  let degaussRing = $state<HTMLElement>();
+  let lastTheme: Settings["theme"] | null = null;
+  let screensaverOn = $state(false);
 
   // Where each window should grow from next time it appears: the icon or
   // taskbar button that summoned it. Read once by the window's intro.
@@ -281,6 +288,35 @@
     }
 
     applySettingsToRoot(document.documentElement, prefs);
+    // Degauss on a theme switch, but not when settings first load.
+    if (lastTheme && lastTheme !== prefs.theme && mainEl && degaussRing) void degauss(mainEl, degaussRing);
+    lastTheme = prefs.theme;
+  });
+
+  // Screensaver: only on the desktop, and never over a half-written draft.
+  $effect(() => {
+    const timeoutMs = screensaverDelayMs(prefs.screensaver);
+    if (timeoutMs === null || phase !== "desktop") return;
+    // The key that wakes the screen is swallowed, as on a real machine, so it
+    // can't also close a window or type into the terminal. Registered before
+    // the idle watcher so it still sees the screensaver as on.
+    const swallow = (e: KeyboardEvent) => {
+      if (!screensaverOn) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener("keydown", swallow, { capture: true });
+    const stop = watchIdle({
+      timeoutMs,
+      onIdle: () => (screensaverOn = true),
+      onActive: () => (screensaverOn = false),
+      canIdle: () => !isDrafting(),
+    });
+    return () => {
+      stop();
+      window.removeEventListener("keydown", swallow, { capture: true });
+      screensaverOn = false;
+    };
   });
 
   function finishBoot() {
@@ -340,6 +376,7 @@
 <!-- The desktop mounts under the splash so the splash can dissolve into it. -->
 {#if phase === "splash" || phase === "leaving" || phase === "desktop"}
   <main
+    bind:this={mainEl}
     class={MAIN_CLASS}
     inert={phase !== "desktop"}
     oncontextmenu={handleDesktopContext}
@@ -428,6 +465,7 @@
     {/each}
 
     <CrtLayer />
+    <div bind:this={degaussRing} class="degauss-ring" aria-hidden="true"></div>
 
     {#if ctxMenu}
       <ContextMenu
@@ -450,4 +488,8 @@
       onMenuSelect={handleStartSelect}
     />
   </div>
+
+  {#if screensaverOn}
+    <Screensaver />
+  {/if}
 {/if}

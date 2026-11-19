@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CRT_MODES, GRID_SPEEDS, ICON_SIZES, THEMES } from "@lib/settings";
+  import { CRT_MODES, GRID_SPEEDS, ICON_SIZES, SCREENSAVER_DELAYS, THEMES } from "@lib/settings";
   import { settings } from "@lib/store/settings";
   import type { AppProps } from "@lib/app-shell";
   import RetroButton from "@primitives/RetroButton.svelte";
@@ -12,6 +12,7 @@
     crt: { off: "Off", subtle: "Subtle", full: "Full" },
     gridSpeed: { paused: "Paused", slow: "Slow", normal: "Normal", fast: "Fast" },
     iconSize: { small: "Small", medium: "Medium", large: "Large" },
+    screensaver: { never: "Never", "1": "After 1 minute", "3": "After 3 minutes", "10": "After 10 minutes" },
   } as const;
 
   const CONTROL_LABEL_CLASS =
@@ -94,6 +95,20 @@
           onchange={() => settings.set("iconSize", size)}
         />
         <span>{OPTION_LABELS.iconSize[size]}</span>
+      </label>
+    {/each}
+    <span class={SETTING_TITLE_CLASS}>Screensaver</span>
+    {#each SCREENSAVER_DELAYS as delay (delay)}
+      <label class={CONTROL_LABEL_CLASS}>
+        <input
+          class="accent-accent"
+          type="radio"
+          name="settings-screensaver"
+          value={delay}
+          checked={$settings.screensaver === delay}
+          onchange={() => settings.set("screensaver", delay)}
+        />
+        <span>{OPTION_LABELS.screensaver[delay]}</span>
       </label>
     {/each}
   </fieldset>

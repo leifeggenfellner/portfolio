@@ -20,18 +20,18 @@ const HELP_NOTE_KEY = "retro-os:help-note";
  * stall Svelte exit transitions for seconds, so WebKit runs without motion;
  * Chromium covers the motion path.
  */
-export async function openDesktop(page: Page, { withNote = false } = {}) {
+export async function openDesktop(page: Page, { withNote = false, settings = {} as Record<string, unknown> } = {}) {
   if (page.context().browser()?.browserType().name() === "webkit") {
     await page.emulateMedia({ reducedMotion: "reduce" });
   }
   await page.addInitScript(
-    ({ settingsKey, noteKey, dismissNote }) => {
+    ({ settingsKey, noteKey, dismissNote, extra }) => {
       if (sessionStorage.getItem("shell-seeded") === "true") return;
       sessionStorage.setItem("shell-seeded", "true");
-      localStorage.setItem(settingsKey, JSON.stringify({ bootAnimation: false }));
+      localStorage.setItem(settingsKey, JSON.stringify({ bootAnimation: false, ...extra }));
       if (dismissNote) localStorage.setItem(noteKey, "dismissed");
     },
-    { settingsKey: SETTINGS_KEY, noteKey: HELP_NOTE_KEY, dismissNote: !withNote },
+    { settingsKey: SETTINGS_KEY, noteKey: HELP_NOTE_KEY, dismissNote: !withNote, extra: settings },
   );
   await page.goto("/");
   await expect(page.getByRole("navigation", { name: "Taskbar" })).toBeVisible();

@@ -2,6 +2,8 @@ export type Theme = "light" | "dark";
 export type CrtMode = "off" | "subtle" | "full";
 export type GridSpeed = "paused" | "slow" | "normal" | "fast";
 export type IconSize = "small" | "medium" | "large";
+/** Minutes of inactivity before the screensaver starts, or never. */
+export type ScreensaverDelay = "never" | "1" | "3" | "10";
 
 export type Settings = {
   bootAnimation: boolean;
@@ -9,12 +11,14 @@ export type Settings = {
   crt: CrtMode;
   gridSpeed: GridSpeed;
   iconSize: IconSize;
+  screensaver: ScreensaverDelay;
 };
 
 export const THEMES: readonly Theme[] = ["light", "dark"];
 export const CRT_MODES: readonly CrtMode[] = ["off", "subtle", "full"];
 export const GRID_SPEEDS: readonly GridSpeed[] = ["paused", "slow", "normal", "fast"];
 export const ICON_SIZES: readonly IconSize[] = ["small", "medium", "large"];
+export const SCREENSAVER_DELAYS: readonly ScreensaverDelay[] = ["never", "1", "3", "10"];
 
 export const SETTINGS_STORAGE_KEY = "retro-os:settings";
 
@@ -24,6 +28,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   crt: "subtle",
   gridSpeed: "normal",
   iconSize: "medium",
+  screensaver: "3",
 };
 
 const ROOT_ATTRIBUTE_RULES = [
@@ -86,7 +91,17 @@ export function parseSettings(raw: string | null): Settings {
     next.iconSize = iconSize;
   }
 
+  const screensaver = parsed.screensaver;
+  if (isAllowedValue(screensaver, SCREENSAVER_DELAYS)) {
+    next.screensaver = screensaver;
+  }
+
   return next;
+}
+
+/** The screensaver delay in milliseconds, or null when it is off. */
+export function screensaverDelayMs(delay: ScreensaverDelay): number | null {
+  return delay === "never" ? null : Number(delay) * 60_000;
 }
 
 export function applySettingsToRoot(root: HTMLElement, value: Settings): void {
