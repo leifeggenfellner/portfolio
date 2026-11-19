@@ -83,6 +83,7 @@
   --text-dim: #6b5a8c;
   --text-inverse: #ffffff;
   --text-disabled: #9b8fb8;
+  --focus-ring-color: var(--text);
 
   /* ---- title bars ---- */
   --title-active-from: var(--magenta);
@@ -143,12 +144,17 @@
     0 0 18px color-mix(in srgb, var(--magenta) 60%, transparent),
     0 0 36px color-mix(in srgb, var(--magenta) 40%, transparent);
   --desktop-icon-size: 24px;
+  --sun-face: color-mix(in srgb, var(--surface-3) 90%, var(--magenta) 10%);
+  --sun-band: color-mix(in srgb, var(--magenta) 65%, var(--cyan) 35%);
 }
 
 [data-theme="dark"] {
   --magenta: #ff5fd2;
   --cyan: #36e0e0;
   --grid-line-color: color-mix(in srgb, var(--magenta) 58%, transparent);
+  /* Night surfaces are near-black, so the sun face mixes from the light text tone instead. */
+  --sun-face: color-mix(in srgb, var(--text) 80%, var(--magenta) 20%);
+  --sun-band: color-mix(in srgb, var(--magenta) 70%, var(--cyan) 30%);
   --grid-haze-color: color-mix(in srgb, var(--magenta) 24%, transparent);
   --grid-horizon-haze: color-mix(in srgb, var(--cyan) 28%, transparent);
   --grid-horizon-shadow:

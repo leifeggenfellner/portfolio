@@ -20,7 +20,7 @@
   const MIN_LOADING_MS = 800;
 
   const MAIN_CLASS = "relative h-screen w-screen overflow-hidden bg-desktop";
-  const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop)";
+  const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop) [--focus-ring-color:var(--desktop-text)]";
   const ICON_GRID_DESKTOP = "left-4 flex max-h-[calc(100dvh-2rem)] flex-col flex-wrap content-start gap-3";
   const ICON_GRID_MOBILE = "left-3 right-3 grid grid-cols-4 gap-3";
   const ICON_BUTTON_BASE = "focus-ring icon-label text-12 flex flex-col items-center gap-1 p-1 text-white";
@@ -121,8 +121,10 @@
     });
   }
 
-  function handleIconClick(appId: string) {
-    if (!isMobile) return;
+  // Mouse users double-click on desktop; Enter/Space fire a click with
+  // detail 0, so keyboard activation opens the app in a single press.
+  function handleIconClick(appId: string, e: MouseEvent) {
+    if (!isMobile && e.detail !== 0) return;
     void launch(appId);
   }
 
@@ -187,7 +189,6 @@
 {:else}
   <main class={MAIN_CLASS} oncontextmenu={handleDesktopContext}>
     <Wallpaper />
-    settings
     {#if !isMobile}
       <aside class={SYS_BADGE_CLASS} aria-label="System information">
         <p class="font-chrome text-[28px] leading-none tracking-[0.02em]">
@@ -204,7 +205,7 @@
           <button
             type="button"
             ondblclick={() => handleIconDoubleClick(a.id)}
-            onclick={() => handleIconClick(a.id)}
+            onclick={(e) => handleIconClick(a.id, e)}
             class={cx(ICON_BUTTON_BASE, isMobile ? ICON_BUTTON_MOBILE : ICON_BUTTON_DESKTOP)}
           >
             <img

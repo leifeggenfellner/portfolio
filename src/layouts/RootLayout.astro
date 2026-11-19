@@ -9,7 +9,7 @@
  * the matching <link rel="preload"> tags automatically.
  */
 import { Font } from "astro:assets";
-import { SETTINGS_BOOTSTRAP_SCRIPT } from "@lib/settings";
+import { DEFAULT_SETTINGS, SETTINGS_BOOTSTRAP_SCRIPT } from "@lib/settings";
 import "@styles/globals.css";
 
 interface Props {
@@ -24,8 +24,8 @@ interface Props {
 const {
   title = "Retro — a portfolio OS",
   description = "A retro-OS-inspired portfolio. Drag the windows.",
-  theme = "light",
-  crt = "full",
+  theme = DEFAULT_SETTINGS.theme,
+  crt = DEFAULT_SETTINGS.crt,
   accent = "default",
   image,
 } = Astro.props;

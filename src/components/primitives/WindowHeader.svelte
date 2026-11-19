@@ -16,7 +16,7 @@
   let { icon, title, active = true, maximized, onPointerDown, onMin, onMax, onClose }: Props = $props();
 
   const headerClass = [
-    "group no-select chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5",
+    "group no-select font-chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5",
     "bg-[linear-gradient(90deg,var(--title-inactive-from),var(--title-inactive-to))]",
     "text-[var(--title-inactive-text)]",
     "data-[active=true]:bg-[linear-gradient(90deg,var(--title-active-from),var(--title-active-to))]",
