@@ -11,6 +11,16 @@ export interface ProfileLink {
   url: string;
 }
 
+/** One line of the CV: a job, or a stint at a school. */
+export interface TimelineEntry {
+  /** "2025" or "2022–2024"; "now" for ongoing. */
+  when: string;
+  title: string;
+  org: string;
+  /** Tools or focus, kept to a few words. */
+  note?: string;
+}
+
 export interface Profile {
   name: string;
   /** Terminal user name. */
@@ -18,6 +28,8 @@ export interface Profile {
   role: string;
   location: string | null;
   bio: { paragraphs: string[]; placeholder: boolean };
+  experience: TimelineEntry[];
+  education: TimelineEntry[];
   email: string | null;
   links: ProfileLink[];
 }
@@ -25,18 +37,47 @@ export interface Profile {
 export const PROFILE: Profile = {
   name: "Leif Eggenfellner",
   handle: "leif",
-  role: "Full-stack engineer",
-  location: null,
+  role: "Full-stack developer",
+  location: "Tromsø, NO",
   bio: {
-    placeholder: true,
+    placeholder: false,
     paragraphs: [
-      "I build software at the intersection of craft and systems.",
-      "This site is a working retro desktop: every window, taskbar button and terminal command is real. The full bio is on its way.",
+      "I'm a full-stack developer, and I like programming wherever it turns up. Right now that's at Helse Nord IKT in Tromsø, building with Vue.js, TypeScript and Scala on top of Postgres.",
+      "Before that: DevOps and satellite communications at Orbit NTNU, internships at KSAT, Torghatten and Hemit, and a bachelor's in informatics from NTNU. The field changes; the fun of making things work doesn't.",
+      "Away from the keyboard it's volleyball, music production, and music in general.",
     ],
   },
+  experience: [
+    { when: "2025–now", title: "System Developer", org: "Helse Nord IKT", note: "Vue.js, TypeScript, Scala, Postgres" },
+    { when: "2025", title: "Software Developer (intern)", org: "Hemit HF", note: ".NET, AngularJS" },
+    {
+      when: "2024",
+      title: "Software Developer (intern)",
+      org: "Torghatten",
+      note: "Next.js, React, Tailwind, Kotlin, Java",
+    },
+    { when: "2023", title: "Software Developer (intern)", org: "KSAT", note: "Three.js, GitLab" },
+    {
+      when: "2022–2024",
+      title: "DevOps Engineer → Team Lead → Satellite Comms Engineer",
+      org: "Orbit NTNU",
+      note: "Docker, GitLab",
+    },
+    {
+      when: "2022–2023",
+      title: "Software Developer, then Cyber Defense Incident Responder",
+      org: "secunor",
+    },
+    { when: "2023", title: "Teaching Assistant, MA0001", org: "NTNU" },
+  ],
+  education: [
+    { when: "2022–2025", title: "Bachelor's, Informatics", org: "NTNU" },
+    { when: "2021–2022", title: "Electrical and Electronics Engineering", org: "NTNU" },
+  ],
   email: null,
   links: [
     { label: "GitHub", url: "https://github.com/leifeggenfellner" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/leif-eggenfellner/" },
     { label: "This site's source", url: "https://github.com/leifeggenfellner/portfolio" },
   ],
 };

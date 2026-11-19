@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "advent-of-code",
+  "name": "Advent of Code",
+  "tagline": "December puzzles, in whatever language I'm curious about.",
+  "year": 2022,
+  "role": "Solo",
+  "tech": ["Python", "Rust", "Java"],
+  "repo": "https://github.com/leifeggenfellner/advent-of-code",
+  "featured": false,
+  "summary": "Solutions to Advent of Code: 2022 in Python with tests for each day, plus Rust and Java takes on some of the same days, and 2015 in Rust."
+}

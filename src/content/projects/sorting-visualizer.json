@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "sorting-visualizer",
+  "name": "Sorting Algorithm Visualizer",
+  "tagline": "Watching sorting algorithms do their thing.",
+  "year": 2021,
+  "role": "Solo",
+  "tech": ["JavaScript", "HTML", "CSS"],
+  "repo": "https://github.com/leifeggenfellner/sortingAlgorithmVisualizer",
+  "featured": false,
+  "summary": "A personal project to understand sorting algorithms better by visualising them step by step in the browser."
+}

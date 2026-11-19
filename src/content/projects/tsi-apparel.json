@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "tsi-apparel",
+  "name": "TSI Apparel",
+  "tagline": "Order tooling for my volleyball club's team kit.",
+  "year": 2026,
+  "role": "Solo",
+  "tech": ["Python", "Nix", "GitHub Actions"],
+  "repo": "https://github.com/leifeggenfellner/tsi-apparel",
+  "featured": true,
+  "summary": "A single command-line tool that turns the club's order-form answers into the supplier's order sheet, looks up what each person ordered and owes at the pickup desk, and totals the invoices. Personal data never touches the repo: CI fails if an order file is committed."
+}

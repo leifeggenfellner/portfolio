@@ -51,6 +51,11 @@
       `[${group.name}]`,
       ...group.skills.map((s) => `  ${s.name.padEnd(22)}${s.evidence}`),
     ]);
+    const timeline = (heading: string, entries: typeof PROFILE.experience) => [
+      `[${heading}]`,
+      ...entries.map((e) => `  ${e.when.padEnd(11)}${e.title}, ${e.org}`),
+    ];
+    const cv = [...timeline("work", PROFILE.experience), "", ...timeline("education", PROFILE.education)];
     const contact = [
       ...(PROFILE.email ? [`mail: ${PROFILE.email}`] : []),
       ...PROFILE.links.map((link) => `${link.label.toLowerCase()}: ${link.url}`),
@@ -59,6 +64,7 @@
       home: dir({
         [PROFILE.handle]: dir({
           "about.txt": file(aboutLines(), "about"),
+          "cv.txt": file(cv, "about"),
           "skills.txt": file(skills, "skills"),
           "contact.txt": file(contact, "contact"),
           projects: dir(projects),
