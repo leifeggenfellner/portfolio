@@ -16,7 +16,9 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   webServer: {
-    command: "pnpm preview --port " + PORT,
+    // CI downloads the dist/ artifact from the build job. Locally, build first so
+    // the suite never runs against a stale dist/ from an earlier build.
+    command: (process.env.CI ? "" : "pnpm build && ") + "pnpm preview --port " + PORT,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

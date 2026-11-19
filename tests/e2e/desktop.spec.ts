@@ -1,10 +1,10 @@
 import AxeBuilder from "@axe-core/playwright";
 import { test, expect } from "@playwright/test";
+import { skipBoot } from "./helpers";
 
 test("desktop boots and opens an app", async ({ page }) => {
   await page.goto("/");
-  // Skip the boot sequence
-  await page.keyboard.press("Escape");
+  await skipBoot(page);
   // Desktop icon for About should be visible and openable
   const aboutIcon = page.getByRole("button", { name: /me\.txt|about/i }).first();
   await aboutIcon.dblclick();
@@ -13,7 +13,7 @@ test("desktop boots and opens an app", async ({ page }) => {
 
 test("desktop icons open with the keyboard", async ({ page }) => {
   await page.goto("/");
-  await page.keyboard.press("Escape");
+  await skipBoot(page);
   const aboutIcon = page.getByRole("button", { name: /me\.txt/i }).first();
   await aboutIcon.focus();
   await page.keyboard.press("Enter");
@@ -22,7 +22,7 @@ test("desktop icons open with the keyboard", async ({ page }) => {
 
 test("has no critical a11y violations on first paint", async ({ page }) => {
   await page.goto("/");
-  await page.keyboard.press("Escape");
+  await skipBoot(page);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa"])
     .disableRules(["color-contrast"]) // CRT/vaporwave triages contrast separately
