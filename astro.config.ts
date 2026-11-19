@@ -15,7 +15,11 @@ export default defineConfig({
   base: BASE,
   output: "static",
   trailingSlash: "ignore",
-  integrations: [svelte(), mdx(), sitemap()],
+  // Astro only collects CSS for components rendered during SSR, so scoped
+  // <style> blocks in components that first appear after hydration (menus,
+  // windows) were dropped from builds. Injecting component CSS via JS ships
+  // it with whichever side renders the component.
+  integrations: [svelte({ emitCss: false }), mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
   },
