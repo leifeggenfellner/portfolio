@@ -129,11 +129,13 @@
         onclick={(e) => choose(item, e.currentTarget)}
         onpointerenter={() => focusItem(i)}
       >
-        {#if item.icon && item.iconify}
-          <Icon icon={item.icon} width="20" height="20" aria-hidden="true" />
-        {:else if item.icon}
-          <img src={item.icon} alt="" width="20" height="20" class="h-5 w-5 object-contain" />
-        {/if}
+        <span class="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden="true">
+          {#if item.icon && item.iconify}
+            <Icon icon={item.icon} width="20" height="20" />
+          {:else if item.icon}
+            <img src={item.icon} alt="" width="20" height="20" class="h-5 w-5 object-contain" />
+          {/if}
+        </span>
         <span>{item.label}</span>
       </button>
     {/each}
