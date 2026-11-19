@@ -131,14 +131,11 @@
   --dur-4: 400ms;
   --dur-boot: 4000ms;
   --grid-scroll-duration: 8s;
-  --grid-row-step: 44px;
   --grid-column-step: 96px;
   --grid-horizon-bottom: 33%;
-  --grid-fade-start: 48%;
-  --grid-fade-end: 62%;
-  --grid-line-color: color-mix(in srgb, var(--cyan) 58%, transparent);
-  --grid-haze-color: color-mix(in srgb, var(--cyan) 24%, transparent);
-  --grid-horizon-haze: color-mix(in srgb, var(--magenta) 28%, transparent);
+  /* Plain colours for the canvas horizon, which applies its own alpha. */
+  --grid-line-base: var(--cyan);
+  --grid-haze-base: var(--magenta);
   --grid-horizon-shadow:
     0 0 8px color-mix(in srgb, var(--cyan) 75%, transparent),
     0 0 18px color-mix(in srgb, var(--magenta) 60%, transparent),
@@ -167,7 +164,8 @@
 [data-theme="dark"] {
   --magenta: #ff5fd2;
   --cyan: #36e0e0;
-  --grid-line-color: color-mix(in srgb, var(--magenta) 58%, transparent);
+  --grid-line-base: var(--magenta);
+  --grid-haze-base: var(--cyan);
   /* Night surfaces are near-black, so the sun face mixes from the light text tone instead. */
   --sun-face: color-mix(in srgb, var(--text) 80%, var(--magenta) 20%);
   --sun-band: color-mix(in srgb, var(--magenta) 70%, var(--cyan) 30%);
@@ -178,8 +176,6 @@
   --note-text: #2a2105;
   --note-tape: color-mix(in srgb, var(--text) 30%, transparent);
   --note-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
-  --grid-haze-color: color-mix(in srgb, var(--magenta) 24%, transparent);
-  --grid-horizon-haze: color-mix(in srgb, var(--cyan) 28%, transparent);
   --grid-horizon-shadow:
     0 0 8px color-mix(in srgb, var(--magenta) 80%, transparent),
     0 0 20px color-mix(in srgb, var(--cyan) 65%, transparent), 0 0 40px color-mix(in srgb, var(--cyan) 45%, transparent);

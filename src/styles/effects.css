@@ -426,22 +426,12 @@
 }
 
 /* ---- cinematic loading splash (outrun) ---- */
-@keyframes outrun-scroll {
+@keyframes outrun-sun-pulse {
   from {
-    transform: translateY(0);
+    opacity: 0.7;
   }
   to {
-    transform: translateY(var(--grid-row-step));
-  }
-}
-@keyframes outrun-sun-pulse {
-  0% {
-    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--magenta) 65%, transparent))
-      drop-shadow(0 0 36px color-mix(in srgb, var(--cyan) 30%, transparent));
-  }
-  100% {
-    filter: drop-shadow(0 0 24px color-mix(in srgb, var(--magenta) 75%, transparent))
-      drop-shadow(0 0 62px color-mix(in srgb, var(--cyan) 45%, transparent));
+    opacity: 1;
   }
 }
 @keyframes outrun-glitch {
@@ -513,7 +503,24 @@
   border-radius: 9999px;
   background: repeating-linear-gradient(to bottom, var(--sun-face) 0 14px, var(--sun-band) 14px 20px);
   mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 88%);
+}
+
+/* The glow is painted once on its own layer; only its opacity pulses, so the
+   sun never repaints per frame. */
+.outrun-sun-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--magenta) 55%, transparent) 0%,
+    color-mix(in srgb, var(--cyan) 22%, transparent) 45%,
+    transparent 70%
+  );
   animation: outrun-sun-pulse 2.6s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
 .outrun-mountains {
@@ -532,61 +539,16 @@
   stroke-width: 2;
 }
 
-.outrun-grid-plane {
-  --grid-perspective: 320px;
-  --grid-rotate: 22deg;
-  position: absolute;
-  left: -50%;
-  right: -50%;
-  bottom: 0;
-  height: 100%;
-  z-index: 3;
-  overflow: hidden;
-  pointer-events: none;
-  transform: perspective(var(--grid-perspective)) rotateX(var(--grid-rotate));
-  transform-origin: bottom center;
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent var(--grid-fade-start),
-    rgba(0, 0, 0, 0.55) var(--grid-fade-end),
-    rgba(0, 0, 0, 0.82) 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent var(--grid-fade-start),
-    rgba(0, 0, 0, 0.55) var(--grid-fade-end),
-    rgba(0, 0, 0, 0.82) 100%
-  );
-}
-
-.outrun-grid {
+/* Canvas floor: spans from the horizon line to the bottom edge. */
+.horizon-canvas {
   position: absolute;
   left: 0;
-  right: 0;
-  bottom: calc(-1 * var(--grid-row-step));
-  height: calc(100% + var(--grid-row-step) * 2);
+  bottom: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: var(--grid-horizon-bottom);
   pointer-events: none;
-  background-image:
-    repeating-linear-gradient(to right, var(--grid-line-color) 0 2px, transparent 2px var(--grid-column-step)),
-    repeating-linear-gradient(to bottom, var(--grid-line-color) 0 2px, transparent 2px var(--grid-row-step));
-  will-change: transform;
-  animation: outrun-scroll var(--grid-scroll-duration) linear infinite;
-}
-
-[data-grid-speed="paused"] .outrun-grid {
-  animation-play-state: paused;
-}
-
-.outrun-grid-plane::after {
-  content: "";
-  position: absolute;
-  inset: 24% 0 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to bottom, transparent 0%, var(--grid-horizon-haze) 48%, transparent 82%),
-    radial-gradient(ellipse at 50% var(--grid-fade-start), var(--grid-haze-color), transparent 68%);
 }
 
 .outrun-horizon {
@@ -721,10 +683,6 @@
   .outrun-sun-wrap {
     width: min(58vw, 280px);
     top: 24%;
-  }
-
-  .outrun-grid-plane {
-    --grid-perspective: 500px;
   }
 
   .outrun-label {

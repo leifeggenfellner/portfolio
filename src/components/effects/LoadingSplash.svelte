@@ -1,4 +1,5 @@
 <script lang="ts">
+  import HorizonCanvas from "./HorizonCanvas.svelte";
   interface Props {
     label?: string;
   }
@@ -17,9 +18,7 @@
     ></path>
   </svg>
 
-  <div class="outrun-grid-plane" aria-hidden="true">
-    <div class="outrun-grid"></div>
-  </div>
+  <HorizonCanvas />
   <div class="outrun-horizon" aria-hidden="true"></div>
 
   <div class="splash-overlay crt-scanlines" aria-hidden="true"></div>
