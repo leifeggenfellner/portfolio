@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "dotfiles",
+  "name": "dotfiles",
+  "tagline": "My machines, declared in one Nix flake.",
+  "year": 2025,
+  "role": "Solo",
+  "tech": ["Nix", "NixOS", "Home Manager", "Lua", "Shell"],
+  "repo": "https://github.com/leifeggenfellner/dotfiles",
+  "featured": true,
+  "summary": "NixOS and Home Manager configuration for my machines, split into per-host system configs and toggleable feature modules, with custom packages exposed through the flake."
+}

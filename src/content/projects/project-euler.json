@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "project-euler",
+  "name": "Project Euler",
+  "tagline": "Maths problems, solved with code.",
+  "year": 2022,
+  "role": "Solo",
+  "tech": ["Python", "C++", "JavaScript"],
+  "repo": "https://github.com/leifeggenfellner/ProjectEuler",
+  "featured": false,
+  "summary": "My solutions to Project Euler problems, mostly in Python with some in C++ and JavaScript."
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../.astro/collections/projects.schema.json",
+  "slug": "a-star",
+  "name": "A* Pathfinding",
+  "tagline": "The A* search algorithm, running in the browser.",
+  "year": 2023,
+  "role": "Solo",
+  "tech": ["JavaScript", "HTML", "CSS"],
+  "repo": "https://github.com/leifeggenfellner/A_Star-Algorithm",
+  "featured": false,
+  "summary": "A simple implementation of the A* search algorithm in JavaScript."
+}
