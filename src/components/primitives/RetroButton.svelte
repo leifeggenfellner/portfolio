@@ -28,8 +28,9 @@
   let pressed = $state(false);
 
   const sizeMap: Record<Size, string> = {
-    sm: "min-h-[22px] px-2 py-[2px] text-13",
-    md: "min-h-[28px] px-4 py-[5px] text-14",
+    // pointer-coarse: 44px touch targets without changing the mouse layout.
+    sm: "min-h-[22px] px-2 py-[2px] text-13 pointer-coarse:min-h-11",
+    md: "min-h-[28px] px-4 py-[5px] text-14 pointer-coarse:min-h-11",
     lg: "min-h-[36px] px-5 py-2 text-16",
     icon: "h-[26px] w-[26px] p-0 text-14",
   };

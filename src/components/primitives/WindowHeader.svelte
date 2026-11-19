@@ -16,7 +16,7 @@
   let { icon, title, active = true, maximized, onPointerDown, onMin, onMax, onClose }: Props = $props();
 
   const headerClass = [
-    "group no-select font-chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5",
+    "group no-select font-chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5 pointer-coarse:h-12",
     "bg-[linear-gradient(90deg,var(--title-inactive-from),var(--title-inactive-to))]",
     "text-[var(--title-inactive-text)]",
     "data-[active=true]:bg-[linear-gradient(90deg,var(--title-active-from),var(--title-active-to))]",
@@ -43,7 +43,8 @@
     "group-data-[active=true]:[text-shadow:1px_1px_0_rgba(0,0,0,0.35)]",
   ].join(" ");
 
-  const sysBtnClass = "w-5.5 h-5 text-sm font-bold text-text";
+  // Touch screens get 44px targets; a mouse keeps the period-sized buttons.
+  const sysBtnClass = "w-5.5 h-5 text-sm font-bold text-text pointer-coarse:h-10 pointer-coarse:w-11";
 </script>
 
 <div
@@ -61,7 +62,12 @@
     </span>
   {/if}
   <span class={titleClass}>{title}</span>
-  <div class="flex gap-0.75" role="group" aria-label="Window controls" onpointerdown={(e) => e.stopPropagation()}>
+  <div
+    class="flex gap-0.75 pointer-coarse:gap-1.5"
+    role="group"
+    aria-label="Window controls"
+    onpointerdown={(e) => e.stopPropagation()}
+  >
     {#if onMin}
       <RetroButton variant="icon" class={sysBtnClass} aria-label="Minimize" title="Minimize" onclick={onMin}>
         <Icon icon="ic:baseline-minimize" width="16" height="16" />

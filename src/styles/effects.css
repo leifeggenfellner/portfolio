@@ -554,10 +554,18 @@
   height: min(25vh, 220px);
   z-index: 2;
 }
+/* Fill comes from the SVG's own gradient; its stops read these tokens. */
 .outrun-mountains path {
-  fill: color-mix(in srgb, var(--desktop-bg) 75%, var(--text) 25%);
-  stroke: color-mix(in srgb, var(--cyan) 26%, transparent);
+  stroke: var(--mountain-ridge);
   stroke-width: 2;
+}
+
+.mountain-stop-top {
+  stop-color: var(--mountain-top);
+}
+
+.mountain-stop-base {
+  stop-color: var(--mountain-base);
 }
 
 /* Canvas floor: spans from the horizon line to the bottom edge. */

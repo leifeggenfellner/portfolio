@@ -7,6 +7,7 @@
   import LoadingSplash from "@effects/LoadingSplash.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
   import type { AppProps, AppShell } from "@lib/app-shell";
+  import { APP_VERSION, BUILD_DATE } from "@lib/build-info";
   import { FIRST_SPLASH_MS, hasVisited, markVisited, RETURN_SPLASH_MS } from "@lib/boot";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
@@ -238,8 +239,6 @@
     windowManager.move(id, next.x, next.y);
   }
 
-  const buildDate = "2026.06.02";
-
   // Viewport listeners — owns matchMedia + resize.
   $effect(() => {
     syncViewport();
@@ -352,8 +351,8 @@
         <p class="font-chrome text-[28px] leading-none tracking-[0.02em]">
           RETRO<span class="text-cyan">//OS</span>
         </p>
-        <p class="font-mono mt-1 text-[13px] opacity-80">portfolio kit · v2.6.0 · {themeLabel}</p>
-        <p class="font-mono text-[12px] opacity-70">build {buildDate}</p>
+        <p class="font-mono mt-1 text-[13px] opacity-80">v{APP_VERSION} · {themeLabel}</p>
+        <p class="font-mono text-[12px] opacity-70">build {BUILD_DATE}</p>
       </aside>
     {/if}
 

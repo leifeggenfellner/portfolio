@@ -240,7 +240,7 @@
       {@render children?.()}
     </div>
     {#if statusbar}
-      <div class="bevel-in-thin bg-surface text-12 text-text-dim mt-0.75 flex gap-3.5 px-1.5 py-0.5">
+      <div class="bevel-in-thin bg-surface text-12 text-text mt-0.75 flex gap-3.5 px-1.5 py-0.5">
         {@render statusbar?.()}
       </div>
     {/if}
