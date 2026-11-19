@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { APPS } from "@apps/registry.svelte";
   import BootSequence from "@effects/BootSequence.svelte";
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
+  import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import { applySettingsToRoot } from "@lib/settings";
   import type { Settings } from "@lib/settings";
   import { settings } from "@lib/store/settings";
@@ -14,14 +15,19 @@
   import ContextMenu from "@primitives/ContextMenu.svelte";
   import type { MenuEntry } from "@primitives/ContextMenu.svelte";
   import RetroWindow from "@primitives/RetroWindow.svelte";
+  import { clampWindowPosition } from "@lib/window-bounds";
+  import HelpNote from "./HelpNote.svelte";
+  import type { StartMenuItem } from "./StartMenu.svelte";
+  import Taskbar from "./Taskbar.svelte";
 
   const MOBILE_QUERY = "(max-width: 768px)";
-  const MOBILE_TASKBAR_OFFSET = 56;
   const MIN_LOADING_MS = 800;
+  const FALLBACK_TASKBAR_HEIGHT = 36;
 
   const MAIN_CLASS = "relative h-screen w-screen overflow-hidden bg-desktop";
   const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop) [--focus-ring-color:var(--desktop-text)]";
-  const ICON_GRID_DESKTOP = "left-4 flex max-h-[calc(100dvh-2rem)] flex-col flex-wrap content-start gap-3";
+  const ICON_GRID_DESKTOP =
+    "left-4 flex max-h-[calc(100dvh-2rem-var(--taskbar-height))] flex-col flex-wrap content-start gap-3";
   const ICON_GRID_MOBILE = "left-3 right-3 grid grid-cols-4 gap-3";
   const ICON_BUTTON_BASE = "focus-ring icon-label text-12 flex flex-col items-center gap-1 p-1 text-white";
   const ICON_BUTTON_DESKTOP = "w-19";
@@ -40,6 +46,15 @@
   let settingsReady = $state(false);
   let viewportWidth = $state(0);
   let viewportHeight = $state(0);
+  let taskbarHeight = $state(FALLBACK_TASKBAR_HEIGHT);
+  let selectedIcon = $state<string | null>(null);
+  let helpNoteOpen = $state(false);
+  let helpNote = $state<ReturnType<typeof HelpNote>>();
+  let iconList = $state<HTMLElement>();
+
+  // Where each window should grow from next time it appears: the icon or
+  // taskbar button that summoned it. Read once by the window's intro.
+  const origins = new Map<string, DOMRect>();
 
   let wmState = $state(windowManager.get());
   let svelteComponents = $state<Record<string, Component>>({});
@@ -66,6 +81,38 @@
     ctxMenu = { x: e.clientX, y: e.clientY };
   }
 
+  const START_MENU_ITEMS: StartMenuItem[] = [
+    ...APPS.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
+    { id: "help", label: "Help", icon: "pixelarticons:info-box", iconify: true, separatorBefore: true },
+  ];
+
+  function handleStartSelect(id: string, origin: DOMRect) {
+    if (id.startsWith("open:")) void launch(id.replace("open:", ""), origin);
+    else if (id === "help") void showHelpNote();
+  }
+
+  function handleTaskbarToggle(id: string) {
+    const button = document.querySelector<HTMLElement>(`[data-taskbar-window="${id}"]`);
+    if (button) origins.set(id, button.getBoundingClientRect());
+    windowManager.toggleFromTaskbar(id);
+  }
+
+  function taskbarButtonRect(id: string): DOMRect | null {
+    return document.querySelector(`[data-taskbar-window="${id}"]`)?.getBoundingClientRect() ?? null;
+  }
+
+  async function showHelpNote() {
+    helpNoteOpen = true;
+    await tick();
+    helpNote?.focus();
+  }
+
+  function closeHelpNote() {
+    dismissHelpNote();
+    helpNoteOpen = false;
+    iconList?.querySelector<HTMLElement>("button")?.focus();
+  }
+
   function handleMenuSelect(id: string) {
     if (id.startsWith("open:")) {
       void launch(id.replace("open:", ""));
@@ -80,6 +127,10 @@
     isMobile = window.matchMedia(MOBILE_QUERY).matches;
     viewportWidth = window.innerWidth;
     viewportHeight = window.innerHeight;
+    const cssHeight = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue("--taskbar-height"),
+    );
+    taskbarHeight = Number.isNaN(cssHeight) ? FALLBACK_TASKBAR_HEIGHT : cssHeight;
   }
 
   function readStaticTemplate(appId: string): string {
@@ -103,9 +154,10 @@
     }
   }
 
-  async function launch(appId: string) {
+  async function launch(appId: string, origin?: DOMRect) {
     const app = APPS.find((a) => a.id === appId);
     if (!app) return;
+    if (origin) origins.set(app.id, origin);
     if (app.kind === "svelte") {
       const component = await ensureSvelteLoaded(app.id, app.load);
       if (!component) return;
@@ -121,15 +173,48 @@
     });
   }
 
-  // Mouse users double-click on desktop; Enter/Space fire a click with
-  // detail 0, so keyboard activation opens the app in a single press.
-  function handleIconClick(appId: string, e: MouseEvent) {
-    if (!isMobile && e.detail !== 0) return;
-    void launch(appId);
+  // A mouse click selects and a double-click opens, as on a period desktop.
+  // Enter/Space fire a click with detail 0, so the keyboard opens in one press;
+  // touch has no double-tap convention here, so a tap opens.
+  function handleIconClick(appId: string, e: MouseEvent & { currentTarget: HTMLElement }) {
+    selectedIcon = appId;
+    if (isMobile || e.detail === 0) void launch(appId, e.currentTarget.getBoundingClientRect());
   }
 
-  function handleIconDoubleClick(appId: string) {
-    void launch(appId);
+  function handleIconDoubleClick(appId: string, e: MouseEvent & { currentTarget: HTMLElement }) {
+    void launch(appId, e.currentTarget.getBoundingClientRect());
+  }
+
+  // Arrow keys walk the icon column; the selection follows focus.
+  function handleIconKeydown(e: KeyboardEvent) {
+    const buttons = [...(iconList?.querySelectorAll<HTMLElement>("button[data-app-id]") ?? [])];
+    const index = buttons.indexOf(document.activeElement as HTMLElement);
+    if (index < 0) return;
+    const next = {
+      ArrowDown: index + 1,
+      ArrowRight: index + 1,
+      ArrowUp: index - 1,
+      ArrowLeft: index - 1,
+      Home: 0,
+      End: buttons.length - 1,
+    }[e.key];
+    if (next === undefined) return;
+    e.preventDefault();
+    const target = buttons[Math.min(Math.max(next, 0), buttons.length - 1)];
+    target?.focus();
+    selectedIcon = target?.dataset.appId ?? selectedIcon;
+  }
+
+  function handleDesktopPointerDown(e: PointerEvent) {
+    if (!(e.target as Element).closest("button[data-app-id]")) selectedIcon = null;
+  }
+
+  function moveWindow(id: string, width: number, x: number, y: number) {
+    const next = clampWindowPosition(x, y, width, {
+      width: viewportWidth,
+      height: viewportHeight - taskbarHeight,
+    });
+    windowManager.move(id, next.x, next.y);
   }
 
   const buildDate = "2026.06.02";
@@ -152,6 +237,24 @@
 
   $effect(() => settings.subscribe((next) => (prefs = next)));
 
+  // Keyboard focus follows the active window, so opening, restoring or
+  // closing a window never strands focus on something that disappeared.
+  let lastActiveId: string | null = null;
+  $effect(() => {
+    const id = wmState.activeId;
+    if (id === lastActiveId) return;
+    lastActiveId = id;
+    void tick().then(() => {
+      const current = document.activeElement;
+      if (id) {
+        const win = document.querySelector<HTMLElement>(`[data-window-id="${id}"]`);
+        if (win && !win.contains(current)) win.focus({ preventScroll: true });
+      } else if (!current || current === document.body || current.closest("[data-window-id]")) {
+        document.querySelector<HTMLElement>('nav[aria-label="Taskbar"] button')?.focus();
+      }
+    });
+  });
+
   $effect(() => {
     if (!settingsReady) {
       return;
@@ -165,6 +268,7 @@
     settings.hydrate();
     prefs = settings.get();
     settingsReady = true;
+    helpNoteOpen = !isHelpNoteDismissed();
 
     if (!settings.get().bootAnimation) {
       ready = true;
@@ -198,7 +302,7 @@
 {:else if !booted}
   <BootSequence onDone={() => (booted = true)} />
 {:else}
-  <main class={MAIN_CLASS} oncontextmenu={handleDesktopContext}>
+  <main class={MAIN_CLASS} oncontextmenu={handleDesktopContext} onpointerdown={handleDesktopPointerDown}>
     <Wallpaper />
     {#if !isMobile}
       <aside class={SYS_BADGE_CLASS} aria-label="System information">
@@ -210,13 +314,21 @@
       </aside>
     {/if}
 
-    <ul class={cx(ICON_GRID_BASE, isMobile ? ICON_GRID_MOBILE : ICON_GRID_DESKTOP)}>
+    <ul
+      bind:this={iconList}
+      aria-label="Desktop"
+      class={cx(ICON_GRID_BASE, isMobile ? ICON_GRID_MOBILE : ICON_GRID_DESKTOP)}
+      onkeydown={handleIconKeydown}
+    >
       {#each APPS as a (a.id)}
         <li>
           <button
             type="button"
-            ondblclick={() => handleIconDoubleClick(a.id)}
+            data-app-id={a.id}
+            data-selected={selectedIcon === a.id}
+            ondblclick={(e) => handleIconDoubleClick(a.id, e)}
             onclick={(e) => handleIconClick(a.id, e)}
+            onfocus={() => (selectedIcon = a.id)}
             class={cx(ICON_BUTTON_BASE, isMobile ? ICON_BUTTON_MOBILE : ICON_BUTTON_DESKTOP)}
           >
             <img
@@ -234,10 +346,15 @@
       {/each}
     </ul>
 
+    {#if helpNoteOpen}
+      <HelpNote bind:this={helpNote} mobile={isMobile} onDismiss={closeHelpNote} />
+    {/if}
+
     {#each wmState.windows as w (w.id)}
       {@const app = APPS.find((a) => a.id === w.appId)}
       {#if app}
         <RetroWindow
+          id={w.id}
           title={w.title}
           icon={w.icon}
           active={wmState.activeId === w.id}
@@ -246,11 +363,13 @@
           x={isMobile ? 0 : w.x}
           y={isMobile ? 0 : w.y}
           w={isMobile ? viewportWidth : w.w}
-          h={isMobile ? viewportHeight - MOBILE_TASKBAR_OFFSET : w.h}
+          h={isMobile ? viewportHeight - taskbarHeight : w.h}
           maximized={isMobile ? true : w.maximized}
           resizable={!isMobile}
+          originFor={() => origins.get(w.id) ?? null}
+          minimizeTargetFor={() => taskbarButtonRect(w.id)}
           onFocus={() => windowManager.focus(w.id)}
-          onMove={(x, y) => windowManager.move(w.id, x, y)}
+          onMove={(x, y) => moveWindow(w.id, w.w, x, y)}
           onResize={(ww, hh) => windowManager.resize(w.id, ww, hh)}
           onMin={() => windowManager.minimize(w.id)}
           onMax={() => windowManager.toggleMax(w.id)}
@@ -278,4 +397,13 @@
       />
     {/if}
   </main>
+
+  <Taskbar
+    windows={wmState.windows}
+    activeId={wmState.activeId}
+    menuItems={START_MENU_ITEMS}
+    mobile={isMobile}
+    onToggleWindow={handleTaskbarToggle}
+    onMenuSelect={handleStartSelect}
+  />
 {/if}

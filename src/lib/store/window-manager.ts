@@ -45,6 +45,16 @@ const initial: WindowManagerSnapshot = {
 
 const store = writable<WindowManagerSnapshot>(initial);
 
+/** The window that should hold focus: the top-most one that is not minimised. */
+function topVisibleId(windows: WindowState[], exceptId?: string): string | null {
+  let top: WindowState | null = null;
+  for (const w of windows) {
+    if (w.minimized || w.id === exceptId) continue;
+    if (!top || w.z > top.z) top = w;
+  }
+  return top?.id ?? null;
+}
+
 function open(w: OpenPayload) {
   store.update((s) => {
     const existing = s.windows.find((x) => x.id === w.id);
@@ -66,11 +76,14 @@ function open(w: OpenPayload) {
 }
 
 function close(id: string) {
-  store.update((s) => ({
-    windows: s.windows.filter((w) => w.id !== id),
-    activeId: s.activeId === id ? null : s.activeId,
-    zCursor: s.zCursor,
-  }));
+  store.update((s) => {
+    const windows = s.windows.filter((w) => w.id !== id);
+    return {
+      windows,
+      activeId: s.activeId === id ? topVisibleId(windows) : s.activeId,
+      zCursor: s.zCursor,
+    };
+  });
 }
 
 function focus(id: string) {
@@ -93,11 +106,23 @@ function resize(id: string, w: number, h: number) {
 }
 
 function minimize(id: string) {
-  store.update((s) => ({
-    windows: s.windows.map((w) => (w.id === id ? { ...w, minimized: true } : w)),
-    activeId: s.activeId === id ? null : s.activeId,
-    zCursor: s.zCursor,
-  }));
+  store.update((s) => {
+    const windows = s.windows.map((w) => (w.id === id ? { ...w, minimized: true } : w));
+    return {
+      windows,
+      activeId: s.activeId === id ? topVisibleId(windows) : s.activeId,
+      zCursor: s.zCursor,
+    };
+  });
+}
+
+/** Taskbar button: minimise the active window, otherwise bring the window forward. */
+function toggleFromTaskbar(id: string) {
+  const s = get(store);
+  const target = s.windows.find((w) => w.id === id);
+  if (!target) return;
+  if (s.activeId === id && !target.minimized) minimize(id);
+  else focus(id);
 }
 
 function toggleMax(id: string) {
@@ -137,6 +162,7 @@ export const windowManager = {
   move,
   resize,
   minimize,
+  toggleFromTaskbar,
   toggleMax,
   reset,
   cascade,
