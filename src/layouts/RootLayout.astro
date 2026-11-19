@@ -9,6 +9,7 @@
  * the matching <link rel="preload"> tags automatically.
  */
 import { Font } from "astro:assets";
+import { SETTINGS_BOOTSTRAP_SCRIPT } from "@lib/settings";
 import "@styles/globals.css";
 
 interface Props {
@@ -38,6 +39,7 @@ const ogImage = image ? new URL(image, Astro.site).toString() : undefined;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script is:inline set:html={SETTINGS_BOOTSTRAP_SCRIPT} />
     <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

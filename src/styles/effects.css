@@ -435,10 +435,10 @@
 /* ---- cinematic loading splash (outrun) ---- */
 @keyframes outrun-scroll {
   from {
-    transform: perspective(var(--grid-perspective)) rotateX(var(--grid-rotate)) translateY(0);
+    transform: translateY(0);
   }
   to {
-    transform: perspective(var(--grid-perspective)) rotateX(var(--grid-rotate)) translateY(26px);
+    transform: translateY(var(--grid-row-step));
   }
 }
 @keyframes outrun-sun-pulse {
@@ -530,8 +530,9 @@
 .outrun-mountains {
   position: absolute;
   left: 0;
+  pointer-events: none;
   right: 0;
-  bottom: 36%;
+  bottom: var(--grid-horizon-bottom);
   width: 100%;
   height: min(25vh, 220px);
   z-index: 2;
@@ -542,7 +543,7 @@
   stroke-width: 2;
 }
 
-.outrun-grid {
+.outrun-grid-plane {
   --grid-perspective: 320px;
   --grid-rotate: 22deg;
   position: absolute;
@@ -551,42 +552,59 @@
   bottom: 0;
   height: 100%;
   z-index: 3;
-  background-image:
-    repeating-linear-gradient(to right, color-mix(in srgb, var(--cyan) 70%, transparent) 0 2px, transparent 2px 64px),
-    repeating-linear-gradient(to bottom, color-mix(in srgb, var(--cyan) 70%, transparent) 0 2px, transparent 2px 26px);
+  overflow: hidden;
+  pointer-events: none;
   transform: perspective(var(--grid-perspective)) rotateX(var(--grid-rotate));
   transform-origin: bottom center;
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    rgba(0, 0, 0, 0.3) 18%,
-    #000 40%,
-    rgba(0, 0, 0, 0.85) 100%
+    transparent var(--grid-fade-start),
+    rgba(0, 0, 0, 0.55) var(--grid-fade-end),
+    rgba(0, 0, 0, 0.82) 100%
   );
-  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 18%, #000 40%, rgba(0, 0, 0, 0.85) 100%);
-  will-change: transform;
-  animation: outrun-scroll 8s linear infinite;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent var(--grid-fade-start),
+    rgba(0, 0, 0, 0.55) var(--grid-fade-end),
+    rgba(0, 0, 0, 0.82) 100%
+  );
 }
 
-[data-theme="dark"] .outrun-grid {
+.outrun-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--grid-row-step));
+  height: calc(100% + var(--grid-row-step) * 2);
+  pointer-events: none;
   background-image:
-    repeating-linear-gradient(
-      to right,
-      color-mix(in srgb, var(--magenta) 70%, transparent) 0 2px,
-      transparent 2px 64px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--magenta) 70%, transparent) 0 2px,
-      transparent 2px 26px
-    );
+    repeating-linear-gradient(to right, var(--grid-line-color) 0 2px, transparent 2px var(--grid-column-step)),
+    repeating-linear-gradient(to bottom, var(--grid-line-color) 0 2px, transparent 2px var(--grid-row-step));
+  will-change: transform;
+  animation: outrun-scroll var(--grid-scroll-duration) linear infinite;
+}
+
+[data-grid-speed="paused"] .outrun-grid {
+  animation-play-state: paused;
+}
+
+.outrun-grid-plane::after {
+  content: "";
+  position: absolute;
+  inset: 24% 0 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent 0%, var(--grid-horizon-haze) 48%, transparent 82%),
+    radial-gradient(ellipse at 50% var(--grid-fade-start), var(--grid-haze-color), transparent 68%);
 }
 
 .outrun-horizon {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 36%;
+  bottom: var(--grid-horizon-bottom);
   height: 1px;
   z-index: 4;
   pointer-events: none;
@@ -597,10 +615,7 @@
     color-mix(in srgb, var(--magenta) 85%, transparent) 72%,
     transparent 100%
   );
-  box-shadow:
-    0 0 8px color-mix(in srgb, var(--cyan) 75%, transparent),
-    0 0 18px color-mix(in srgb, var(--magenta) 60%, transparent),
-    0 0 36px color-mix(in srgb, var(--magenta) 40%, transparent);
+  box-shadow: var(--grid-horizon-shadow);
 }
 [data-theme="dark"] .outrun-horizon {
   background: linear-gradient(
@@ -610,10 +625,6 @@
     color-mix(in srgb, var(--cyan) 90%, transparent) 72%,
     transparent 100%
   );
-  box-shadow:
-    0 0 8px color-mix(in srgb, var(--magenta) 80%, transparent),
-    0 0 20px color-mix(in srgb, var(--cyan) 65%, transparent),
-    0 0 40px color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 
 .splash-overlay {
@@ -723,7 +734,7 @@
     top: 24%;
   }
 
-  .outrun-grid {
+  .outrun-grid-plane {
     --grid-perspective: 500px;
   }
 

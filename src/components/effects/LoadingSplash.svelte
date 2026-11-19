@@ -17,7 +17,9 @@
     ></path>
   </svg>
 
-  <div class="outrun-grid" aria-hidden="true"></div>
+  <div class="outrun-grid-plane" aria-hidden="true">
+    <div class="outrun-grid"></div>
+  </div>
   <div class="outrun-horizon" aria-hidden="true"></div>
 
   <div class="splash-overlay crt-scanlines" aria-hidden="true"></div>

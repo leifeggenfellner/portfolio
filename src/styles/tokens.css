@@ -129,11 +129,31 @@
   --dur-3: 240ms;
   --dur-4: 400ms;
   --dur-boot: 4000ms;
+  --grid-scroll-duration: 8s;
+  --grid-row-step: 44px;
+  --grid-column-step: 96px;
+  --grid-horizon-bottom: 33%;
+  --grid-fade-start: 48%;
+  --grid-fade-end: 62%;
+  --grid-line-color: color-mix(in srgb, var(--cyan) 58%, transparent);
+  --grid-haze-color: color-mix(in srgb, var(--cyan) 24%, transparent);
+  --grid-horizon-haze: color-mix(in srgb, var(--magenta) 28%, transparent);
+  --grid-horizon-shadow:
+    0 0 8px color-mix(in srgb, var(--cyan) 75%, transparent),
+    0 0 18px color-mix(in srgb, var(--magenta) 60%, transparent),
+    0 0 36px color-mix(in srgb, var(--magenta) 40%, transparent);
+  --desktop-icon-size: 24px;
 }
 
 [data-theme="dark"] {
   --magenta: #ff5fd2;
   --cyan: #36e0e0;
+  --grid-line-color: color-mix(in srgb, var(--magenta) 58%, transparent);
+  --grid-haze-color: color-mix(in srgb, var(--magenta) 24%, transparent);
+  --grid-horizon-haze: color-mix(in srgb, var(--cyan) 28%, transparent);
+  --grid-horizon-shadow:
+    0 0 8px color-mix(in srgb, var(--magenta) 80%, transparent),
+    0 0 20px color-mix(in srgb, var(--cyan) 65%, transparent), 0 0 40px color-mix(in srgb, var(--cyan) 45%, transparent);
 
   --accent: #2de0a6;
   --accent-2: #36e0e0;
@@ -203,4 +223,20 @@
   --accent: #ffbf3f;
   --accent-2: #c2790c;
   --accent-soft: #ffd97a;
+}
+
+[data-grid-speed="slow"] {
+  --grid-scroll-duration: 16s;
+}
+
+[data-grid-speed="fast"] {
+  --grid-scroll-duration: 4s;
+}
+
+[data-icon-size="small"] {
+  --desktop-icon-size: 16px;
+}
+
+[data-icon-size="large"] {
+  --desktop-icon-size: 40px;
 }

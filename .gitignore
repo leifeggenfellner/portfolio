@@ -58,6 +58,7 @@ web_modules/
 
 # Tooling caches (eslint / stylelint / prettier / vitest)
 .cache/
+test-results
 
 # Optional REPL history
 .node_repl_history

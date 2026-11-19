@@ -2,6 +2,7 @@ import minigameIcon from "@/assets/icons/apps/16/gnome-mines.svg?url";
 import contactIcon from "@/assets/icons/apps/16/mail.svg?url";
 import aboutIcon from "@/assets/icons/apps/16/notepad.svg?url";
 import projectsIcon from "@/assets/icons/apps/16/package.svg?url";
+import settingsIcon from "@/assets/icons/apps/16/settings.svg?url";
 import skillsIcon from "@/assets/icons/apps/16/skills-chart.svg?url";
 import terminalIcon from "@/assets/icons/apps/16/terminal.svg?url";
 import type { Component } from "svelte";
@@ -71,5 +72,13 @@ export const APPS: AppManifest[] = [
     icon: minigameIcon,
     defaults: { x: 500, y: 80, w: 320, h: 360 },
     load: () => import("@apps/MiniGame.svelte"),
+  },
+  {
+    kind: "svelte",
+    id: "settings",
+    title: "Settings",
+    icon: settingsIcon,
+    defaults: { x: 560, y: 120, w: 380, h: 440 },
+    load: () => import("@apps/Settings.svelte"),
   },
 ];

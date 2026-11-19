@@ -6,8 +6,11 @@
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
-  import { cx } from "@lib/cx";
+  import { applySettingsToRoot } from "@lib/settings";
+  import type { Settings } from "@lib/settings";
+  import { settings } from "@lib/store/settings";
   import { windowManager } from "@lib/store/window-manager";
+  import { cx } from "@lib/cx";
   import ContextMenu from "@primitives/ContextMenu.svelte";
   import type { MenuEntry } from "@primitives/ContextMenu.svelte";
   import RetroWindow from "@primitives/RetroWindow.svelte";
@@ -18,12 +21,12 @@
 
   const MAIN_CLASS = "relative h-screen w-screen overflow-hidden bg-desktop";
   const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop)";
-  const ICON_GRID_DESKTOP = "left-4 flex flex-col gap-3";
+  const ICON_GRID_DESKTOP = "left-4 flex max-h-[calc(100dvh-2rem)] flex-col flex-wrap content-start gap-3";
   const ICON_GRID_MOBILE = "left-3 right-3 grid grid-cols-4 gap-3";
   const ICON_BUTTON_BASE = "focus-ring icon-label text-12 flex flex-col items-center gap-1 p-1 text-white";
   const ICON_BUTTON_DESKTOP = "w-19";
   const ICON_BUTTON_MOBILE = "w-full";
-  const ICON_IMG_CLASS = "icon-glow h-6 w-6 object-contain";
+  const ICON_IMG_CLASS = "icon-glow h-(--desktop-icon-size) w-(--desktop-icon-size) object-contain";
   const SYS_BADGE_CLASS = [
     "pointer-events-none absolute top-3.5 right-4 z-(--z-desktop)",
     "text-right text-white/85",
@@ -33,7 +36,8 @@
   let ready = $state(false);
   let booted = $state(false);
   let isMobile = $state(false);
-  let themeLabel = $state("LIGHT");
+  let prefs = $state<Settings>(settings.get());
+  let settingsReady = $state(false);
   let viewportWidth = $state(0);
   let viewportHeight = $state(0);
 
@@ -44,13 +48,15 @@
   // Context menu state
   let ctxMenu = $state<{ x: number; y: number } | null>(null);
 
+  const themeLabel = $derived(prefs.theme.toUpperCase());
+
   const DESKTOP_MENU_ITEMS = $derived<MenuEntry[]>([
     ...APPS.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: "pixelarticons:folder" })),
     { separator: true as const },
     {
       id: "theme:toggle",
-      label: themeLabel === "DARK" ? "Light Theme" : "Dark Theme",
-      icon: themeLabel === "DARK" ? "lucide:sun" : "lucide:moon",
+      label: prefs.theme === "dark" ? "Light Theme" : "Dark Theme",
+      icon: prefs.theme === "dark" ? "lucide:sun" : "lucide:moon",
     },
     { id: "cascade", label: "Cascade Windows", icon: "pixelarticons:layout" },
   ]);
@@ -64,10 +70,7 @@
     if (id.startsWith("open:")) {
       void launch(id.replace("open:", ""));
     } else if (id === "theme:toggle") {
-      const html = document.documentElement;
-      const current = html.getAttribute("data-theme");
-      html.setAttribute("data-theme", current === "dark" ? "light" : "dark");
-      themeLabel = (html.getAttribute("data-theme") ?? "light").toUpperCase();
+      settings.set("theme", prefs.theme === "dark" ? "light" : "dark");
     } else if (id === "cascade") {
       windowManager.cascade();
     }
@@ -75,7 +78,6 @@
 
   function syncViewport() {
     isMobile = window.matchMedia(MOBILE_QUERY).matches;
-    themeLabel = (document.documentElement.getAttribute("data-theme") ?? "light").toUpperCase();
     viewportWidth = window.innerWidth;
     viewportHeight = window.innerHeight;
   }
@@ -146,8 +148,28 @@
   // Window manager subscription — mirror store into local rune state.
   $effect(() => windowManager.subscribe((next) => (wmState = next)));
 
+  $effect(() => settings.subscribe((next) => (prefs = next)));
+
+  $effect(() => {
+    if (!settingsReady) {
+      return;
+    }
+
+    applySettingsToRoot(document.documentElement, prefs);
+  });
+
   // Minimum splash duration, then show boot sequence.
   onMount(() => {
+    settings.hydrate();
+    prefs = settings.get();
+    settingsReady = true;
+
+    if (!settings.get().bootAnimation) {
+      ready = true;
+      booted = true;
+      return;
+    }
+
     const t = window.setTimeout(() => {
       ready = true;
     }, MIN_LOADING_MS);
@@ -165,7 +187,7 @@
 {:else}
   <main class={MAIN_CLASS} oncontextmenu={handleDesktopContext}>
     <Wallpaper />
-
+    settings
     {#if !isMobile}
       <aside class={SYS_BADGE_CLASS} aria-label="System information">
         <p class="font-chrome text-[28px] leading-none tracking-[0.02em]">
