@@ -60,7 +60,7 @@
       aria-pressed={undefined}
       aria-haspopup="menu"
       aria-expanded={menuOpen}
-      class={cx("font-chrome gap-1.5 px-2.5", mobile && "h-11")}
+      class={cx("gap-1.5 px-2.5", mobile && "h-11")}
       onclick={() => (menuOpen = !menuOpen)}
     >
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" class="shrink-0">
