@@ -64,7 +64,7 @@ export const APPS: AppManifest[] = [
     id: "contact",
     title: "Contact",
     icon: contactIcon,
-    defaults: { x: 420, y: 240, w: 480, h: 360 },
+    defaults: { x: 420, y: 120, w: 500, h: 460 },
     load: () => import("@apps/ContactTerminal.svelte"),
   },
   {
