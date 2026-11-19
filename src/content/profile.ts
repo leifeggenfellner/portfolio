@@ -74,7 +74,7 @@ export const PROFILE: Profile = {
     { when: "2022–2025", title: "Bachelor's, Informatics", org: "NTNU" },
     { when: "2021–2022", title: "Electrical and Electronics Engineering", org: "NTNU" },
   ],
-  email: null,
+  email: "dev@zorvian.eu",
   links: [
     { label: "GitHub", url: "https://github.com/leifeggenfellner" },
     { label: "LinkedIn", url: "https://www.linkedin.com/in/leif-eggenfellner/" },
