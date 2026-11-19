@@ -3,6 +3,7 @@ import {
   applySettingsToRoot,
   DEFAULT_SETTINGS,
   parseSettings,
+  screensaverDelayMs,
   SETTINGS_BOOTSTRAP_SCRIPT,
   SETTINGS_STORAGE_KEY,
 } from "@lib/settings";
@@ -31,9 +32,23 @@ describe("settings contract", () => {
     expect(parseSettings('"x"')).toEqual(DEFAULT_SETTINGS);
   });
 
-  it("always returns exactly five keys", () => {
+  it("always returns exactly six keys", () => {
     const parsed = parseSettings('{"theme":"dark","extra":"drop-me"}');
-    expect(Object.keys(parsed).sort()).toEqual(["bootAnimation", "crt", "gridSpeed", "iconSize", "theme"]);
+    expect(Object.keys(parsed).sort()).toEqual([
+      "bootAnimation",
+      "crt",
+      "gridSpeed",
+      "iconSize",
+      "screensaver",
+      "theme",
+    ]);
+  });
+
+  it("parses the screensaver delay and converts it to milliseconds", () => {
+    expect(parseSettings('{"screensaver":"10"}').screensaver).toBe("10");
+    expect(parseSettings('{"screensaver":"5"}').screensaver).toBe(DEFAULT_SETTINGS.screensaver);
+    expect(screensaverDelayMs("1")).toBe(60_000);
+    expect(screensaverDelayMs("never")).toBeNull();
   });
 
   it("applySettingsToRoot sets exactly the four mapped attributes", () => {
@@ -44,6 +59,7 @@ describe("settings contract", () => {
       crt: "subtle",
       gridSpeed: "fast",
       iconSize: "large",
+      screensaver: "3",
     };
 
     applySettingsToRoot(root, value);

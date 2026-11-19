@@ -138,6 +138,7 @@
   --dur-3: 240ms;
   --dur-4: 400ms;
   --dur-boot: 4000ms;
+  --dur-degauss: 650ms;
   --grid-scroll-duration: 8s;
   --grid-column-step: 96px;
   --grid-horizon-bottom: 33%;
