@@ -16,12 +16,12 @@ Coding conventions, one screen.
 
 | Kind           | Convention                  | Example                         |
 | -------------- | --------------------------- | ------------------------------- |
-| Component file | `PascalCase.tsx`            | `RetroButton.tsx`               |
+| Component file | `PascalCase.svelte`         | `RetroButton.svelte`            |
 | Hook file      | `use-kebab.ts`              | `use-drag.ts`                   |
 | Util file      | `kebab.ts`                  | `cx.ts`                         |
 | Token CSS var  | `--kebab`                   | `--bevel-shadow`                |
 | Tailwind class | utility-first, mobile-first | `flex items-center md:flex-row` |
-| Test file      | `<Source>.test.tsx`         | `RetroButton.test.tsx`          |
+| Test file      | `<Source>.test.ts`          | `RetroButton.test.ts`           |
 
 ## Component architecture
 
@@ -74,7 +74,7 @@ Coding conventions, one screen.
 ## Performance constraints
 
 - No expensive work in render. `useMemo` real cost only.
-- `React.lazy` every app.
+- Dynamic-import every interactive app (see `registry.svelte.ts`).
 - No icon libraries — use emoji glyphs or hand-authored SVG
   sprites.
 

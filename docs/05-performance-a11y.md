@@ -17,7 +17,7 @@ Enforced manually until we wire `@lhci/cli` in CI.
 ## Hydration
 
 - Only **one island** (`<Desktop client:load />`) on `/`.
-- All apps are `React.lazy` — Terminal is not downloaded until
+- All Svelte apps are dynamic imports — Terminal is not downloaded until
   Terminal is opened.
 - No third-party scripts. Fonts are self-fetched from Google
   Fonts (or self-hosted later — see roadmap).
@@ -33,7 +33,7 @@ Enforced manually until we wire `@lhci/cli` in CI.
 ## Animation performance
 
 - Window drag uses native pointer events; we do **not** trigger
-  React state per `pointermove` — the window-manager's `move`
+  component state per `pointermove` — the window-manager's `move`
   call is rate-limited by the browser's event loop already, and
   the moved element is the only thing that re-renders thanks to
   controlled props.

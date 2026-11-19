@@ -19,13 +19,12 @@ When the user asks for a new primitive (e.g. `Tooltip`,
 
 1. Read `docs/02-design-system.md` §"Extraction rules" and
    `docs/08-conventions.md`.
-2. Create `src/components/primitives/<Name>.tsx`:
-   - Top-of-file JSDoc: purpose, composition, a11y note.
-   - Strict prop interface (export it as `<Name>Props`).
+2. Create `src/components/primitives/<Name>.svelte`:
+   - A short comment on purpose, composition and the a11y contract.
+   - Strict `Props` interface read with `$props()`.
    - Use Tailwind utilities + bevel classes; never raw colors.
-   - Default-export NONE — named export only.
 3. Add an export to `src/components/primitives/index.ts`.
-4. Create `tests/unit/primitives/<Name>.test.tsx` with:
+4. Create `tests/unit/primitives/<Name>.test.ts` with:
    - default render
    - keyboard interaction (Tab, Enter/Space, arrows where relevant)
    - ARIA attribute assertions

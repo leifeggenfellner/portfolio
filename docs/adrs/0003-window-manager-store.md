@@ -1,6 +1,7 @@
 # ADR 0003 — Window manager via Zustand store
 
-- **Status:** Accepted (2026-05-29)
+- **Status:** Accepted (2026-05-29); the Zustand part is
+  superseded by ADR 0004, and the store is now a Svelte store.
 
 ## Decision
 
