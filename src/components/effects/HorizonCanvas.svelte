@@ -168,7 +168,10 @@
     });
     resizeObserver.observe(el);
     const attrObserver = new MutationObserver(sync);
-    attrObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-grid-speed"] });
+    attrObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-grid-speed"],
+    });
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     motion.addEventListener("change", sync);
     document.addEventListener("visibilitychange", sync);
