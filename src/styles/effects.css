@@ -179,6 +179,9 @@
 .wallpaper {
   position: absolute;
   inset: 0;
+  /* Keep the scene's internal layers (floor z-index 3, horizon 4) inside the
+     wallpaper, so they never paint over desktop content such as the note. */
+  isolation: isolate;
   overflow: hidden;
   background: var(--desktop-bg);
 }
