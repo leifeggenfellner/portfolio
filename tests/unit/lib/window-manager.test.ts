@@ -31,4 +31,36 @@ describe("window-manager store", () => {
     windowManager.minimize("a");
     expect(windowManager.get().windows[0]!.minimized).toBe(true);
   });
+
+  it("hands focus to the top-most visible window after minimise and close", () => {
+    reset();
+    windowManager.open({ id: "a", appId: "a", title: "A", x: 0, y: 0, w: 1, h: 1 });
+    windowManager.open({ id: "b", appId: "b", title: "B", x: 0, y: 0, w: 1, h: 1 });
+    windowManager.open({ id: "c", appId: "c", title: "C", x: 0, y: 0, w: 1, h: 1 });
+    windowManager.minimize("c");
+    expect(windowManager.get().activeId).toBe("b");
+    windowManager.close("b");
+    expect(windowManager.get().activeId).toBe("a");
+    windowManager.close("a");
+    expect(windowManager.get().activeId).toBeNull();
+  });
+
+  it("toggleFromTaskbar minimises the active window and restores others", () => {
+    reset();
+    windowManager.open({ id: "a", appId: "a", title: "A", x: 0, y: 0, w: 1, h: 1 });
+    windowManager.open({ id: "b", appId: "b", title: "B", x: 0, y: 0, w: 1, h: 1 });
+
+    windowManager.toggleFromTaskbar("b");
+    let s = windowManager.get();
+    expect(s.windows.find((w) => w.id === "b")!.minimized).toBe(true);
+    expect(s.activeId).toBe("a");
+
+    windowManager.toggleFromTaskbar("b");
+    s = windowManager.get();
+    expect(s.windows.find((w) => w.id === "b")!.minimized).toBe(false);
+    expect(s.activeId).toBe("b");
+
+    windowManager.toggleFromTaskbar("a");
+    expect(windowManager.get().activeId).toBe("a");
+  });
 });
