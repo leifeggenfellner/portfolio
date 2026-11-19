@@ -12,7 +12,7 @@ model: sonnet
 - Track `dist/` size against budgets in `docs/05-performance-a11y.md`.
 - Audit hydration: islands count, `client:*` directives, code splits.
 - Profile animations for jank.
-- Recommend lazy boundaries and `React.lazy` placements.
+- Recommend lazy boundaries (dynamic `import()` in the app registry).
 
 ## Boundaries
 
@@ -34,7 +34,7 @@ model: sonnet
 
 - [ ] No new `client:load` outside the desktop island.
 - [ ] No new third-party scripts.
-- [ ] Heavy components are `React.lazy`-loaded.
+- [ ] Heavy components are dynamic-imported, not in the initial island.
 - [ ] Animations stay on `transform` / `opacity`.
 - [ ] LCP image (if any) is `loading="eager"` + preloaded.
 

@@ -51,7 +51,7 @@ anything.
 │   ├── lib/
 │   │   ├── cx.ts
 │   │   ├── hooks/              # use-drag, use-media-query, use-prefers-reduced-motion
-│   │   ├── store/              # zustand stores (window-manager)
+│   │   ├── store/              # Svelte stores (window-manager, settings)
 │   │   └── a11y/               # focus traps, roving tabindex, etc.
 │   └── components/
 │       ├── primitives/         # design-system layer
@@ -70,8 +70,8 @@ anything.
 
 ## State management
 
-- **Zustand** for window-manager state (one store, ~80 lines).
-- **React local state** for everything else.
+- **Svelte stores** for window-manager and settings state.
+- **Svelte 5 runes** (`$state`, `$derived`) for everything else.
 - **No global event bus**, no Redux, no context for things one or
   two components need. If a piece of state lives in only one app,
   it lives in that app.
@@ -84,13 +84,16 @@ anything.
 | Future `posts/[slug]` | static           | MDX content, no JS needed      |
 | Future `projects/...` | `client:visible` | Reveal animation when scrolled |
 
-The Desktop owns one zustand store and renders apps via
-`React.lazy` — so opening the Terminal does not download
-Minesweeper.
+The Desktop subscribes to the window-manager store and
+dynamic-imports each Svelte app on first open (see
+`registry.svelte.ts`), so opening the Terminal does not download
+Minesweeper. Apps receive an `AppShell` prop
+(`src/lib/app-shell.ts`) to open other apps or close their own
+window; they never import the shell layer.
 
 ## Error boundaries
 
-- Each app is wrapped at the shell level in an `<AppErrorBoundary />`
-  that renders a "blue screen" style fallback inside the window
-  chrome. One crashing app never takes down the desktop.
-- See `src/components/shell/AppErrorBoundary.tsx` (to be authored).
+- Planned: wrap each app in a `<svelte:boundary>` that renders a
+  "blue screen" fallback inside the window chrome, so one
+  crashing app never takes down the desktop. Not built yet; today
+  only a failed app import is caught (and logged) by the Desktop.

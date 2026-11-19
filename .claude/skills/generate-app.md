@@ -14,17 +14,19 @@ description: Scaffold a new desktop "app" window end-to-end (component + registr
 
 ## Steps
 
-1. Create `src/components/apps/<PascalName>.tsx`. Default export
-   a React component. Use primitives — never raw chrome.
-2. Add an entry in `src/components/apps/registry.ts`:
+1. Interactive app: create `src/components/apps/<PascalName>.svelte`
+   taking `AppProps` (`src/lib/app-shell.ts`). Static, zero-JS app:
+   create `<PascalName>.astro` and add a `<template data-static-app>`
+   for it in `src/pages/index.astro`. Use primitives — never raw chrome.
+2. Add an entry in `src/components/apps/registry.svelte.ts`:
    ```ts
    {
-     id, title, icon,
+     kind: "svelte", id, title, icon,
      defaults: { x, y, w, h },
-     render: lazy(() => import("./<PascalName>")),
+     load: () => import("@apps/<PascalName>.svelte"),
    }
    ```
-3. Add an E2E case to `tests/e2e/desktop.spec.ts` opening the app.
+3. Add an E2E case to `tests/e2e/apps.spec.ts` (use `openApp`).
 4. Verify it appears as a desktop icon and opens correctly.
 5. Run `pnpm run ci`.
 
@@ -32,5 +34,5 @@ description: Scaffold a new desktop "app" window end-to-end (component + registr
 
 - Importing another app.
 - Direct access to the window-manager from inside the app body
-  (apps stay agnostic).
+  (apps stay agnostic; ask the `shell` prop instead).
 - New colors / shadows without going through the theme architect.

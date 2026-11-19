@@ -6,8 +6,9 @@
 
 ## Project shape
 
-- **Stack:** Astro 5 + React 19 + TypeScript (strict) +
-  Tailwind v4 + Zustand. Static export to GitHub Pages.
+- **Stack:** Astro 6 + Svelte 5 (runes) + TypeScript (strict) +
+  Tailwind v4 + Svelte stores. Static export to GitHub Pages.
+  See ADR 0004 for why Svelte replaced React.
 - **Identity:** vaporwave retro-OS. Magenta/cyan title bars,
   chunky bevels, CRT scanlines, ~4s cinematic boot.
 - **Single source of design truth:** `retro-os/` mockups.

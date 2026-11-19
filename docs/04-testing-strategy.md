@@ -19,7 +19,7 @@
 
 ### Component
 
-- Every primitive ships at least one `*.test.tsx` exercising:
+- Every primitive ships at least one `*.test.ts` (Testing Library for Svelte) exercising:
   - default render
   - keyboard interaction (`Tab`, `Enter`, `Escape`, arrows where
     relevant)
@@ -76,7 +76,7 @@ E2E runs as a separate job after `build`, using `pnpm preview`.
 
 ## Local conventions
 
-- Co-locate tests next to source as `*.test.tsx` for primitives.
+- Tests live under `tests/unit/` mirroring `src/` (`*.test.ts`).
 - Larger suites and E2E live under `/tests/`.
 - No snapshot tests for visual output. Use Playwright screenshots
   if a visual is critical.

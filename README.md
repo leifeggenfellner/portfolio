@@ -9,17 +9,17 @@
 ## What this is
 
 The home route IS the hero: a faux operating system you can
-interact with. Open the Terminal, drag windows, peek at the
-Tweaks panel. Underneath: TypeScript, strict layering, design
+interact with. Open the Terminal, drag windows, play
+Minesweeper. Underneath: TypeScript, strict layering, design
 tokens, and a small primitive kit.
 
 ## Stack
 
-- **Astro 5** with the React integration (one island for the
-  Desktop; everything else stays static)
+- **Astro 6** with the Svelte integration (one Svelte 5 island
+  for the Desktop; static apps render as Astro components)
 - **TypeScript** (strict, no `any`)
 - **TailwindCSS v4** with CSS-first `@theme` tokens
-- **Zustand** for the window manager
+- **Svelte stores** for the window manager and settings
 - **Vitest + Testing Library** for unit/component
 - **Playwright + axe** for E2E and a11y
 - **pnpm** as the package manager
@@ -59,13 +59,13 @@ src/
   pages/          Astro routes
   layouts/        RootLayout.astro
   styles/         tokens.css → globals.css (@theme) → effects.css
-  lib/            cx, hooks, zustand store, a11y helpers
+  lib/            pure logic: stores, terminal shell, minesweeper, motion
   components/
     primitives/   RetroButton, RetroCard, RetroWindow, WindowHeader, …
-    effects/      Wallpaper, CrtLayer, BootSequence
+    effects/      Wallpaper, HorizonCanvas, CrtLayer, BootSequence, Screensaver
     apps/         About, ProjectsExplorer, Terminal, SkillsMatrix, …
-    shell/        Desktop, Taskbar, StartMenu, Dock, CommandPalette
-  content/        projects (TS data) + posts (MDX)
+    shell/        Desktop, Taskbar, StartMenu, HelpNote
+  content/        profile, skills, projects (JSON) + posts (MDX)
 tests/
   unit/           Vitest
   e2e/            Playwright (+ axe)

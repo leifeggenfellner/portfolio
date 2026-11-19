@@ -9,7 +9,7 @@ description: Validate folder placement and naming conventions across the repo.
 2. List all files under `src/` and assert:
    - Components are in the correct layer folder
      (primitives/effects/apps/shell).
-   - File names match: `PascalCase.tsx` for components,
+   - File names match: `PascalCase.svelte` (or `.astro`) for components,
      `use-kebab.ts` for hooks, `kebab.ts` for utilities.
    - No CSS files outside `src/styles/`.
    - No barrel files outside `primitives/index.ts`.

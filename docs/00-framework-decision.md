@@ -35,8 +35,8 @@ for the About and Posts routes is wasted bytes.
 
 ## Where Astro could bite us
 
-- The window manager + terminal must live inside a single React
-  island so they share zustand state. Cross-island state requires
+- The window manager + terminal must live inside a single
+  island so they share store state (Svelte since ADR 0004). Cross-island state requires
   discipline. **Mitigation:** the Desktop is one island.
 - `client:load` for the Desktop trades island-architecture
   savings for immediate hydration. That is intentional — the
