@@ -88,15 +88,10 @@ test("grid speed and icon size preferences control desktop layout", async ({ pag
   await page.goto("/");
 
   await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
-  const grid = page.locator(".outrun-grid");
-  if (testInfo.project.name === "reduced-motion") {
-    await expect
-      .poll(() => grid.evaluate((element) => Number.parseFloat(getComputedStyle(element).animationDuration)))
-      .toBeLessThanOrEqual(0.001);
-  } else {
-    await expect.poll(() => grid.evaluate((element) => getComputedStyle(element).animationDuration)).toBe("16s");
-  }
-  await expect.poll(() => grid.evaluate((element) => getComputedStyle(element).animationPlayState)).toBe("running");
+  const grid = page.locator("main [data-horizon]");
+  await expect(grid).toHaveAttribute("data-duration-ms", "16000");
+  const reduced = testInfo.project.name === "reduced-motion";
+  await expect(grid).toHaveAttribute("data-running", reduced ? "false" : "true");
 
   const icons = page.locator("main ul > li > button");
   await expect(icons).toHaveCount(7);
@@ -110,7 +105,7 @@ test("grid speed and icon size preferences control desktop layout", async ({ pag
 
   await page.locator("main ul").getByRole("button", { name: "Settings" }).dblclick();
   await page.getByRole("radio", { name: "Paused" }).check();
-  await expect.poll(() => grid.evaluate((element) => getComputedStyle(element).animationPlayState)).toBe("paused");
+  await expect(grid).toHaveAttribute("data-running", "false");
 });
 
 test("context menu theme toggle stays synchronized with Settings", async ({ page }, testInfo) => {
