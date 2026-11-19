@@ -318,7 +318,6 @@
       bind:this={iconList}
       aria-label="Desktop"
       class={cx(ICON_GRID_BASE, isMobile ? ICON_GRID_MOBILE : ICON_GRID_DESKTOP)}
-      onkeydown={handleIconKeydown}
     >
       {#each APPS as a (a.id)}
         <li>
@@ -329,6 +328,7 @@
             ondblclick={(e) => handleIconDoubleClick(a.id, e)}
             onclick={(e) => handleIconClick(a.id, e)}
             onfocus={() => (selectedIcon = a.id)}
+            onkeydown={handleIconKeydown}
             class={cx(ICON_BUTTON_BASE, isMobile ? ICON_BUTTON_MOBILE : ICON_BUTTON_DESKTOP)}
           >
             <img
