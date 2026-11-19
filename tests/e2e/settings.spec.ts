@@ -141,7 +141,7 @@ test("settings controls apply immediately and reset persisted values", async ({ 
     .click({ force: testInfo.project.name === "mobile-iphone" });
   await expect.poll(() => page.evaluate((key) => localStorage.getItem(key), STORAGE_KEY)).toBeNull();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.locator("html")).toHaveAttribute("data-crt", "full");
+  await expect(page.locator("html")).toHaveAttribute("data-crt", "subtle");
 });
 
 test("malformed storage falls back safely and Settings has no axe violations", async ({ page }, testInfo) => {

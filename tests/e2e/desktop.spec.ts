@@ -11,6 +11,15 @@ test("desktop boots and opens an app", async ({ page }) => {
   await expect(page.getByRole("dialog", { name: /me\.txt|About/i })).toBeVisible();
 });
 
+test("desktop icons open with the keyboard", async ({ page }) => {
+  await page.goto("/");
+  await page.keyboard.press("Escape");
+  const aboutIcon = page.getByRole("button", { name: /me\.txt/i }).first();
+  await aboutIcon.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog", { name: /me\.txt/i })).toBeVisible();
+});
+
 test("has no critical a11y violations on first paint", async ({ page }) => {
   await page.goto("/");
   await page.keyboard.press("Escape");

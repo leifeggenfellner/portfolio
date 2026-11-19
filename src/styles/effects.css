@@ -518,11 +518,7 @@
   width: 100%;
   height: 100%;
   border-radius: 9999px;
-  background: repeating-linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--surface-3) 90%, var(--magenta) 10%) 0 14px,
-    color-mix(in srgb, var(--magenta) 65%, var(--cyan) 35%) 14px 20px
-  );
+  background: repeating-linear-gradient(to bottom, var(--sun-face) 0 14px, var(--sun-band) 14px 20px);
   mask-image: linear-gradient(to bottom, #000 0%, #000 56%, transparent 88%);
   animation: outrun-sun-pulse 2.6s ease-in-out infinite alternate;
 }

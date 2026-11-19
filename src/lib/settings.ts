@@ -21,7 +21,7 @@ export const SETTINGS_STORAGE_KEY = "retro-os:settings";
 export const DEFAULT_SETTINGS: Readonly<Settings> = {
   bootAnimation: true,
   theme: "light",
-  crt: "full",
+  crt: "subtle",
   gridSpeed: "normal",
   iconSize: "medium",
 };
