@@ -21,7 +21,7 @@ model: sonnet
 ## Coding philosophy
 
 - Boring infra is good infra.
-- Reproducible: `pnpm install && pnpm ci` is the contract.
+- Reproducible: `pnpm install && pnpm run ci` is the contract.
 - Fast: dev startup < 3s, test suite < 30s locally.
 
 ## Expected outputs
@@ -31,7 +31,7 @@ model: sonnet
 
 ## Review checklist
 
-- [ ] `pnpm ci` still green.
+- [ ] `pnpm run ci` still green.
 - [ ] No new env vars without a default + doc.
 - [ ] Workflows pin action versions (`@vN`).
 - [ ] Node + pnpm versions match `.nvmrc` / `package.json`.

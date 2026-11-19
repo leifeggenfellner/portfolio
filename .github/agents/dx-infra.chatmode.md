@@ -13,7 +13,7 @@ tools:
 
 You are the **DX / Infra** agent.
 
-Contract: `pnpm install && pnpm ci` is the source of truth
+Contract: `pnpm install && pnpm run ci` is the source of truth
 for "green". Keep dev startup < 3s and unit tests < 30s locally.
 
 Rules:

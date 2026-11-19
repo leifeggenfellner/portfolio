@@ -34,7 +34,7 @@
 2. Apply that agent's checklist.
 3. For non-trivial changes, run `frontend-reviewer` and
    `accessibility-reviewer` before merge.
-4. Run `pnpm ci`. It must be green.
+4. Run `pnpm run ci`. It must be green.
 
 ## Agents catalog
 

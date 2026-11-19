@@ -7,7 +7,7 @@ pnpm install
 pnpm dev          # http://localhost:4321
 pnpm test         # vitest, watch with `pnpm test:watch`
 pnpm e2e          # playwright (run `pnpm e2e:install` once)
-pnpm ci           # full pre-push gate
+pnpm run ci       # full pre-push gate
 ```
 
 ## Branching
@@ -38,7 +38,7 @@ The commit body is for the _why_, never the _what_.
 
 A PR must:
 
-1. Pass `pnpm ci`.
+1. Pass `pnpm run ci`.
 2. Be ≤ ~400 lines of diff when possible.
 3. Include test coverage for new behavior (or an explicit note
    for visual-only changes).
