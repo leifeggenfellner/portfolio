@@ -3,12 +3,15 @@ import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
+import pkg from "./package.json" with { type: "json" };
 
 // Update both values when deploying. For a user/organization GitHub Pages site
 // (https://<user>.github.io) use site only and leave base = "/".
 // For a project page (https://<user>.github.io/<repo>) set base to "/<repo>/".
 const SITE = process.env.SITE_URL ?? "https://example.github.io";
 const BASE = process.env.BASE_PATH ?? "/";
+// Shown on the desktop badge and the BIOS screen; see src/lib/build-info.ts.
+const BUILD_DATE = new Date().toISOString().slice(0, 10).replaceAll("-", ".");
 
 export default defineConfig({
   site: SITE,
@@ -22,6 +25,10 @@ export default defineConfig({
   integrations: [svelte({ emitCss: false }), mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+      __BUILD_DATE__: JSON.stringify(BUILD_DATE),
+    },
   },
   prefetch: { prefetchAll: true, defaultStrategy: "viewport" },
   build: { inlineStylesheets: "auto" },

@@ -152,6 +152,10 @@
   --desktop-icon-size: 32px;
   --sun-face: color-mix(in srgb, var(--surface-3) 90%, var(--magenta) 10%);
   --sun-band: color-mix(in srgb, var(--magenta) 65%, var(--cyan) 35%);
+  /* Mountains: lit violet ridges fading into the floor colour. */
+  --mountain-top: color-mix(in srgb, var(--desktop-bg) 72%, var(--magenta) 28%);
+  --mountain-base: var(--desktop-bg);
+  --mountain-ridge: color-mix(in srgb, var(--cyan) 26%, transparent);
 
   /* ---- taskbar ---- */
   --taskbar-height: 36px;
@@ -193,6 +197,8 @@
   /* Night surfaces are near-black, so the sun face mixes from the light text tone instead. */
   --sun-face: color-mix(in srgb, var(--text) 80%, var(--magenta) 20%);
   --sun-band: color-mix(in srgb, var(--magenta) 70%, var(--cyan) 30%);
+  --mountain-top: color-mix(in srgb, var(--desktop-bg) 70%, var(--magenta) 30%);
+  --mountain-ridge: color-mix(in srgb, var(--magenta) 50%, transparent);
 
   /* Paper stays paper at night, just dimmed so it doesn't glare. */
   --note-bg: #e6d98c;

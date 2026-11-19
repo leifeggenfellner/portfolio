@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { BUILD_DATE } from "@lib/build-info";
   import { onMount } from "svelte";
 
   const LINES = [
@@ -84,7 +85,7 @@
 
       <header class="boot-header">
         <span class="boot-host">RETRO BIOS v9.95.06</span>
-        <span class="boot-meta">Build 2026.06.01 // 640K OK</span>
+        <span class="boot-meta">Build {BUILD_DATE} // 640K OK</span>
       </header>
 
       <div class="boot-log retro-scroll">
