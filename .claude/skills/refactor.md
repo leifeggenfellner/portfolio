@@ -11,7 +11,7 @@ description: Plan and execute a safe refactor.
    - 1: introduce new structure parallel to old.
    - 2: migrate call sites.
    - 3: delete old.
-4. Run `pnpm ci` after each commit.
+4. Run `pnpm run ci` after each commit.
 5. If the refactor touches a public surface (`primitives/`,
    `lib/`), update docs and `CHANGELOG.md`.
 6. If unsure, write an ADR first.

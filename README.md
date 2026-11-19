@@ -48,7 +48,7 @@ pnpm dev
 | `pnpm e2e`       | Playwright E2E (run `pnpm e2e:install` once) |
 | `pnpm typecheck` | `astro check` + `tsc --noEmit`               |
 | `pnpm lint`      | ESLint flat config                           |
-| `pnpm ci`        | typecheck + lint + test + build (the gate)   |
+| `pnpm run ci`    | typecheck + lint + test + build (the gate)   |
 
 ## Repo map
 

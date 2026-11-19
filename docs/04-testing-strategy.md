@@ -65,7 +65,7 @@ Thresholds enforced in `vitest.config.ts`.
 
 ## CI expectations
 
-`pnpm ci` (defined in `package.json`) runs:
+`pnpm run ci` (defined in `package.json`) runs:
 
 1. `pnpm typecheck`
 2. `pnpm lint`

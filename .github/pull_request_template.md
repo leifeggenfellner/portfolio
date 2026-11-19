@@ -27,7 +27,7 @@
 
 ## Checklist
 
-- [ ] `pnpm ci` passes locally
+- [ ] `pnpm run ci` passes locally
 - [ ] Tests added / updated
 - [ ] Docs / ADR updated when warranted
 - [ ] Diff ≤ ~400 lines or explicitly justified

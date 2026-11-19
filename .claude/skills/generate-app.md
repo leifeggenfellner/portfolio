@@ -26,7 +26,7 @@ description: Scaffold a new desktop "app" window end-to-end (component + registr
    ```
 3. Add an E2E case to `tests/e2e/desktop.spec.ts` opening the app.
 4. Verify it appears as a desktop icon and opens correctly.
-5. Run `pnpm ci`.
+5. Run `pnpm run ci`.
 
 ## Anti-patterns
 
