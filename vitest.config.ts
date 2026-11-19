@@ -30,6 +30,8 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       include: ["src/components/primitives/**", "src/lib/**"],
+      // Astro components render at build time and can't be parsed for v8 coverage.
+      exclude: ["**/*.astro"],
       thresholds: { lines: 80, functions: 80, branches: 75, statements: 80 },
     },
   },

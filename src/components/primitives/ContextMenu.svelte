@@ -56,7 +56,9 @@
         break;
       case "ArrowUp":
         e.preventDefault();
-        focusIndex = (focusIndex - 1 + actionItems.length) % actionItems.length;
+        // With nothing focused yet, ArrowUp starts from the last item.
+        focusIndex =
+          focusIndex < 0 ? actionItems.length - 1 : (focusIndex - 1 + actionItems.length) % actionItems.length;
         break;
       case "Enter":
       case " ":
