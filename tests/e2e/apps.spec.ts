@@ -59,7 +59,7 @@ test.describe("minesweeper", () => {
   test("first click is safe, flags count down, the face restarts", async ({ page }) => {
     const win = await openApp(page, "minigame");
     const status = win.locator("p[aria-live]");
-    await expect(status).toContainText("Open any square");
+    await expect(status).toContainText("Right-click or F flags");
 
     await win.locator('[data-cell="40"]').click();
     await expect(status).not.toContainText("Boom");
@@ -70,8 +70,12 @@ test.describe("minesweeper", () => {
     await page.keyboard.press("f");
     await expect(win.getByRole("status")).toHaveAttribute("aria-label", "9 mines left");
 
+    const flagMode = win.getByRole("button", { name: "Flag mode" });
+    await flagMode.click();
+    await expect(flagMode).toHaveAttribute("aria-pressed", "true");
     await win.getByRole("button", { name: "New game" }).click();
-    await expect(status).toContainText("Open any square");
+    await expect(flagMode).toHaveAttribute("aria-pressed", "false");
+    await expect(status).toContainText("Right-click or F flags");
     await expect(win.locator('[data-cell][aria-label$="hidden"]')).toHaveCount(81);
   });
 
