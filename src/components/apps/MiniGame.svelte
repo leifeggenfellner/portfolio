@@ -31,6 +31,12 @@
 
   let game = $state<Game>(newGame(rows, cols, mines));
   let focusIndex = $state(Math.floor((rows * cols) / 2));
+  // The cell under the pointer, if any. F flags it when the pointer was used
+  // last, and the focused cell when the keyboard was.
+  let hoverIndex = $state<number | null>(null);
+  let lastInput: "pointer" | "keyboard" = "pointer";
+  // Set on pointerdown so the focus that follows a click isn't read as keyboard use.
+  let focusFromPointer = false;
   let pressing = $state(false);
   let flagMode = $state(false);
   let startedAt = 0;
@@ -108,8 +114,31 @@
   }
 
   function moveFocus(index: number) {
+    lastInput = "keyboard";
     focusIndex = index;
     gridEl?.querySelector<HTMLButtonElement>(`[data-cell="${index}"]`)?.focus();
+  }
+
+  /** A bare key press, so Ctrl+F (find) or Ctrl+N never reach the game. */
+  function isPlain(e: KeyboardEvent): boolean {
+    return !e.ctrlKey && !e.metaKey && !e.altKey;
+  }
+
+  function isEditable(target: EventTarget | null): boolean {
+    return (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      (target instanceof HTMLElement && target.isContentEditable)
+    );
+  }
+
+  // When the pointer was used last, F flags the hovered cell wherever focus
+  // is, as long as the key isn't typing into a field.
+  function handleWindowKeydown(e: KeyboardEvent) {
+    if (lastInput !== "pointer" || hoverIndex === null) return;
+    if (e.key.toLowerCase() !== "f" || !isPlain(e) || isEditable(e.target)) return;
+    e.preventDefault();
+    flag(hoverIndex);
   }
 
   function handleGridKeydown(e: KeyboardEvent) {
@@ -127,10 +156,12 @@
     if (target !== undefined) {
       e.preventDefault();
       moveFocus(target);
-    } else if (e.key.toLowerCase() === "f") {
+    } else if (e.key.toLowerCase() === "f" && isPlain(e)) {
+      // Hovering: the window handler flags the hovered cell instead.
+      if (lastInput === "pointer" && hoverIndex !== null) return;
       e.preventDefault();
       flag(focusIndex);
-    } else if (e.key === "F2" || e.key.toLowerCase() === "n") {
+    } else if (e.key === "F2" || (e.key.toLowerCase() === "n" && isPlain(e))) {
       e.preventDefault();
       restart();
     }
@@ -161,6 +192,8 @@
   const LED_CLASS =
     "bevel-in-thin bg-led-bg text-led-fg font-mono text-32 relative px-1.5 leading-none tabular-nums [text-shadow:0_0_6px_var(--led-ghost)]";
 </script>
+
+<svelte:window onkeydown={handleWindowKeydown} />
 
 <div
   class="text-text grid h-full place-items-center overflow-auto p-3 [--cell:28px] max-md:[--cell:min(36px,calc((100vw-56px)/9))]"
@@ -196,7 +229,10 @@
       style:grid-template-columns={`repeat(${cols}, var(--cell))`}
       onkeydown={handleGridKeydown}
       onpointerup={() => (pressing = false)}
-      onpointerleave={() => (pressing = false)}
+      onpointerleave={() => {
+        pressing = false;
+        hoverIndex = null;
+      }}
     >
       {#each Array.from({ length: rows }, (_, r) => r) as r (r)}
         <div role="row" class="contents">
@@ -226,9 +262,19 @@
                   if (e.button === 1) apply(chord(game, index));
                 }}
                 onpointerdown={(e) => {
+                  lastInput = "pointer";
+                  focusFromPointer = true;
                   if (e.button === 0 && !open && game.status !== "won" && game.status !== "lost") pressing = true;
                 }}
-                onfocus={() => (focusIndex = index)}
+                onfocus={() => {
+                  focusIndex = index;
+                  if (!focusFromPointer) lastInput = "keyboard";
+                  focusFromPointer = false;
+                }}
+                onpointerenter={() => {
+                  hoverIndex = index;
+                  lastInput = "pointer";
+                }}
               >
                 {#if wrongFlag}
                   <span class="relative grid place-items-center">
@@ -250,9 +296,10 @@
     </div>
 
     <!-- w-0 min-w-full: as wide as the board, never wider. -->
-    <div class="flex w-0 min-w-full flex-wrap items-center justify-between gap-2">
-      <p class="text-13 text-text-dim" aria-live="polite">{status}</p>
-      <RetroButton size="sm" class="ml-auto" active={flagMode} onclick={() => (flagMode = !flagMode)}>
+    <!-- One row: the status wraps within 3/4 of the width; the button keeps its place. -->
+    <div class="flex w-0 min-w-full items-start justify-between gap-2">
+      <p class="text-13 text-text-dim max-w-3/4 leading-snug text-pretty" aria-live="polite">{status}</p>
+      <RetroButton size="sm" class="shrink-0" active={flagMode} onclick={() => (flagMode = !flagMode)}>
         <PixelArt rows={FLAG} palette={FLAG_PALETTE} size={12} />
         Flag mode
       </RetroButton>
