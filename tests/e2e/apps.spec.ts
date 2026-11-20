@@ -79,6 +79,22 @@ test.describe("minesweeper", () => {
     await expect(win.locator('[data-cell][aria-label$="hidden"]')).toHaveCount(81);
   });
 
+  test("F flags the hovered cell, not the last one clicked", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === "mobile-iphone", "hover needs a mouse");
+    const win = await openApp(page, "minigame");
+    await win.locator('[data-cell="40"]').click();
+    const hidden = win.locator('[data-cell][aria-label$="hidden"]');
+    const first = hidden.first();
+    const id = await first.getAttribute("data-cell");
+    // Focus stays on the clicked cell; only the pointer moves.
+    await first.hover();
+    await page.keyboard.press("f");
+    await expect(win.locator(`[data-cell="${id}"]`)).toHaveAttribute("aria-label", /flagged$/);
+    await expect(win.locator('[data-cell="40"]')).not.toHaveAttribute("aria-label", /flagged$/);
+    await page.keyboard.press("Control+f");
+    await expect(win.locator(`[data-cell="${id}"]`)).toHaveAttribute("aria-label", /flagged$/);
+  });
+
   test("is playable from the keyboard", async ({ page }) => {
     const win = await openApp(page, "minigame");
     const cell = win.locator('[data-cell="40"]');
