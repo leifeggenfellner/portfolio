@@ -112,7 +112,7 @@
 >
   <div
     aria-hidden="true"
-    class="font-chrome text-18 flex w-7 shrink-0 rotate-180 items-center bg-[linear-gradient(to_bottom,var(--title-active-from),var(--title-active-to))] py-2 tracking-[0.12em] text-(--title-active-text) [writing-mode:vertical-rl]"
+    class="font-chrome text-18 flex w-8 shrink-0 rotate-180 items-center justify-start bg-[linear-gradient(to_bottom,var(--title-active-from),var(--title-active-to))] px-1 py-3 leading-none tracking-[0.12em] text-(--title-active-text) [writing-mode:vertical-rl]"
   >
     RETRO//OS
   </div>
