@@ -33,12 +33,15 @@ export default defineConfig({
   prefetch: { prefetchAll: true, defaultStrategy: "viewport" },
   build: { inlineStylesheets: "auto" },
   compressHTML: true,
+  // Only normal styles: nothing uses italic, and Astro would otherwise
+  // include (and preload) italic files the first paint never needs.
   fonts: [
     {
       provider: fontProviders.google(),
       name: "Inter",
       cssVariable: "--font-body",
       weights: ["400", "500", "600", "700"],
+      styles: ["normal"],
       fallbacks: ["Hanken Grotesk", "system-ui", "sans-serif"],
     },
     {
@@ -46,6 +49,7 @@ export default defineConfig({
       name: "Pixelify Sans",
       cssVariable: "--font-chrome",
       weights: ["400", "600"],
+      styles: ["normal"],
       fallbacks: ["Hanken Grotesk", "system-ui", "sans-serif"],
     },
     {
@@ -53,6 +57,7 @@ export default defineConfig({
       name: "VT323",
       cssVariable: "--font-mono",
       weights: ["400"],
+      styles: ["normal"],
       fallbacks: ["JetBrains Mono", "Courier New", "monospace"],
     },
   ],
