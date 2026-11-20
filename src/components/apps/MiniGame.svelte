@@ -45,8 +45,8 @@
   const status = $derived.by(() => {
     if (game.status === "won") return `Cleared in ${seconds} s.${best === seconds ? " New best!" : ""}`;
     if (game.status === "lost") return "Boom. Press the face to play again.";
-    if (game.status === "ready") return "Open any square. Right-click or F flags.";
-    return best === null ? "No best time yet." : `Best: ${best} s.`;
+    if (game.status === "ready") return "Right-click or F flags.";
+    return "";
   });
 
   function readBest(): number | null {
@@ -90,6 +90,7 @@
     game = newGame(rows, cols, mines);
     seconds = 0;
     pressing = false;
+    flagMode = false;
   }
 
   function act(index: number) {
@@ -251,7 +252,7 @@
     <!-- w-0 min-w-full: as wide as the board, never wider. -->
     <div class="flex w-0 min-w-full flex-wrap items-center justify-between gap-2">
       <p class="text-13 text-text-dim" aria-live="polite">{status}</p>
-      <RetroButton size="sm" active={flagMode} onclick={() => (flagMode = !flagMode)}>
+      <RetroButton size="sm" class="ml-auto" active={flagMode} onclick={() => (flagMode = !flagMode)}>
         <PixelArt rows={FLAG} palette={FLAG_PALETTE} size={12} />
         Flag mode
       </RetroButton>
