@@ -22,6 +22,6 @@
   aria-hidden="true"
   focusable="false"
 >
-  <!-- Trusted build-time markup from scripts/build-icons.mjs, not user content. -->
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted build-time markup from scripts/build-icons.mjs, not user content -->
   {@html data.body}
 </svg>

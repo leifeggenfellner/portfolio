@@ -117,9 +117,6 @@ export type Settings = { [K in SettingKey]: Schema[K]["default"] };
 export type Theme = Settings["theme"];
 export type CrtMode = Settings["crt"];
 export type GridSpeed = Settings["gridSpeed"];
-export type IconSize = Settings["iconSize"];
-/** The desktop's pixel-art cursors, or the platform's own. */
-export type CursorStyle = Settings["cursors"];
 /** Minutes of inactivity before the screensaver starts, or never. */
 export type ScreensaverDelay = Settings["screensaver"];
 

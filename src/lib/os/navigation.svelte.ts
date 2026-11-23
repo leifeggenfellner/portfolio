@@ -26,6 +26,7 @@ export class Navigation {
   #launcher: Launcher;
   #base: string;
   #depth = 0;
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping for history, never rendered
   #known = new Set<string>();
 
   constructor(windows: WindowManager, launcher: Launcher, base = "/") {
@@ -68,6 +69,7 @@ export class Navigation {
     const app = win && this.#launcher.app(win.appId);
     const path = app ? this.pathFor(app, win.args) : this.#base;
     document.title = win ? pageTitle(win.title) : HOME_TITLE;
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a one-off string, not state
     document.querySelector('link[rel="canonical"]')?.setAttribute("href", new URL(path, location.origin).href);
     // Drop windows that closed, so reopening one counts as new.
     for (const known of this.#known) if (!this.#windows.get(known)) this.#known.delete(known);
