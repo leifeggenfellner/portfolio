@@ -9,15 +9,12 @@
  * the matching <link rel="preload"> tags automatically.
  */
 import { Font } from "astro:assets";
-import { DEFAULT_SETTINGS, SETTINGS_BOOTSTRAP_SCRIPT } from "@lib/settings";
+import { DEFAULT_SETTINGS, rootAttributes, SETTINGS_BOOTSTRAP_SCRIPT } from "@lib/settings";
 import "@styles/globals.css";
 
 interface Props {
   title?: string;
   description?: string;
-  theme?: "light" | "dark";
-  crt?: "off" | "subtle" | "full";
-  accent?: "default" | "magenta" | "cyan" | "amber";
   image?: string;
   /** A scrolling document page rather than the full-viewport desktop. */
   document?: boolean;
@@ -26,9 +23,6 @@ interface Props {
 const {
   title = "Leif Eggenfellner — RETRO//OS",
   description = "Full-stack developer in Tromsø. This portfolio is a working retro desktop: a real terminal, a file explorer, Minesweeper and a synthwave horizon.",
-  theme = DEFAULT_SETTINGS.theme,
-  crt = DEFAULT_SETTINGS.crt,
-  accent = "default",
   image,
   document = false,
 } = Astro.props;
@@ -40,13 +34,8 @@ const ogImageAlt = "The RETRO//OS desktop: pixel icons over a synthwave sunset a
 ---
 
 <!doctype html>
-<html
-  lang="en"
-  data-theme={theme}
-  data-crt={crt}
-  data-cursors={DEFAULT_SETTINGS.cursors}
-  data-accent={accent === "default" ? undefined : accent}
->
+<!-- The defaults; the bootstrap script swaps in stored settings before first paint. -->
+<html lang="en" {...rootAttributes(DEFAULT_SETTINGS)}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
