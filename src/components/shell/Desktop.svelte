@@ -22,7 +22,7 @@
   import ContextMenu from "@primitives/ContextMenu.svelte";
   import type { MenuEntry } from "@primitives/ContextMenu.svelte";
   import RetroWindow from "@primitives/RetroWindow.svelte";
-  import { clampWindowPosition } from "@lib/window-bounds";
+  import { clampWindowPosition, fitWindowToViewport } from "@lib/window-bounds";
   import HelpNote from "./HelpNote.svelte";
   import type { StartMenuItem } from "./StartMenu.svelte";
   import Taskbar from "./Taskbar.svelte";
@@ -177,12 +177,16 @@
     } else {
       readStaticTemplate(app.id);
     }
+    // Read the viewport live: a resize event may not have landed yet.
+    const box = isMobile
+      ? app.defaults
+      : fitWindowToViewport(app.defaults, { width: window.innerWidth, height: window.innerHeight - taskbarHeight });
     windowManager.open({
       id: app.id,
       appId: app.id,
       title: app.title,
       icon: app.icon,
-      ...app.defaults,
+      ...box,
     });
   }
 
@@ -264,6 +268,44 @@
 
   $effect(() => settings.subscribe((next) => (prefs = next)));
 
+  // Focus stack: the last element focused inside each window's body, so a
+  // window that becomes active again hands focus back to where it was.
+  // Header buttons aren't remembered; restoring onto "minimise" helps nobody.
+  const lastFocus = new Map<string, HTMLElement>();
+  // Set by a pointer press on a window's title bar or frame, not its body or
+  // buttons. Only that focus is passed on: the app owns clicks in its body (the
+  // Terminal lets them select text), and Tab onto the title bar must stay put.
+  let pressedChrome = false;
+
+  /** Where focus goes when a window activates: where it was, else the app's `data-autofocus`, else the frame. */
+  function focusTargetFor(win: HTMLElement): HTMLElement {
+    const remembered = lastFocus.get(win.dataset.windowId ?? "");
+    if (remembered?.isConnected && win.contains(remembered)) return remembered;
+    return win.querySelector<HTMLElement>("[data-window-body] [data-autofocus]") ?? win;
+  }
+
+  function handleWindowPointerDown(e: PointerEvent) {
+    const target = e.target as Element;
+    pressedChrome = Boolean(target.closest("[data-window-id]")) && !target.closest("[data-window-body], button");
+    // Focus from this press is dispatched in the same task; clear afterwards.
+    window.setTimeout(() => (pressedChrome = false));
+  }
+
+  function handleWindowFocusIn(e: FocusEvent) {
+    const target = e.target as HTMLElement;
+    const win = target.closest<HTMLElement>("[data-window-id]");
+    if (!win) return;
+    if (target.closest("[data-window-body]")) {
+      lastFocus.set(win.dataset.windowId ?? "", target);
+      return;
+    }
+    // A click on the title bar or edge: pass focus on to where the window was working.
+    if (pressedChrome) {
+      const next = focusTargetFor(win);
+      if (next !== win) next.focus({ preventScroll: true });
+    }
+  }
+
   // Keyboard focus follows the active window, so opening, restoring or
   // closing a window never strands focus on something that disappeared.
   let lastActiveId: string | null = null;
@@ -275,7 +317,7 @@
       const current = document.activeElement;
       if (id) {
         const win = document.querySelector<HTMLElement>(`[data-window-id="${id}"]`);
-        if (win && !win.contains(current)) win.focus({ preventScroll: true });
+        if (win && !win.contains(current)) focusTargetFor(win).focus({ preventScroll: true });
       } else if (!current || current === document.body || current.closest("[data-window-id]")) {
         document.querySelector<HTMLElement>('nav[aria-label="Taskbar"] button')?.focus();
       }
@@ -381,6 +423,8 @@
     inert={phase !== "desktop"}
     oncontextmenu={handleDesktopContext}
     onpointerdown={handleDesktopPointerDown}
+    onpointerdowncapture={handleWindowPointerDown}
+    onfocusin={handleWindowFocusIn}
   >
     <Wallpaper />
     {#if !isMobile}
