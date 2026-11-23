@@ -9,10 +9,32 @@
 | Largest image on `/`            | ≤ 60 KB |
 | LCP on slow 4G (Moto G4)        | ≤ 2.5s  |
 | INP                             | ≤ 200ms |
+| TBT (lab stand-in for INP)      | ≤ 200ms |
 | CLS                             | ≤ 0.05  |
 | Lighthouse Performance (mobile) | ≥ 90    |
 
-Enforced manually until we wire `@lhci/cli` in CI.
+Enforced in CI:
+
+- **Bundle size:** `pnpm size` (`scripts/check-bundle.mjs`) follows
+  the static imports from `dist/index.html` and fails the build job
+  when the initial JS or CSS is over budget. It also lists the lazy
+  app chunks. Both go in the job summary; it runs in `pnpm run ci`
+  too.
+- **Lighthouse:** the `lighthouse` job runs `@lhci/cli` three times
+  each on mobile and desktop against the built site and asserts
+  the performance score, LCP, CLS and TBT budgets
+  (`lighthouserc.mobile.json`, `lighthouserc.desktop.json`).
+  Results go in the job summary; the full reports are uploaded as
+  an artifact.
+- **Mobile LCP in CI is a 3 s guard, not the 2.5 s target.** The
+  LCP element is the boot splash heading, which appears once the
+  desktop island hydrates, so simulated slow 4G puts it near
+  2.5 s, and shared CI runners measure about 0.7 s slower than a
+  laptop (2.52 s against 1.8 s for the same build). A 2.5 s gate
+  there would fail at random; 3 s still catches a real
+  regression.
+
+The image budget and real-device INP are still checked by hand.
 
 ## Hydration
 
