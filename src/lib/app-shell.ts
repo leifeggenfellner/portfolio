@@ -39,6 +39,10 @@ export interface AppRoute {
   /** The page title, e.g. the project's name. */
   title: string;
   description?: string;
+  /** Social preview image under public/, e.g. a project's cover. */
+  image?: string;
+  /** schema.org data for the page, given its URL and the site's. */
+  jsonLd?: (page: URL, site: URL) => Record<string, unknown>;
 }
 
 /** An app: what the desktop needs to list, open and route to it. Lives in `src/apps/<id>/manifest.ts`. */
@@ -47,6 +51,8 @@ export interface AppManifest {
   /** Position on the desktop, the Start menu and other app lists. */
   order: number;
   title: string;
+  /** For the app's page: its meta description. */
+  description: string;
   icon: string;
   /** Short name under the desktop icon; the title's first word if absent. */
   label?: string;

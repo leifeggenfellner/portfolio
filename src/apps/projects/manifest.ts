@@ -6,6 +6,8 @@ export default {
   id: "projects",
   order: 1,
   title: "Projects",
+  description:
+    "Projects by Leif Eggenfellner, browsed in a retro file explorer: what each is, the stack, and links to the code.",
   icon,
   defaults: { x: 180, y: 110, w: 620, h: 420 },
   load: () => import("./App.svelte"),
@@ -15,12 +17,17 @@ export default {
     fromArgs: (args) => args.project,
   },
   routes: async () => {
-    const { PROJECTS } = await import("@content/projects");
+    const [{ PROJECTS }, { projectLd }] = await Promise.all([
+      import("@content/projects"),
+      import("@lib/structured-data"),
+    ]);
     return PROJECTS.map((p) => ({
       path: `/projects/${p.slug}/` as const,
       args: { project: p.slug },
       title: p.name,
       description: `${p.tagline} ${p.summary}`,
+      image: p.cover,
+      jsonLd: (page: URL, site: URL) => projectLd(p, page, site),
     }));
   },
 } satisfies AppManifest;
