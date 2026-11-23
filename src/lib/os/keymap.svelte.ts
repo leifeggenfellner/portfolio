@@ -12,8 +12,9 @@
  */
 
 import { untrack } from "svelte";
+import type { ShortcutScope } from "./shortcuts";
 
-export type KeyScope = "modal" | "window" | "desktop" | "global";
+export type KeyScope = ShortcutScope;
 
 export interface KeyBinding {
   id: string;

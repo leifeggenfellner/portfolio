@@ -3,6 +3,7 @@
  * the lines to print plus any state change, and reaches the rest of the site
  * only through the `actions` the caller provides.
  */
+import { SHORTCUTS, shortcutsByPlace } from "@lib/os/shortcuts";
 import { CRT_MODES, GRID_SPEEDS, THEMES } from "@lib/settings";
 import { formatPath, listDir, nodeAt, resolvePath } from "./fs";
 import { pipeCount } from "./pipes";
@@ -277,12 +278,13 @@ const COMMANDS: Record<string, Command> = {
     },
   },
   man: {
-    usage: "man <command>",
+    usage: "man <command|keys>",
     summary: "the manual for a command",
-    manual: ["Show the manual page for a command. You are reading one."],
+    manual: ["Show the manual page for a command. You are reading one.", "'man keys' lists every keyboard shortcut."],
     run: (args) => {
       const name = args[0]?.toLowerCase();
       if (!name) return err("what manual page do you want? try 'man ls'");
+      if (name === "keys") return { lines: keysPage() };
       const command = COMMANDS[name];
       if (!command) return err(`no manual entry for ${args[0]}`);
       return {
@@ -305,6 +307,19 @@ const COMMANDS: Record<string, Command> = {
     },
   },
 };
+
+/** Every keyboard shortcut, grouped by where it works. */
+function keysPage(): Line[] {
+  const width = Math.max(...Object.values(SHORTCUTS).map((s) => s.label.length)) + 2;
+  return [
+    { text: "KEYS(7)", tone: "accent" },
+    ...shortcutsByPlace().flatMap(([where, shortcuts]) => [
+      { text: "" },
+      { text: where, tone: "dim" as const },
+      ...shortcuts.map((s) => ({ text: `  ${s.label.padEnd(width)}${s.description.toLowerCase()}` })),
+    ]),
+  ];
+}
 
 /** Easter eggs: answered, but not listed in `help`. */
 const HIDDEN: Record<string, string> = {

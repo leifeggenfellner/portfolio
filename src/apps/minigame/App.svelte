@@ -3,6 +3,7 @@
   import { cx } from "@lib/cx";
   import { getOs } from "@lib/os/context";
   import { inTextField } from "@lib/os/keymap.svelte";
+  import { bindingFor } from "@lib/os/shortcuts";
   import { BEGINNER, chord, minesLeft, newGame, reveal, toggleFlag } from "./logic";
   import type { Cell, Game } from "./logic";
   import PixelArt from "@primitives/PixelArt.svelte";
@@ -131,9 +132,7 @@
   const { keymap } = getOs();
   $effect(() =>
     keymap.bind({
-      id: "minesweeper:flag",
-      keys: ["F", "Shift+F"],
-      scope: "window",
+      ...bindingFor("minesweeperFlag"),
       when: (e) => lastInput === "pointer" && hoverIndex !== null && !inTextField(e),
       run: () => {
         if (hoverIndex !== null) flag(hoverIndex);

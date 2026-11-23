@@ -10,6 +10,7 @@
   import { wallpaperCovered } from "@lib/horizon";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { getOs } from "@lib/os/context";
+  import { bindingFor } from "@lib/os/shortcuts";
   import { applySettingsToRoot } from "@lib/settings";
   import type { Theme } from "@lib/settings";
   import DesktopIcons from "./DesktopIcons.svelte";
@@ -81,10 +82,7 @@
   $effect(() => {
     if (!boot.running) return;
     return keymap.bind({
-      id: "boot:skip",
-      keys: ["Escape", "Enter", " "],
-      scope: "modal",
-      description: "Skip the boot sequence",
+      ...bindingFor("bootSkip"),
       run: () => boot.finish(),
     });
   });
