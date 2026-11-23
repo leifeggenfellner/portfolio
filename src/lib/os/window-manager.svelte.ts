@@ -12,6 +12,7 @@
  *   was before).
  */
 import { snapBox } from "@lib/window-bounds";
+import type { SessionWindow } from "./session";
 import type { AppArgs } from "@lib/app-shell";
 import type { Viewport, WindowBox } from "@lib/window-bounds";
 
@@ -97,6 +98,25 @@ export class WindowManager {
   /** The window's z-index: its place in the stack above the base. */
   z(id: string): number {
     return WINDOW_Z_BASE + this.#stack.indexOf(id);
+  }
+
+  /** Every window, bottom to top, as the session stores it. */
+  snapshot(): SessionWindow[] {
+    return this.#stack.flatMap((id) => {
+      const win = this.get(id);
+      return win
+        ? [{ appId: win.appId, args: win.args, box: { ...win.box }, layout: win.layout, minimized: win.minimized }]
+        : [];
+    });
+  }
+
+  /** Put an opened window back the way the session had it. */
+  arrange(id: string, saved: Pick<SessionWindow, "box" | "layout" | "minimized">): void {
+    const win = this.get(id);
+    if (!win) return;
+    win.box = saved.box;
+    win.layout = saved.layout;
+    win.minimized = saved.minimized;
   }
 
   /** The z-index of the top window (the base when none is open). */

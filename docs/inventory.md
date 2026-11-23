@@ -40,19 +40,20 @@ Every page is server-rendered; app pages are the desktop with that window open.
 - `/posts/` and each published post — documents
 - `/rss.xml`, `/sitemap-index.xml`, `/robots.txt`
 
-## Settings (7)
+## Settings (8)
 
 From `SETTINGS_SCHEMA` in `src/lib/settings.ts`.
 
-| Key             | Label               | Values                     | Default | On `<html>`       |
-| --------------- | ------------------- | -------------------------- | ------- | ----------------- |
-| `bootAnimation` | Play boot animation | on, off                    | on      | —                 |
-| `theme`         | Theme               | light, dark                | light   | `data-theme`      |
-| `cursors`       | Pixel-art cursors   | retro, system              | retro   | `data-cursors`    |
-| `crt`           | CRT effect          | off, subtle, full          | subtle  | `data-crt`        |
-| `gridSpeed`     | Grid speed          | paused, slow, normal, fast | normal  | `data-grid-speed` |
-| `iconSize`      | Icon size           | small, medium, large       | medium  | `data-icon-size`  |
-| `screensaver`   | Screensaver         | never, 1, 3, 10            | 3       | —                 |
+| Key              | Label                             | Values                     | Default | On `<html>`       |
+| ---------------- | --------------------------------- | -------------------------- | ------- | ----------------- |
+| `bootAnimation`  | Play boot animation               | on, off                    | on      | —                 |
+| `theme`          | Theme                             | light, dark                | light   | `data-theme`      |
+| `cursors`        | Pixel-art cursors                 | retro, system              | retro   | `data-cursors`    |
+| `crt`            | CRT effect                        | off, subtle, full          | subtle  | `data-crt`        |
+| `gridSpeed`      | Grid speed                        | paused, slow, normal, fast | normal  | `data-grid-speed` |
+| `iconSize`       | Icon size                         | small, medium, large       | medium  | `data-icon-size`  |
+| `restoreSession` | Reopen windows from my last visit | on, off                    | off     | —                 |
+| `screensaver`    | Screensaver                       | never, 1, 3, 10            | 3       | —                 |
 
 ## Shortcuts
 

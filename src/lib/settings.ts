@@ -97,6 +97,7 @@ export const SETTINGS_SCHEMA = {
       ["large", "Large"],
     ],
   }),
+  restoreSession: toggle({ group: "Desktop", label: "Reopen windows from my last visit", default: false }),
   screensaver: choice({
     group: "Desktop",
     label: "Screensaver",
