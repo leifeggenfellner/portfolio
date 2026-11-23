@@ -3,11 +3,13 @@
  * doesn't download Minesweeper), fits the window to the screen and hands it
  * to the window manager.
  */
-import { fitWindowToViewport } from "@lib/window-bounds";
+import { fitWindowToViewport, snapBox } from "@lib/window-bounds";
 import { loadedAppComponent } from "./app-components";
+import type { SessionWindow } from "./session";
 import type { Viewport } from "./viewport.svelte";
 import type { WindowManager } from "./window-manager.svelte";
 import type { AppArgs, AppManifest, AppProps, AppShell } from "@lib/app-shell";
+import type { WindowBox } from "@lib/window-bounds";
 import type { Component } from "svelte";
 
 export class Launcher {
@@ -89,6 +91,26 @@ export class Launcher {
       box: app.defaults,
       args: this.#parse(app, args),
     });
+  }
+
+  /**
+   * Reopen a stored session, bottom window first so the stacking comes back.
+   * Boxes are fitted to today's screen; layouts and minimised states return.
+   * A window that is already open (the page's own) keeps its arguments and
+   * only gets its arrangement back.
+   */
+  async restore(saved: readonly SessionWindow[]): Promise<void> {
+    const area = { width: window.innerWidth, height: window.innerHeight - this.#viewport.taskbarHeight };
+    for (const entry of saved) {
+      if (this.#windows.get(entry.appId)) this.#windows.focus(entry.appId);
+      else if (!(await this.open(entry.appId, { args: entry.args }))) continue;
+      const fit = (box: WindowBox) => fitWindowToViewport(box, area);
+      // A snapped window snaps again to today's screen; its floating box is fitted.
+      const { layout } = entry;
+      const box = layout.kind === "snapped" ? snapBox(layout.side, area) : fit(entry.box);
+      const restoredLayout = layout.kind === "snapped" ? { ...layout, restore: fit(layout.restore) } : layout;
+      this.#windows.arrange(entry.appId, { box, layout: restoredLayout, minimized: entry.minimized });
+    }
   }
 
   #parse(app: AppManifest, args: AppArgs | undefined): AppArgs | undefined {

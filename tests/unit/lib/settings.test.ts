@@ -34,15 +34,7 @@ describe("settings contract", () => {
 
   it("always returns exactly the known keys", () => {
     const parsed = parseSettings('{"theme":"dark","extra":"drop-me"}');
-    expect(Object.keys(parsed).sort()).toEqual([
-      "bootAnimation",
-      "crt",
-      "cursors",
-      "gridSpeed",
-      "iconSize",
-      "screensaver",
-      "theme",
-    ]);
+    expect(Object.keys(parsed).sort()).toEqual(Object.keys(DEFAULT_SETTINGS).sort());
   });
 
   it("parses the screensaver delay and converts it to milliseconds", () => {
@@ -68,6 +60,7 @@ describe("settings contract", () => {
       iconSize: "large",
       screensaver: "3",
       cursors: "system",
+      restoreSession: false,
     };
 
     applySettingsToRoot(root, value);

@@ -10,6 +10,7 @@
   import { wallpaperCovered } from "@lib/horizon";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { getOs } from "@lib/os/context";
+  import { readSession, writeSession } from "@lib/os/session";
   import { bindingFor } from "@lib/os/shortcuts";
   import { applySettingsToRoot } from "@lib/settings";
   import type { Theme } from "@lib/settings";
@@ -30,7 +31,7 @@
 
   let { deepLink = false }: Props = $props();
 
-  const { windows, settings, keymap, boot, viewport, launcher, announcer } = getOs();
+  const { windows, settings, keymap, boot, viewport, launcher, announcer, navigation } = getOs();
 
   let icons = $state<ReturnType<typeof DesktopIcons>>();
   let menu = $state<ReturnType<typeof DesktopMenu>>();
@@ -106,11 +107,31 @@
     boot.leaveSplash(prefersReducedMotion() ? 0 : durationMs("--dur-3", 240));
   }
 
+  // "Reopen windows from my last visit": restore once, then keep it saved.
+  // Nothing is saved until the restore is done, so an early empty save can't
+  // overwrite the session being restored.
+  let sessionRestored = $state(false);
+
+  async function restoreSession() {
+    // On an app page the URL wins: its window keeps its arguments and ends on top.
+    const linked = windows.activeId;
+    const saved = readSession(launcher.apps.map((app) => app.id));
+    await navigation.quietly(() => launcher.restore(saved));
+    if (linked) windows.focus(linked);
+  }
+
   onMount(() => {
     settings.hydrate();
     settingsReady = true;
     helpNoteOpen = !isHelpNoteDismissed();
     boot.start(settings.current.bootAnimation && !deepLink);
+    if (settings.current.restoreSession) void restoreSession().finally(() => (sessionRestored = true));
+    else sessionRestored = true;
+  });
+
+  $effect(() => {
+    if (!sessionRestored) return;
+    writeSession(settings.current.restoreSession ? windows.snapshot() : null);
   });
 </script>
 

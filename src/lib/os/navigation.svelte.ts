@@ -10,7 +10,7 @@
  *   Forward opens the window again
  * - the tab title follows the active window, as the server's would
  */
-import { untrack } from "svelte";
+import { tick, untrack } from "svelte";
 import { HOME_TITLE, pageTitle } from "@lib/site";
 import type { Launcher } from "./launcher.svelte";
 import type { WindowManager } from "./window-manager.svelte";
@@ -28,6 +28,19 @@ export class Navigation {
   #depth = 0;
   // eslint-disable-next-line svelte/prefer-svelte-reactivity -- bookkeeping for history, never rendered
   #known = new Set<string>();
+  #quiet = 0;
+
+  /** Run `work` without pushing history entries (restoring a session opens several windows at once). */
+  async quietly(work: () => Promise<void>): Promise<void> {
+    this.#quiet++;
+    try {
+      await work();
+    } finally {
+      // Let the last window's sync run before entries push again.
+      await tick();
+      this.#quiet--;
+    }
+  }
 
   constructor(windows: WindowManager, launcher: Launcher, base = "/") {
     this.#windows = windows;
@@ -76,7 +89,7 @@ export class Navigation {
     const opened = win !== undefined && !this.#known.has(win.id);
     if (win) this.#known.add(win.id);
     if (path === location.pathname) return;
-    if (opened) history.pushState({ depth: ++this.#depth } satisfies Entry, "", path);
+    if (opened && this.#quiet === 0) history.pushState({ depth: ++this.#depth } satisfies Entry, "", path);
     else history.replaceState({ depth: this.#depth } satisfies Entry, "", path);
   }
 
