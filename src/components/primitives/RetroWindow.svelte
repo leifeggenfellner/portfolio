@@ -282,3 +282,17 @@
     {/if}
   </div>
 {/if}
+
+<style>
+  /* ---- phone windows ----
+     Full screen above the taskbar, in CSS rather than script, so the
+     server-rendered window of an app's page already fits before hydration.
+     Matches MOBILE_QUERY in src/lib/os/viewport.svelte.ts. */
+  @media (width <= 768px) {
+    [data-window-id] {
+      inset: 0 0 auto !important;
+      width: 100% !important;
+      height: calc(100% - var(--taskbar-height)) !important;
+    }
+  }
+</style>

@@ -62,3 +62,68 @@
   </p>
   <p class="screensaver-hint font-mono">move the mouse or press any key</p>
 </div>
+
+<style>
+  /* ---- screensaver: the horizon at speed, with a bouncing logo ---- */
+  .screensaver {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    overflow: hidden;
+    isolation: isolate;
+    cursor: none;
+    background: var(--terminal-bg);
+    --grid-horizon-bottom: 42%;
+    --grid-scroll-duration: 2.4s;
+    animation: screensaver-in var(--dur-4) var(--ease-out) both;
+  }
+
+  /* A dim sky, so the floor and logo carry the screen. */
+  .screensaver .outrun-sky {
+    opacity: 0.35;
+  }
+
+  .screensaver-logo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    white-space: nowrap;
+    text-shadow: 0 0 18px currentcolor;
+    transition: color var(--dur-2) linear;
+    will-change: transform;
+  }
+
+  .screensaver-logo--still {
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .screensaver-hint {
+    position: absolute;
+    inset-inline: 0;
+    bottom: var(--sp-5);
+    z-index: 5;
+    margin: 0;
+    text-align: center;
+    font-size: var(--fs-18);
+    color: var(--boot-muted);
+  }
+
+  @keyframes screensaver-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screensaver {
+      animation: none;
+    }
+  }
+</style>
