@@ -75,6 +75,8 @@
   let paletteSession = $state(0);
   // Where focus was when the palette opened, to go back to when it closes.
   let paletteReturn: HTMLElement | null = null;
+  // Apps whose code is downloading on first open; the busy cursor shows meanwhile.
+  let loadingApps = $state(0);
 
   // Where each window should grow from next time it appears: the icon or
   // taskbar button that summoned it. Read once by the window's intro.
@@ -172,6 +174,7 @@
   async function ensureSvelteLoaded(appId: string, load: () => Promise<{ default: Component<AppProps> }>) {
     const cached = svelteComponents[appId];
     if (cached) return cached;
+    loadingApps += 1;
     try {
       const mod = await load();
       svelteComponents = { ...svelteComponents, [appId]: mod.default };
@@ -179,6 +182,8 @@
     } catch (error) {
       console.error(`Failed to load app "${appId}"`, error);
       return null;
+    } finally {
+      loadingApps -= 1;
     }
   }
 
@@ -574,6 +579,7 @@
     bind:this={mainEl}
     class={MAIN_CLASS}
     inert={phase !== "desktop"}
+    aria-busy={loadingApps > 0 || undefined}
     oncontextmenu={handleDesktopContext}
     onpointerdown={handleDesktopPointerDown}
     onpointerdowncapture={handleWindowPointerDown}

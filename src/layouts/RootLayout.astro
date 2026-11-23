@@ -40,7 +40,13 @@ const ogImageAlt = "The RETRO//OS desktop: pixel icons over a synthwave sunset a
 ---
 
 <!doctype html>
-<html lang="en" data-theme={theme} data-crt={crt} data-accent={accent === "default" ? undefined : accent}>
+<html
+  lang="en"
+  data-theme={theme}
+  data-crt={crt}
+  data-cursors={DEFAULT_SETTINGS.cursors}
+  data-accent={accent === "default" ? undefined : accent}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
