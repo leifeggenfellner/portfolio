@@ -1,0 +1,55 @@
+/* =============================================================
+   cursors.css — the pixel-art cursors
+   ============================================================= */
+
+/* ---- pixel-art cursors ----
+   Fine pointers only: touch screens show no cursor, and the "System cursor"
+   setting (data-cursors="system") keeps the platform's own, including any
+   enlarged system cursor. Deliberately unlayered, so these win over the cursor-* utilities.
+   The element lists use :where() so an explicit cursor-* class (the resize
+   grip is a button, but wants the resize cursor) always takes precedence. */
+@media (pointer: fine) {
+  :root[data-cursors="retro"] {
+    cursor: var(--cursor-default);
+  }
+
+  :root[data-cursors="retro"]
+    :where(
+      a[href],
+      button:not(:disabled),
+      summary,
+      select,
+      label:has(input:is([type="checkbox"], [type="radio"])),
+      input:is([type="checkbox"], [type="radio"]),
+      [role="menuitem"],
+      [role="option"],
+      .cursor-pointer
+    ) {
+    cursor: var(--cursor-pointer);
+  }
+
+  :root[data-cursors="retro"]
+    :is(
+      input:not([type="checkbox"], [type="radio"], [type="range"], [type="button"], [type="submit"]),
+      textarea,
+      .cursor-text
+    ) {
+    cursor: var(--cursor-text);
+  }
+
+  :root[data-cursors="retro"] .cursor-default {
+    cursor: var(--cursor-default);
+  }
+
+  :root[data-cursors="retro"] .cursor-move {
+    cursor: var(--cursor-move);
+  }
+
+  :root[data-cursors="retro"] .cursor-nwse-resize {
+    cursor: var(--cursor-resize);
+  }
+
+  :root[data-cursors="retro"] [aria-busy="true"] {
+    cursor: var(--cursor-busy);
+  }
+}

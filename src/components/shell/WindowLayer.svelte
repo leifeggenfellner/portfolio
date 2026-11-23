@@ -170,3 +170,13 @@
     data-snap-preview={snapPreview}
   ></div>
 {/if}
+
+<style>
+  /* ---- window snapping ---- */
+  /* Where a dragged window will land when dropped on a screen edge. */
+  .snap-preview {
+    border: 2px dashed var(--cyan);
+    background: color-mix(in srgb, var(--cyan) 16%, transparent);
+    box-shadow: inset 0 0 24px color-mix(in srgb, var(--cyan) 35%, transparent);
+  }
+</style>

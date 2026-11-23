@@ -96,6 +96,12 @@
   --title-inactive-to: #b8acd2;
   --title-inactive-text: #e7dffa;
   --title-text-shadow: rgba(0, 0, 0, 0.35);
+  /* Mixed into a colour to darken it, e.g. color-mix(in srgb, var(--boot-bg) 88%, var(--shade) 12%). */
+  --shade: #000;
+  /* ---- CRT layer ---- */
+  --crt-scanline: rgba(0, 0, 0, 0.16);
+  --crt-vignette: rgba(0, 0, 0, 0.28);
+  --crt-glow: rgba(60, 255, 160, 0.025);
   /* An inactive window sits lower: a short hard shadow instead of --win-shadow. */
   --win-shadow-inactive: rgba(0, 0, 0, 0.18);
 

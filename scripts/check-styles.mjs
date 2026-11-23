@@ -1,15 +1,16 @@
 // Hard rule 2 (AGENTS.md): no raw colours in components — add a token in
 // src/styles/tokens.css first. Fails on colour literals and hand-written
 // title-bar gradients in components, apps and layouts. Allowed: fallbacks
-// for when a canvas can't read a token (the line says "fallback"), and the
-// theme-color meta tag, which can't use CSS variables.
+// for when a canvas can't read a token (the line says "fallback"), the
+// theme-color meta tag, which can't use CSS variables, and masks, which only
+// use alpha.
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOTS = ["src/components", "src/apps", "src/layouts"];
 const COLOUR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch)\(/;
 const TITLE_GRADIENT = /var\(--title-(?:active|inactive)-from\)/;
-const ALLOWED = /fallback|theme-color/i;
+const ALLOWED = /fallback|theme-color|mask-image/i;
 
 function* files(dir) {
   for (const name of readdirSync(dir)) {

@@ -161,3 +161,35 @@
 
 <PaletteHost bind:this={palette} />
 <ScreensaverHost bind:on={screensaverOn} />
+
+<style>
+  /* ---- degauss ring: colour fringing that sweeps out on a theme switch ---- */
+  .degauss-ring {
+    position: fixed;
+    inset: -25vmax;
+    z-index: var(--z-crt);
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: screen;
+    background: radial-gradient(
+      circle,
+      transparent 28%,
+      color-mix(in srgb, var(--magenta) 55%, transparent) 36%,
+      color-mix(in srgb, var(--cyan) 55%, transparent) 42%,
+      color-mix(in srgb, var(--accent) 40%, transparent) 47%,
+      transparent 54%
+    );
+  }
+
+  /* ---- boot cover ----
+     Server-rendered with the desktop but hidden; the inline bootstrap script
+     shows it (html[data-boot="pending"]) only when a boot sequence will play,
+     so the desktop never flashes before the BIOS and never hides without JS. */
+  .boot-cover {
+    display: none;
+  }
+
+  :global(:root[data-boot="pending"]) .boot-cover {
+    display: block;
+  }
+</style>

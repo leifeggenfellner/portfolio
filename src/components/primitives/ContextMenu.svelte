@@ -132,9 +132,10 @@
       <button
         type="button"
         role="menuitem"
-        class="context-menu__item"
+        class="context-menu__item focus-visible:title-bar"
         class:context-menu__item--disabled={item.disabled}
         class:context-menu__item--focused={focusIndex === actionIdx}
+        class:title-bar={focusIndex === actionIdx}
         tabindex={focusIndex === actionIdx ? 0 : -1}
         aria-disabled={item.disabled || undefined}
         onclick={() => handleItemClick(item)}
@@ -150,3 +151,64 @@
     {/if}
   {/each}
 </div>
+
+<style>
+  .context-menu {
+    position: fixed;
+    z-index: var(--z-menu);
+    min-width: 180px;
+    padding: 3px;
+    background: var(--surface);
+    border: var(--bevel) solid;
+    border-color: var(--bevel-light) var(--bevel-dark) var(--bevel-dark) var(--bevel-light);
+    box-shadow: var(--win-shadow);
+    font-family: var(--font-body);
+    font-size: var(--fs-13);
+    color: var(--text);
+    outline: none;
+  }
+
+  .context-menu__separator {
+    height: 0;
+    margin: 3px 2px;
+    border-top: 1px solid var(--bevel-shadow);
+    border-bottom: 1px solid var(--bevel-hilite);
+  }
+
+  .context-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 4px 20px 4px 8px;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .context-menu__item--disabled {
+    color: var(--text-disabled);
+    cursor: default;
+  }
+
+  .context-menu__item--disabled.context-menu__item--focused {
+    background-image: none;
+    color: var(--text-disabled);
+  }
+
+  .context-menu__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    flex-shrink: 0;
+  }
+
+  .context-menu__label {
+    white-space: nowrap;
+  }
+</style>
