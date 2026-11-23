@@ -8,12 +8,25 @@
     active?: boolean;
     maximized?: boolean;
     onPointerDown?: (e: PointerEvent) => void;
+    /** Arrow keys while the title bar itself has focus. */
+    onArrowKey?: (direction: "left" | "right" | "up" | "down") => void;
     onMin?: () => void;
     onMax?: () => void;
     onClose?: () => void;
   }
 
-  let { icon, title, active = true, maximized, onPointerDown, onMin, onMax, onClose }: Props = $props();
+  let { icon, title, active = true, maximized, onPointerDown, onArrowKey, onMin, onMax, onClose }: Props = $props();
+
+  const ARROWS = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const;
+
+  function handleKeydown(e: KeyboardEvent) {
+    // Only the title bar itself; its buttons keep their own keys.
+    if (e.target !== e.currentTarget || !onArrowKey || e.altKey || e.ctrlKey || e.metaKey) return;
+    const direction = ARROWS[e.key as keyof typeof ARROWS];
+    if (!direction) return;
+    e.preventDefault();
+    onArrowKey(direction);
+  }
 
   const headerClass = [
     "group no-select font-chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5 pointer-coarse:h-12",
@@ -53,7 +66,9 @@
   aria-label="Window header"
   data-active={active}
   tabindex="0"
+  aria-keyshortcuts={onArrowKey ? "ArrowLeft ArrowRight ArrowUp ArrowDown" : undefined}
   onpointerdown={onPointerDown}
+  onkeydown={handleKeydown}
   ondblclick={() => onMax?.()}
 >
   {#if icon}

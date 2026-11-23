@@ -4,7 +4,11 @@ import {
   FIT_MARGIN,
   fitWindowToViewport,
   GRAB_MARGIN,
+  SNAP_EDGE_PX,
+  snapBox,
+  snapZoneAt,
   TITLE_BAR_HEIGHT,
+  unsnapX,
 } from "@lib/window-bounds";
 
 const viewport = { width: 1000, height: 700 };
@@ -48,5 +52,30 @@ describe("fitWindowToViewport", () => {
       w: small.width - 2 * FIT_MARGIN,
       h: small.height - 2 * FIT_MARGIN,
     });
+  });
+});
+
+describe("snapping", () => {
+  it("finds the snap zone under the pointer, the top edge winning in corners", () => {
+    expect(snapZoneAt(500, 300, viewport)).toBeNull();
+    expect(snapZoneAt(SNAP_EDGE_PX, 300, viewport)).toBe("left");
+    expect(snapZoneAt(viewport.width - 1, 300, viewport)).toBe("right");
+    expect(snapZoneAt(500, 0, viewport)).toBe("max");
+    expect(snapZoneAt(0, 0, viewport)).toBe("max");
+  });
+
+  it("splits the desktop into halves that cover it exactly", () => {
+    const odd = { width: 1001, height: 700 };
+    const left = snapBox("left", odd);
+    const right = snapBox("right", odd);
+    expect(left).toEqual({ x: 0, y: 0, w: 500, h: 700 });
+    expect(right.x + right.w).toBe(odd.width);
+    expect(right.x).toBe(odd.width - right.w);
+  });
+
+  it("keeps the pointer's relative spot when a snapped window shrinks back", () => {
+    const snapped = { x: 500, y: 0, w: 500, h: 700 };
+    // Grabbed at 40% across the snapped title bar: still at 40% of the old width.
+    expect(unsnapX(700, snapped, 300)).toBe(700 - 120);
   });
 });
