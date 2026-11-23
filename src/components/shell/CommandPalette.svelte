@@ -84,11 +84,7 @@
 
   onMount(() => inputEl?.focus());
 
-  const TITLE_BAR_CLASS = [
-    "font-chrome text-15 flex h-7 items-center px-1.5",
-    "bg-[linear-gradient(90deg,var(--title-active-from),var(--title-active-to))] text-(--title-active-text)",
-    "[text-shadow:1px_1px_0_rgba(0,0,0,0.35)]",
-  ].join(" ");
+  const TITLE_BAR_CLASS = ["font-chrome text-15 flex h-7 items-center px-1.5", "title-bar title-text-shadow"].join(" ");
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -141,9 +137,7 @@
             aria-selected={i === active}
             class={[
               "text-14 flex cursor-pointer items-center justify-between gap-3 px-2.5 py-1",
-              i === active
-                ? "bg-[linear-gradient(90deg,var(--title-active-from),var(--title-active-to))] text-(--title-active-text)"
-                : "text-text",
+              i === active ? "title-bar" : "text-text",
             ]}
             onpointermove={() => (active = i)}
             onclick={() => onRun(item)}

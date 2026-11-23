@@ -27,6 +27,7 @@
   let running = $state(false);
   let durationMs = $state(8000);
 
+  // Token fallbacks, used only if the custom properties can't be read.
   const FALLBACK_LINE = "#1fb6d6";
   const FALLBACK_HAZE = "#e83fb0";
   const FALLBACK_FLOOR = "#2a1a4a";
