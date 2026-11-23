@@ -238,6 +238,7 @@
         bind:this={inputEl}
         bind:value={input}
         id="terminal-input"
+        data-autofocus
         class="caret-terminal-fg min-w-0 flex-1 border-0 bg-transparent p-0 text-inherit outline-none [font:inherit] [text-shadow:inherit]"
         autocomplete="off"
         autocapitalize="off"

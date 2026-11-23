@@ -58,7 +58,13 @@
           <RetroButton size="sm" onclick={copyAddress}>{copied ? "Copied" : "Copy"}</RetroButton>
         </div>
         <label for="contact-from" class={LABEL_CLASS}>From</label>
-        <input id="contact-from" class={FIELD_CLASS} bind:value={from} placeholder="Your name (optional)" />
+        <input
+          id="contact-from"
+          data-autofocus
+          class={FIELD_CLASS}
+          bind:value={from}
+          placeholder="Your name (optional)"
+        />
         <label for="contact-subject" class={LABEL_CLASS}>Subject</label>
         <input id="contact-subject" class={FIELD_CLASS} bind:value={subject} placeholder="Hello from your desktop" />
       </div>

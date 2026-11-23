@@ -232,6 +232,7 @@
       <WindowHeader {icon} {title} {active} {maximized} onPointerDown={startDrag} {onMin} {onMax} {onClose} />
     {/if}
     <div
+      data-window-body
       class={cx(
         "bevel-in retro-scroll bg-surface-3 flex min-h-0 flex-1 flex-col overflow-hidden",
         !noChrome && "mt-0.5",
