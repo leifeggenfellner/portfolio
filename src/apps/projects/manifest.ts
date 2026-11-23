@@ -10,6 +10,10 @@ export default {
   defaults: { x: 180, y: 110, w: 620, h: 420 },
   load: () => import("./App.svelte"),
   parseArgs: ({ project }) => (project ? { project } : undefined),
+  subpath: {
+    toArgs: (rest) => (rest ? { project: rest } : undefined),
+    fromArgs: (args) => args.project,
+  },
   routes: async () => {
     const { PROJECTS } = await import("@content/projects");
     return PROJECTS.map((p) => ({

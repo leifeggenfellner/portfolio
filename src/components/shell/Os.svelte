@@ -18,6 +18,9 @@
 
   $effect(() => os.viewport.listen());
   $effect(() => os.keymap.listen());
+  // Listen before the first sync, so the window a page opened with doesn't push a second entry.
+  $effect(() => os.navigation.listen());
+  $effect(() => os.navigation.sync());
 </script>
 
 <Desktop deepLink={Boolean(initial)} />
