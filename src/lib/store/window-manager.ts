@@ -26,6 +26,8 @@ export interface WindowState {
   z: number;
   minimized: boolean;
   maximized: boolean;
+  /** Snapped to half of the desktop, and the box to go back to when unsnapped. */
+  snapped?: { zone: "left" | "right"; restore: { x: number; y: number; w: number; h: number } };
 }
 
 export interface WindowManagerSnapshot {
@@ -132,6 +134,35 @@ function toggleMax(id: string) {
   }));
 }
 
+/** Snap a window to half of the desktop, remembering its box from before the first snap. */
+function snap(id: string, zone: "left" | "right", box: { x: number; y: number; w: number; h: number }) {
+  store.update((s) => ({
+    ...s,
+    windows: s.windows.map((w) =>
+      w.id === id
+        ? {
+            ...w,
+            ...box,
+            maximized: false,
+            snapped: { zone, restore: w.snapped?.restore ?? { x: w.x, y: w.y, w: w.w, h: w.h } },
+          }
+        : w,
+    ),
+  }));
+}
+
+/** Put a snapped window back to its old size, at `x` (or its old spot). Returns false if it wasn't snapped. */
+function unsnap(id: string, at?: { x: number; y: number }): boolean {
+  const target = get(store).windows.find((w) => w.id === id);
+  const restore = target?.snapped?.restore;
+  if (!restore) return false;
+  store.update((s) => ({
+    ...s,
+    windows: s.windows.map((w) => (w.id === id ? { ...w, ...restore, ...at, snapped: undefined } : w)),
+  }));
+  return true;
+}
+
 function reset(snapshot?: WindowManagerSnapshot) {
   store.set(snapshot ?? initial);
 }
@@ -141,6 +172,8 @@ function cascade() {
     ...s,
     windows: s.windows.map((w, i) => ({
       ...w,
+      ...(w.snapped ? { w: w.snapped.restore.w, h: w.snapped.restore.h } : {}),
+      snapped: undefined,
       x: 32 + i * 28,
       y: 32 + i * 28,
       maximized: false,
@@ -164,6 +197,8 @@ export const windowManager = {
   minimize,
   toggleFromTaskbar,
   toggleMax,
+  snap,
+  unsnap,
   reset,
   cascade,
 };

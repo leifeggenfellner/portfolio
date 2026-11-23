@@ -119,3 +119,37 @@ describe("window-manager store", () => {
     expect(windowManager.get().activeId).toBe("b");
   });
 });
+
+describe("snapping", () => {
+  const open = () => windowManager.open({ id: "w", appId: "w", title: "W", x: 100, y: 80, w: 400, h: 300 });
+
+  it("snaps to a half, remembering the box from before the first snap", () => {
+    windowManager.reset();
+    open();
+    windowManager.snap("w", "left", { x: 0, y: 0, w: 500, h: 700 });
+    windowManager.snap("w", "right", { x: 500, y: 0, w: 500, h: 700 });
+    const win = windowManager.get().windows[0]!;
+    expect(win).toMatchObject({
+      x: 500,
+      w: 500,
+      snapped: { zone: "right", restore: { x: 100, y: 80, w: 400, h: 300 } },
+    });
+  });
+
+  it("unsnaps to the old box, or to a given spot", () => {
+    windowManager.reset();
+    open();
+    expect(windowManager.unsnap("w")).toBe(false);
+    windowManager.snap("w", "left", { x: 0, y: 0, w: 500, h: 700 });
+    expect(windowManager.unsnap("w", { x: 250, y: 10 })).toBe(true);
+    expect(windowManager.get().windows[0]).toMatchObject({ x: 250, y: 10, w: 400, h: 300, snapped: undefined });
+  });
+
+  it("cascading gives snapped windows their old size back", () => {
+    windowManager.reset();
+    open();
+    windowManager.snap("w", "left", { x: 0, y: 0, w: 500, h: 700 });
+    windowManager.cascade();
+    expect(windowManager.get().windows[0]).toMatchObject({ w: 400, h: 300, snapped: undefined });
+  });
+});

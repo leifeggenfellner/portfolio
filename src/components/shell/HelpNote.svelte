@@ -55,6 +55,7 @@
       <li>Double-click an icon, or press <kbd class={KEY_CLASS}>Enter</kbd>, to open it.</li>
       <li>Right-click the desktop for more.</li>
       <li>The taskbar brings back anything you minimise.</li>
+      <li>Drag a window to a screen edge to snap it.</li>
       <li><kbd class={KEY_CLASS}>Esc</kbd> skips the boot and closes windows.</li>
       <li><kbd class={KEY_CLASS}>Ctrl</kbd> + <kbd class={KEY_CLASS}>K</kbd> finds anything.</li>
     {/if}

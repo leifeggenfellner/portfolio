@@ -28,6 +28,14 @@
     /** Where the window should shrink to when minimised (its taskbar button). */
     minimizeTargetFor?: () => DOMRect | null;
     onFocus?: () => void;
+    /** A title-bar drag starts, at this pointer position; called before the window's position is read. */
+    onDragStart?: (clientX: number, clientY: number) => void;
+    /** The pointer moved during a title-bar drag. */
+    onDragMove?: (clientX: number, clientY: number) => void;
+    /** A title-bar drag ended here. */
+    onDragEnd?: (clientX: number, clientY: number) => void;
+    /** Arrow keys on the focused title bar: snap left or right, maximise, or restore. */
+    onSnapKey?: (direction: "left" | "right" | "up" | "down") => void;
     onMove?: (x: number, y: number) => void;
     onResize?: (w: number, h: number) => void;
     onMin?: () => void;
@@ -54,6 +62,10 @@
     originFor,
     minimizeTargetFor,
     onFocus,
+    onDragStart,
+    onDragMove,
+    onDragEnd,
+    onSnapKey,
     onMove,
     onResize,
     onMin,
@@ -73,17 +85,21 @@
 
   function move(e: PointerEvent) {
     onMove?.(baseX + (e.clientX - dragStartX), Math.max(0, baseY + (e.clientY - dragStartY)));
+    onDragMove?.(e.clientX, e.clientY);
   }
 
-  function stopDrag() {
+  function stopDrag(e: PointerEvent) {
     window.removeEventListener("pointermove", move);
     window.removeEventListener("pointerup", stopDrag);
+    onDragEnd?.(e.clientX, e.clientY);
   }
 
   function startDrag(e: PointerEvent) {
     if (maximized) return;
 
     onFocus?.();
+    // May resize or move the window (unsnapping it), so read x and y after.
+    onDragStart?.(e.clientX, e.clientY);
 
     dragStartX = e.clientX;
     dragStartY = e.clientY;
@@ -229,7 +245,17 @@
     out:windowOut|global
   >
     {#if !noChrome}
-      <WindowHeader {icon} {title} {active} {maximized} onPointerDown={startDrag} {onMin} {onMax} {onClose} />
+      <WindowHeader
+        {icon}
+        {title}
+        {active}
+        {maximized}
+        onPointerDown={startDrag}
+        onArrowKey={onSnapKey}
+        {onMin}
+        {onMax}
+        {onClose}
+      />
     {/if}
     <div
       data-window-body
