@@ -1,113 +1,160 @@
-export type Theme = "light" | "dark";
-export type CrtMode = "off" | "subtle" | "full";
-export type GridSpeed = "paused" | "slow" | "normal" | "fast";
-export type IconSize = "small" | "medium" | "large";
+/**
+ * Every user setting, described once. Parsing stored values, the defaults,
+ * the attributes on <html>, the inline bootstrap script and the Settings
+ * app's form are all derived from `SETTINGS_SCHEMA`.
+ */
+
+export type SettingsGroup = "Startup" | "Appearance" | "Desktop";
+
+interface SpecBase {
+  group: SettingsGroup;
+  label: string;
+}
+
+export interface ToggleSpec extends SpecBase {
+  kind: "toggle";
+  default: boolean;
+}
+
+export interface ChoiceSpec<V extends string = string> extends SpecBase {
+  kind: "choice";
+  /** Values in display order, with their labels. */
+  options: readonly (readonly [V, string])[];
+  default: V;
+  /** Mirrored onto <html> as this attribute, for CSS. */
+  attribute?: `data-${string}`;
+  /** Shown as one checkbox instead of radios: checked is the first value. */
+  checkbox?: boolean;
+}
+
+export type SettingSpec = ToggleSpec | ChoiceSpec;
+
+const toggle = (spec: Omit<ToggleSpec, "kind">): ToggleSpec => ({ kind: "toggle", ...spec });
+const choice = <const V extends string>(spec: Omit<ChoiceSpec<V>, "kind">): ChoiceSpec<V> => ({
+  kind: "choice",
+  ...spec,
+});
+
+export const SETTINGS_SCHEMA = {
+  bootAnimation: toggle({ group: "Startup", label: "Play boot animation", default: true }),
+  theme: choice({
+    group: "Appearance",
+    label: "Theme",
+    attribute: "data-theme",
+    default: "light",
+    options: [
+      ["light", "Light"],
+      ["dark", "Dark"],
+    ],
+  }),
+  cursors: choice({
+    group: "Appearance",
+    label: "Pixel-art cursors",
+    attribute: "data-cursors",
+    default: "retro",
+    checkbox: true,
+    options: [
+      ["retro", "Pixel art"],
+      ["system", "System"],
+    ],
+  }),
+  crt: choice({
+    group: "Appearance",
+    label: "CRT effect",
+    attribute: "data-crt",
+    default: "subtle",
+    options: [
+      ["off", "Off"],
+      ["subtle", "Subtle"],
+      ["full", "Full"],
+    ],
+  }),
+  gridSpeed: choice({
+    group: "Desktop",
+    label: "Grid speed",
+    attribute: "data-grid-speed",
+    default: "normal",
+    options: [
+      ["paused", "Paused"],
+      ["slow", "Slow"],
+      ["normal", "Normal"],
+      ["fast", "Fast"],
+    ],
+  }),
+  iconSize: choice({
+    group: "Desktop",
+    label: "Icon size",
+    attribute: "data-icon-size",
+    default: "medium",
+    options: [
+      ["small", "Small"],
+      ["medium", "Medium"],
+      ["large", "Large"],
+    ],
+  }),
+  screensaver: choice({
+    group: "Desktop",
+    label: "Screensaver",
+    default: "3",
+    options: [
+      ["never", "Never"],
+      ["1", "After 1 minute"],
+      ["3", "After 3 minutes"],
+      ["10", "After 10 minutes"],
+    ],
+  }),
+} satisfies Record<string, SettingSpec>;
+
+type Schema = typeof SETTINGS_SCHEMA;
+export type SettingKey = keyof Schema;
+export type Settings = { [K in SettingKey]: Schema[K]["default"] };
+
+export type Theme = Settings["theme"];
+export type CrtMode = Settings["crt"];
+export type GridSpeed = Settings["gridSpeed"];
+export type IconSize = Settings["iconSize"];
 /** The desktop's pixel-art cursors, or the platform's own. */
-export type CursorStyle = "retro" | "system";
+export type CursorStyle = Settings["cursors"];
 /** Minutes of inactivity before the screensaver starts, or never. */
-export type ScreensaverDelay = "never" | "1" | "3" | "10";
+export type ScreensaverDelay = Settings["screensaver"];
 
-export type Settings = {
-  bootAnimation: boolean;
-  theme: Theme;
-  crt: CrtMode;
-  gridSpeed: GridSpeed;
-  iconSize: IconSize;
-  screensaver: ScreensaverDelay;
-  cursors: CursorStyle;
-};
+const KEYS = Object.keys(SETTINGS_SCHEMA) as SettingKey[];
 
-export const THEMES: readonly Theme[] = ["light", "dark"];
-export const CRT_MODES: readonly CrtMode[] = ["off", "subtle", "full"];
-export const GRID_SPEEDS: readonly GridSpeed[] = ["paused", "slow", "normal", "fast"];
-export const ICON_SIZES: readonly IconSize[] = ["small", "medium", "large"];
-export const SCREENSAVER_DELAYS: readonly ScreensaverDelay[] = ["never", "1", "3", "10"];
-export const CURSOR_STYLES: readonly CursorStyle[] = ["retro", "system"];
+function valuesOf<V extends string>(spec: ChoiceSpec<V>): readonly V[] {
+  return spec.options.map(([value]) => value);
+}
+
+export const THEMES = valuesOf(SETTINGS_SCHEMA.theme);
+export const CRT_MODES = valuesOf(SETTINGS_SCHEMA.crt);
+export const GRID_SPEEDS = valuesOf(SETTINGS_SCHEMA.gridSpeed);
 
 export const SETTINGS_STORAGE_KEY = "retro-os:settings";
 
-export const DEFAULT_SETTINGS: Readonly<Settings> = {
-  bootAnimation: true,
-  theme: "light",
-  crt: "subtle",
-  gridSpeed: "normal",
-  iconSize: "medium",
-  screensaver: "3",
-  cursors: "retro",
-};
+export const DEFAULT_SETTINGS: Readonly<Settings> = Object.fromEntries(
+  KEYS.map((key) => [key, SETTINGS_SCHEMA[key].default]),
+) as Settings; // fromEntries loses the key-to-value pairing; built from the schema itself.
 
-const ROOT_ATTRIBUTE_RULES = [
-  { key: "theme", attribute: "data-theme", allowed: THEMES },
-  { key: "crt", attribute: "data-crt", allowed: CRT_MODES },
-  { key: "gridSpeed", attribute: "data-grid-speed", allowed: GRID_SPEEDS },
-  { key: "iconSize", attribute: "data-icon-size", allowed: ICON_SIZES },
-  { key: "cursors", attribute: "data-cursors", allowed: CURSOR_STYLES },
-] as const;
-
-function isAllowedValue<T extends string>(value: unknown, allowed: readonly T[]): value is T {
-  return typeof value === "string" && (allowed as readonly string[]).includes(value);
+function isValid(spec: SettingSpec, value: unknown): boolean {
+  if (spec.kind === "toggle") return typeof value === "boolean";
+  return typeof value === "string" && spec.options.some(([option]) => option === value);
 }
 
-function parseObject(raw: string | null): Record<string, unknown> | null {
-  if (raw === null) {
-    return null;
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (parsed === null || Array.isArray(parsed) || typeof parsed !== "object") {
-      return null;
-    }
-    return parsed as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
+/** Read stored settings, keeping the default for anything missing or invalid. */
 export function parseSettings(raw: string | null): Settings {
-  const parsed = parseObject(raw);
-  const next: Settings = { ...DEFAULT_SETTINGS };
-
-  if (parsed === null) {
-    return next;
+  const next: Record<string, unknown> = { ...DEFAULT_SETTINGS };
+  let parsed: unknown = null;
+  try {
+    parsed = raw === null ? null : JSON.parse(raw);
+  } catch {
+    // Malformed storage falls back to the defaults.
   }
-
-  const bootAnimation = parsed.bootAnimation;
-  if (typeof bootAnimation === "boolean") {
-    next.bootAnimation = bootAnimation;
+  if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+    for (const key of KEYS) {
+      const value = (parsed as Record<string, unknown>)[key];
+      if (isValid(SETTINGS_SCHEMA[key], value)) next[key] = value;
+    }
   }
-
-  const theme = parsed.theme;
-  if (isAllowedValue(theme, THEMES)) {
-    next.theme = theme;
-  }
-
-  const crt = parsed.crt;
-  if (isAllowedValue(crt, CRT_MODES)) {
-    next.crt = crt;
-  }
-
-  const gridSpeed = parsed.gridSpeed;
-  if (isAllowedValue(gridSpeed, GRID_SPEEDS)) {
-    next.gridSpeed = gridSpeed;
-  }
-
-  const iconSize = parsed.iconSize;
-  if (isAllowedValue(iconSize, ICON_SIZES)) {
-    next.iconSize = iconSize;
-  }
-
-  const screensaver = parsed.screensaver;
-  if (isAllowedValue(screensaver, SCREENSAVER_DELAYS)) {
-    next.screensaver = screensaver;
-  }
-
-  const cursors = parsed.cursors;
-  if (isAllowedValue(cursors, CURSOR_STYLES)) {
-    next.cursors = cursors;
-  }
-
-  return next;
+  return next as Settings; // every key was set from the defaults or validated above
 }
 
 /** The screensaver delay in milliseconds, or null when it is off. */
@@ -115,22 +162,25 @@ export function screensaverDelayMs(delay: ScreensaverDelay): number | null {
   return delay === "never" ? null : Number(delay) * 60_000;
 }
 
+const ROOT_ATTRIBUTES = KEYS.flatMap((key) => {
+  const spec: SettingSpec = SETTINGS_SCHEMA[key];
+  return spec.kind === "choice" && spec.attribute ? [{ key, attribute: spec.attribute, allowed: valuesOf(spec) }] : [];
+});
+
 export function applySettingsToRoot(root: HTMLElement, value: Settings): void {
-  for (const rule of ROOT_ATTRIBUTE_RULES) {
-    root.setAttribute(rule.attribute, value[rule.key]);
-  }
+  for (const rule of ROOT_ATTRIBUTES) root.setAttribute(rule.attribute, String(value[rule.key]));
 }
 
-const bootstrapRules = ROOT_ATTRIBUTE_RULES.map((rule) => ({
-  key: rule.key,
-  attribute: rule.attribute,
-  allowed: rule.allowed,
-}));
+/** The attributes on <html> for these settings, for server rendering. */
+export function rootAttributes(value: Settings): Record<string, string> {
+  return Object.fromEntries(ROOT_ATTRIBUTES.map((rule) => [rule.attribute, String(value[rule.key])]));
+}
 
 function toInlineScriptJson(value: unknown): string {
   return JSON.stringify(value).replaceAll("<", "\\u003C");
 }
 
+/** Runs before first paint so stored settings apply without a flash of the defaults. */
 export const SETTINGS_BOOTSTRAP_SCRIPT = `(() => {
   try {
     const key = ${toInlineScriptJson(SETTINGS_STORAGE_KEY)};
@@ -146,7 +196,7 @@ export const SETTINGS_BOOTSTRAP_SCRIPT = `(() => {
       return;
     }
     const root = document.documentElement;
-    const rules = ${toInlineScriptJson(bootstrapRules)};
+    const rules = ${toInlineScriptJson(ROOT_ATTRIBUTES)};
     for (const rule of rules) {
       const candidate = parsed[rule.key];
       if (typeof candidate === "string" && rule.allowed.includes(candidate)) {

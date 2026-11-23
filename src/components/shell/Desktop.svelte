@@ -16,11 +16,10 @@
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import type { PaletteItem } from "@lib/palette";
+  import { getOs } from "@lib/os/context";
   import { applySettingsToRoot, screensaverDelayMs } from "@lib/settings";
   import type { Settings } from "@lib/settings";
-  import { settings } from "@lib/store/settings";
   import { intents } from "@lib/store/intents";
-  import { windowManager } from "@lib/store/window-manager";
   import { cx } from "@lib/cx";
   import ContextMenu from "@primitives/ContextMenu.svelte";
   import type { MenuEntry } from "@primitives/ContextMenu.svelte";
@@ -56,7 +55,8 @@
   let phase = $state<BootPhase>("pending");
   let returning = $state(false);
   let isMobile = $state(false);
-  let prefs = $state<Settings>(settings.get());
+  const { windows: windowManager, settings } = getOs();
+  const prefs = $derived(settings.current);
   let settingsReady = $state(false);
   let viewportWidth = $state(0);
   let viewportHeight = $state(0);
@@ -82,7 +82,6 @@
   // taskbar button that summoned it. Read once by the window's intro.
   const origins = new Map<string, DOMRect>();
 
-  let wmState = $state(windowManager.get());
   let svelteComponents = $state<Record<string, Component<AppProps>>>({});
   let staticHtml = $state<Record<string, string>>({});
 
@@ -201,13 +200,7 @@
     const box = isMobile
       ? app.defaults
       : fitWindowToViewport(app.defaults, { width: window.innerWidth, height: window.innerHeight - taskbarHeight });
-    windowManager.open({
-      id: app.id,
-      appId: app.id,
-      title: app.title,
-      icon: app.icon,
-      ...box,
-    });
+    windowManager.open({ id: app.id, appId: app.id, title: app.title, icon: app.icon, box });
   }
 
   // One shell per window, so apps receive a stable prop.
@@ -332,9 +325,9 @@
 
   /** Dragging a snapped window out of its half gives it back its old size, under the pointer. */
   function handleDragStart(id: string, clientX: number) {
-    const win = wmState.windows.find((w) => w.id === id);
+    const win = windowManager.get(id);
     if (!win?.snapped) return;
-    windowManager.unsnap(id, { x: unsnapX(clientX, win, win.snapped.restore.w), y: win.y });
+    windowManager.restore(id, { x: unsnapX(clientX, win.box, win.floatingBox.w), y: win.box.y });
   }
 
   function handleDragMove(clientX: number, clientY: number) {
@@ -345,32 +338,13 @@
     snapPreview = null;
     if (isMobile) return;
     const zone = snapZoneAt(clientX, clientY, desktopArea());
-    if (zone) snapWindow(id, zone);
-  }
-
-  function snapWindow(id: string, zone: SnapZone) {
-    const win = wmState.windows.find((w) => w.id === id);
-    if (!win) return;
-    if (zone === "max") {
-      if (!win.maximized) windowManager.toggleMax(id);
-    } else {
-      windowManager.snap(id, zone, snapBox(zone, desktopArea()));
-    }
+    if (zone === "max") windowManager.maximize(id);
+    else if (zone) windowManager.snap(id, zone, desktopArea());
   }
 
   /** Arrow keys on a title bar, or Alt+Shift+arrow: snap left/right, maximise, restore. */
   function handleSnapKey(id: string, direction: "left" | "right" | "up" | "down") {
-    if (isMobile) return;
-    const win = wmState.windows.find((w) => w.id === id);
-    if (!win) return;
-    if (direction === "up") snapWindow(id, "max");
-    else if (direction === "down") {
-      if (win.maximized) windowManager.toggleMax(id);
-      else windowManager.unsnap(id);
-    } else {
-      if (win.maximized) windowManager.toggleMax(id);
-      snapWindow(id, direction);
-    }
+    if (!isMobile) windowManager.snapKey(id, direction, desktopArea());
   }
 
   // Alt+Shift+arrow snaps the active window, unless focus is in a text field,
@@ -378,21 +352,22 @@
   $effect(() => {
     if (phase !== "desktop") return;
     const onKey = (e: KeyboardEvent) => {
-      if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey || !wmState.activeId) return;
+      const activeId = windowManager.activeId;
+      if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey || !activeId) return;
       const direction = ({ ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const)[
         e.key as "ArrowLeft"
       ];
       const target = e.target as HTMLElement;
       if (!direction || target.closest("input, textarea, [contenteditable]")) return;
       e.preventDefault();
-      handleSnapKey(wmState.activeId, direction);
+      handleSnapKey(activeId, direction);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  // Just under the dragged (top) window, above the rest; window z-indexes keep growing.
-  const snapPreviewZ = $derived(Math.max(0, ...wmState.windows.map((w) => w.z)) - 1);
+  // Just under the dragged (top) window, above the rest.
+  const snapPreviewZ = $derived(windowManager.topZ - 1);
 
   const snapPreviewBox = $derived.by(() => {
     if (!snapPreview) return null;
@@ -421,15 +396,10 @@
     };
   });
 
-  // Window manager subscription — mirror store into local rune state.
-  $effect(() => windowManager.subscribe((next) => (wmState = next)));
-
-  $effect(() => settings.subscribe((next) => (prefs = next)));
-
-  // Focus stack: the last element focused inside each window's body, so a
-  // window that becomes active again hands focus back to where it was.
-  // Header buttons aren't remembered; restoring onto "minimise" helps nobody.
-  const lastFocus = new Map<string, HTMLElement>();
+  // Focus memory: the window manager keeps the last element focused inside
+  // each window's body, so a window that becomes active again hands focus
+  // back to where it was. Header buttons aren't remembered; restoring onto
+  // "minimise" helps nobody.
   // Set by a pointer press on a window's title bar or frame, not its body or
   // buttons. Only that focus is passed on: the app owns clicks in its body (the
   // Terminal lets them select text), and Tab onto the title bar must stay put.
@@ -437,8 +407,8 @@
 
   /** Where focus goes when a window activates: where it was, else the app's `data-autofocus`, else the frame. */
   function focusTargetFor(win: HTMLElement): HTMLElement {
-    const remembered = lastFocus.get(win.dataset.windowId ?? "");
-    if (remembered?.isConnected && win.contains(remembered)) return remembered;
+    const remembered = windowManager.rememberedFocus(win.dataset.windowId ?? "");
+    if (remembered && win.contains(remembered)) return remembered;
     return win.querySelector<HTMLElement>("[data-window-body] [data-autofocus]") ?? win;
   }
 
@@ -454,7 +424,7 @@
     const win = target.closest<HTMLElement>("[data-window-id]");
     if (!win) return;
     if (target.closest("[data-window-body]")) {
-      lastFocus.set(win.dataset.windowId ?? "", target);
+      windowManager.rememberFocus(win.dataset.windowId ?? "", target);
       return;
     }
     // A click on the title bar or edge: pass focus on to where the window was working.
@@ -468,7 +438,7 @@
   // closing a window never strands focus on something that disappeared.
   let lastActiveId: string | null = null;
   $effect(() => {
-    const id = wmState.activeId;
+    const id = windowManager.activeId;
     if (id === lastActiveId) return;
     lastActiveId = id;
     void tick().then(() => {
@@ -535,11 +505,10 @@
 
   onMount(() => {
     settings.hydrate();
-    prefs = settings.get();
     settingsReady = true;
     helpNoteOpen = !isHelpNoteDismissed();
 
-    if (!settings.get().bootAnimation) {
+    if (!settings.current.bootAnimation) {
       finishBoot();
       return;
     }
@@ -585,7 +554,7 @@
     onpointerdowncapture={handleWindowPointerDown}
     onfocusin={handleWindowFocusIn}
   >
-    <Wallpaper covered={screensaverOn || wallpaperCovered(wmState.windows, isMobile)} />
+    <Wallpaper covered={screensaverOn || wallpaperCovered(windowManager.windows, isMobile)} />
     {#if !isMobile}
       <aside class={SYS_BADGE_CLASS} aria-label="System information">
         <p class="font-chrome text-[28px] leading-none tracking-[0.02em]">
@@ -632,20 +601,20 @@
       <HelpNote bind:this={helpNote} mobile={isMobile} onDismiss={closeHelpNote} />
     {/if}
 
-    {#each wmState.windows as w (w.id)}
+    {#each windowManager.windows as w (w.id)}
       {@const app = APPS.find((a) => a.id === w.appId)}
       {#if app}
         <RetroWindow
           id={w.id}
           title={w.title}
           icon={w.icon}
-          active={wmState.activeId === w.id}
-          z={w.z}
+          active={windowManager.activeId === w.id}
+          z={windowManager.z(w.id)}
           minimized={w.minimized}
-          x={isMobile ? 0 : w.x}
-          y={isMobile ? 0 : w.y}
-          w={isMobile ? viewportWidth : w.w}
-          h={isMobile ? viewportHeight - taskbarHeight : w.h}
+          x={isMobile ? 0 : w.box.x}
+          y={isMobile ? 0 : w.box.y}
+          w={isMobile ? viewportWidth : w.box.w}
+          h={isMobile ? viewportHeight - taskbarHeight : w.box.h}
           maximized={isMobile ? true : w.maximized}
           resizable={!isMobile}
           originFor={() => origins.get(w.id) ?? null}
@@ -655,7 +624,7 @@
           onDragMove={handleDragMove}
           onDragEnd={(x, y) => handleDragEnd(w.id, x, y)}
           onSnapKey={(direction) => handleSnapKey(w.id, direction)}
-          onMove={(x, y) => moveWindow(w.id, w.w, x, y)}
+          onMove={(x, y) => moveWindow(w.id, w.box.w, x, y)}
           onResize={(ww, hh) => windowManager.resize(w.id, ww, hh)}
           onMin={() => windowManager.minimize(w.id)}
           onMax={() => windowManager.toggleMax(w.id)}
@@ -702,8 +671,8 @@
 
   <div class="contents" inert={phase !== "desktop"}>
     <Taskbar
-      windows={wmState.windows}
-      activeId={wmState.activeId}
+      windows={windowManager.windows}
+      activeId={windowManager.activeId}
       menuItems={START_MENU_ITEMS}
       mobile={isMobile}
       onToggleWindow={handleTaskbarToggle}

@@ -4,7 +4,7 @@
   import { SKILL_GROUPS } from "@content/skills";
   import type { AppProps } from "@lib/app-shell";
   import { intents } from "@lib/store/intents";
-  import { settings } from "@lib/store/settings";
+  import { getOs } from "@lib/os/context";
   import { dir, file } from "@lib/terminal/fs";
   import type { FsNode } from "@lib/terminal/fs";
   import { complete, execute, prompt } from "@lib/terminal/shell";
@@ -15,6 +15,7 @@
   import PipesCanvas from "./terminal/PipesCanvas.svelte";
 
   let { shell }: AppProps = $props();
+  const { settings } = getOs();
 
   const HOST = "retro";
   const HOME = ["home", PROFILE.handle];
@@ -114,7 +115,7 @@
   }
 
   function context(): ShellContext {
-    const prefs = settings.get();
+    const prefs = settings.current;
     return {
       root,
       home: HOME,
