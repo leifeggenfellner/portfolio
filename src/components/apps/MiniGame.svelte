@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { AppProps } from "@lib/app-shell";
   import { cx } from "@lib/cx";
+  import { getOs } from "@lib/os/context";
+  import { inTextField } from "@lib/os/keymap.svelte";
   import { BEGINNER, chord, minesLeft, newGame, reveal, toggleFlag } from "@lib/minesweeper";
   import type { Cell, Game } from "@lib/minesweeper";
   import PixelArt from "@primitives/PixelArt.svelte";
@@ -124,22 +126,20 @@
     return !e.ctrlKey && !e.metaKey && !e.altKey;
   }
 
-  function isEditable(target: EventTarget | null): boolean {
-    return (
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLTextAreaElement ||
-      (target instanceof HTMLElement && target.isContentEditable)
-    );
-  }
-
   // When the pointer was used last, F flags the hovered cell wherever focus
   // is, as long as the key isn't typing into a field.
-  function handleWindowKeydown(e: KeyboardEvent) {
-    if (lastInput !== "pointer" || hoverIndex === null) return;
-    if (e.key.toLowerCase() !== "f" || !isPlain(e) || isEditable(e.target)) return;
-    e.preventDefault();
-    flag(hoverIndex);
-  }
+  const { keymap } = getOs();
+  $effect(() =>
+    keymap.bind({
+      id: "minesweeper:flag",
+      keys: ["F", "Shift+F"],
+      scope: "window",
+      when: (e) => lastInput === "pointer" && hoverIndex !== null && !inTextField(e),
+      run: () => {
+        if (hoverIndex !== null) flag(hoverIndex);
+      },
+    }),
+  );
 
   function handleGridKeydown(e: KeyboardEvent) {
     const row = Math.floor(focusIndex / cols);
@@ -192,8 +192,6 @@
   const LED_CLASS =
     "bevel-in-thin bg-led-bg text-led-fg font-mono text-32 relative px-1.5 leading-none tabular-nums [text-shadow:0_0_6px_var(--led-ghost)]";
 </script>
-
-<svelte:window onkeydown={handleWindowKeydown} />
 
 <div
   class="text-text grid h-full place-items-center overflow-auto p-3 [--cell:28px] max-md:[--cell:min(36px,calc((100vw-56px)/9))]"
