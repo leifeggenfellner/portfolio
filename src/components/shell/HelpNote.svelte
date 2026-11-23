@@ -61,12 +61,6 @@
       <li><kbd class={KEY_CLASS}>{SHORTCUTS.palette.label}</kbd> finds anything.</li>
       <li>The Terminal's <kbd class={KEY_CLASS}>man keys</kbd> lists every shortcut.</li>
     {/if}
-    <li>
-      Rather skip the desktop? <a
-        class="focus-ring underline underline-offset-3"
-        href={`${import.meta.env.BASE_URL}about/`}>View it as a plain page</a
-      >.
-    </li>
   </ul>
 
   <button

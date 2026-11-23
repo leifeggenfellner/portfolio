@@ -62,7 +62,7 @@ for (const theme of ["light", "dark"]) {
         badge.locator("p").nth(0),
         badge.locator("p").nth(1),
         badge.locator("p").nth(2),
-        page.locator('button[data-app-id="about"] span'),
+        page.locator('[data-app-id="about"] span'),
       ]) {
         expect(await worstContrast(text)).toBeGreaterThanOrEqual(4.5);
       }

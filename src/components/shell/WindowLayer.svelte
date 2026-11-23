@@ -149,12 +149,8 @@
         onClose={() => windows.close(w.id)}
       >
         <AppFrame appId={w.appId} title={w.title} onClose={() => windows.close(w.id)}>
-          {#if app.kind === "static"}
-            {@html launcher.html(w.appId)}
-          {:else}
-            {@const AppComponent = launcher.component(w.appId)}
-            <AppComponent shell={launcher.shellFor(w.id)} args={w.args} />
-          {/if}
+          {@const AppComponent = launcher.component(w.appId)}
+          <AppComponent shell={launcher.shellFor(w.id)} args={w.args} />
         </AppFrame>
       </RetroWindow>
     {/if}

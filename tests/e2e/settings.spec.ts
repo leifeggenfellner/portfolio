@@ -14,7 +14,7 @@ const LARGE_DARK_SETTINGS = {
 };
 
 async function openSettings(page: Page, mobile: boolean) {
-  const icon = page.locator("main ul").getByRole("button", { name: "Settings" });
+  const icon = page.locator("main ul").getByRole("link", { name: "Settings" });
   if (mobile) {
     await icon.click({ force: true });
   } else {
@@ -45,7 +45,7 @@ test("Settings opens from the desktop icon and relaunch focuses one window", asy
   const dialog = await openSettings(page, testInfo.project.name === "mobile-iphone");
   await expect(dialog).toBeVisible();
 
-  const icon = page.locator("main ul").getByRole("button", { name: "Settings" });
+  const icon = page.locator("main ul").getByRole("link", { name: "Settings" });
   if (testInfo.project.name === "mobile-iphone") {
     await icon.click({ force: true });
   } else {
@@ -68,7 +68,7 @@ test("persisted appearance is applied before and after island hydration", async 
   await expect(page.locator("html")).toHaveAttribute("data-crt", expected.crt);
   await expect(page.locator("html")).toHaveAttribute("data-grid-speed", expected.gridSpeed);
   await expect(page.locator("html")).toHaveAttribute("data-icon-size", expected.iconSize);
-  await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
+  await expect(page.locator("main ul").getByRole("link", { name: "Settings" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", expected.theme);
   await expect(page.locator("html")).toHaveAttribute("data-crt", expected.crt);
 });
@@ -77,7 +77,7 @@ test("boot animation preference skips the splash and BIOS", async ({ page }) => 
   await seedSettings(page, NO_BOOT);
   await page.goto("/");
 
-  await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
+  await expect(page.locator("main ul").getByRole("link", { name: "Settings" })).toBeVisible();
   await expect(page.getByRole("status", { name: "Booting RetroOS" })).toHaveCount(0);
 });
 
@@ -87,13 +87,13 @@ test("grid speed and icon size preferences control desktop layout", async ({ pag
   await seedSettings(page, { ...NO_BOOT, gridSpeed: "slow", iconSize: "large" });
   await page.goto("/");
 
-  await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
+  await expect(page.locator("main ul").getByRole("link", { name: "Settings" })).toBeVisible();
   const grid = page.locator("main [data-horizon]");
   await expect(grid).toHaveAttribute("data-duration-ms", "16000");
   const reduced = testInfo.project.name === "reduced-motion";
   await expect(grid).toHaveAttribute("data-running", reduced ? "false" : "true");
 
-  const icons = page.locator("main ul > li > button");
+  const icons = page.locator("main ul > li > a");
   await expect(icons).toHaveCount(7);
   for (const icon of await icons.all()) {
     expect(await icon.isVisible()).toBe(true);
@@ -103,7 +103,7 @@ test("grid speed and icon size preferences control desktop layout", async ({ pag
     expect(box?.height).toBe(48);
   }
 
-  await page.locator("main ul").getByRole("button", { name: "Settings" }).dblclick();
+  await page.locator("main ul").getByRole("link", { name: "Settings" }).dblclick();
   await page.getByRole("radio", { name: "Paused" }).check();
   await expect(grid).toHaveAttribute("data-running", "false");
 });
@@ -149,7 +149,7 @@ test("malformed storage falls back safely and Settings has no axe violations", a
   }, STORAGE_KEY);
   await page.goto("/");
   await skipBoot(page);
-  await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
+  await expect(page.locator("main ul").getByRole("link", { name: "Settings" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
   const dialog = await openSettings(page, testInfo.project.name === "mobile-iphone");

@@ -10,7 +10,7 @@ import { Launcher } from "./launcher.svelte";
 import { SettingsService } from "./settings.svelte";
 import { Viewport } from "./viewport.svelte";
 import { WindowManager } from "./window-manager.svelte";
-import type { AppManifest } from "@lib/app-shell";
+import type { AppArgs, AppManifest } from "@lib/app-shell";
 
 export interface Os {
   windows: WindowManager;
@@ -23,18 +23,19 @@ export interface Os {
 
 const KEY = Symbol("os");
 
+/** The window a page opens with: an app route such as `/projects/retro-os/`. */
+export interface InitialWindow {
+  appId: string;
+  args?: AppArgs;
+}
+
 /** `apps` come from the caller so the kernel never imports the app layer above it. */
-export function createOs(apps: readonly AppManifest[] = []): Os {
+export function createOs(apps: readonly AppManifest[] = [], initial?: InitialWindow): Os {
   const windows = new WindowManager();
   const viewport = new Viewport();
-  return {
-    windows,
-    settings: new SettingsService(),
-    keymap: new Keymap(),
-    boot: new Boot(),
-    viewport,
-    launcher: new Launcher(apps, windows, viewport),
-  };
+  const launcher = new Launcher(apps, windows, viewport);
+  if (initial) launcher.openInitial(initial.appId, initial.args);
+  return { windows, settings: new SettingsService(), keymap: new Keymap(), boot: new Boot(), viewport, launcher };
 }
 
 export function setOs(os: Os): Os {

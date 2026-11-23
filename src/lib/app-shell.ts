@@ -33,7 +33,16 @@ export interface AppCommand {
   args: AppArgs;
 }
 
-interface AppCommon {
+export interface AppRoute {
+  path: `/${string}/`;
+  args: AppArgs;
+  /** The page title, e.g. the project's name. */
+  title: string;
+  description?: string;
+}
+
+/** An app: what the desktop needs to list, open and route to it. Lives in `src/apps/<id>/manifest.ts`. */
+export interface AppManifest {
   id: string;
   /** Position on the desktop, the Start menu and other app lists. */
   order: number;
@@ -41,21 +50,14 @@ interface AppCommon {
   icon: string;
   /** Short name under the desktop icon; the title's first word if absent. */
   label?: string;
+  /** The app's page, e.g. `/terminal/`: the desktop with this window open. */
+  route: `/${string}/`;
+  /** More pages that open the app with arguments, e.g. one per project. Async so its data stays out of the desktop's bundle. */
+  routes?: () => Promise<readonly AppRoute[]>;
   defaults: { x: number; y: number; w: number; h: number };
   commands?: readonly AppCommand[];
-}
-
-/** Static app — pre-rendered Astro HTML, injected via {@html}. Zero JS. */
-export interface StaticApp extends AppCommon {
-  kind: "static";
-}
-
-/** Interactive app — Svelte component, dynamic-imported on first open. */
-export interface SvelteApp extends AppCommon {
-  kind: "svelte";
+  /** The app's component, loaded on first open so the desktop doesn't carry every app. */
   load: () => Promise<{ default: Component<AppProps> }>;
   /** Keep the arguments this app understands; anything else is dropped before launch. */
   parseArgs?: (raw: AppArgs) => AppArgs | undefined;
 }
-
-export type AppManifest = StaticApp | SvelteApp;

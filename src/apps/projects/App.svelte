@@ -45,8 +45,14 @@
     ];
   }
 
-  let place = $state<Place>({ folder: "projects" });
-  let back = $state<Place[]>([]);
+  const known = (slug: string | undefined) => (slug && PROJECTS.some((p) => p.slug === slug) ? slug : null);
+
+  // Opened with a project (its page, the palette): start there, so the server renders it too.
+  // svelte-ignore state_referenced_locally
+  const startProject = known(args?.project);
+  let place = $state<Place>(startProject ? { project: startProject } : { folder: "projects" });
+  // Opened at a project, Back still leads to the projects folder.
+  let back = $state<Place[]>(startProject ? [{ folder: "projects" }] : []);
   let selected = $state<string | null>(null);
   let lastPointer = "mouse";
   let content = $state<HTMLElement>();
@@ -73,10 +79,14 @@
     content?.scrollTo({ top: 0 });
   }
 
-  // A launch can ask for a project (the palette, later a URL); show it, opened or already open.
+  // Later launches can ask for another project; show it in the open window.
+  // svelte-ignore state_referenced_locally
+  let handledArgs = args;
   $effect(() => {
-    const slug = args?.project;
-    if (slug && PROJECTS.some((p) => p.slug === slug)) untrack(() => go({ project: slug }));
+    if (args === handledArgs) return;
+    handledArgs = args;
+    const slug = known(args?.project);
+    if (slug) untrack(() => go({ project: slug }));
   });
 
   function goBack() {
@@ -102,7 +112,6 @@
     "focus-ring no-select text-12 flex w-22 flex-col items-center gap-1 border border-dotted border-transparent px-0.5 py-1.5 text-center leading-tight break-words";
   const TREE_CLASS = "focus-ring no-select text-13 flex w-full items-center gap-1.5 px-1 py-0.5 text-left";
   const LINK_BUTTON = "bevel-out focus-ring bg-surface text-14 inline-flex min-h-7 items-center px-4 font-semibold";
-  const BASE = import.meta.env.BASE_URL;
 </script>
 
 <div class="text-text flex h-full min-h-0 flex-col">
@@ -155,6 +164,16 @@
             </div>
           </header>
           <div class="flex flex-col gap-3 p-4">
+            {#if project.cover}
+              <img
+                src={project.cover}
+                alt={project.coverAlt ?? ""}
+                width="1200"
+                height="630"
+                class="bevel-in h-auto w-full"
+                decoding="async"
+              />
+            {/if}
             <p class="text-15 font-semibold text-pretty">{project.tagline}</p>
             <p class="text-14 text-text-dim max-w-[65ch] leading-relaxed text-pretty">{project.summary}</p>
             <fieldset class="border-bevel-shadow border p-3 pt-1.5">
@@ -166,7 +185,6 @@
               </ul>
             </fieldset>
             <div class="flex flex-wrap gap-2">
-              <a class={LINK_BUTTON} href={`${BASE}projects/${project.slug}/`}>Case study</a>
               {#if project.url}
                 <a class={LINK_BUTTON} href={project.url} target="_blank" rel="noopener">Live site</a>
               {/if}

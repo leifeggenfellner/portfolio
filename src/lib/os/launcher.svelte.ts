@@ -1,9 +1,10 @@
 /**
- * Opens apps: loads an interactive app's code on first open (so opening the
- * Terminal doesn't download Minesweeper), reads a static app's server-rendered
- * HTML, fits the window to the screen and hands it to the window manager.
+ * Opens apps: loads an app's code on first open (so opening the Terminal
+ * doesn't download Minesweeper), fits the window to the screen and hands it
+ * to the window manager.
  */
 import { fitWindowToViewport } from "@lib/window-bounds";
+import { loadedAppComponent } from "./app-components";
 import type { Viewport } from "./viewport.svelte";
 import type { WindowManager } from "./window-manager.svelte";
 import type { AppArgs, AppManifest, AppProps, AppShell } from "@lib/app-shell";
@@ -14,7 +15,6 @@ export class Launcher {
   /** Apps whose code is downloading; the busy cursor shows meanwhile. */
   loading = $state(0);
   #components = $state<Record<string, Component<AppProps>>>({});
-  #html = $state<Record<string, string>>({});
   #windows: WindowManager;
   #viewport: Viewport;
   // Where each window should grow from next time it appears: the icon or
@@ -33,11 +33,7 @@ export class Launcher {
   }
 
   component(appId: string): Component<AppProps> | undefined {
-    return this.#components[appId];
-  }
-
-  html(appId: string): string {
-    return this.#html[appId] ?? "";
+    return this.#components[appId] ?? loadedAppComponent(appId);
   }
 
   setOrigin(windowId: string, rect: DOMRect): void {
@@ -56,8 +52,7 @@ export class Launcher {
     const app = this.app(appId);
     if (!app) return false;
     if (origin) this.setOrigin(app.id, origin);
-    const parsed = args && app.kind === "svelte" ? app.parseArgs?.(args) : undefined;
-    if (app.kind === "svelte" ? !(await this.#load(app.id, app.load)) : !this.#readStatic(app.id)) return false;
+    if (!(await this.#load(app.id, app.load))) return false;
     // Read the screen live: a resize event may not have landed yet.
     const box = this.#viewport.mobile
       ? app.defaults
@@ -65,8 +60,37 @@ export class Launcher {
           width: window.innerWidth,
           height: window.innerHeight - this.#viewport.taskbarHeight,
         });
-    this.#windows.open({ id: app.id, appId: app.id, title: app.title, icon: app.icon, box, args: parsed });
+    this.#windows.open({
+      id: app.id,
+      appId: app.id,
+      title: app.title,
+      icon: app.icon,
+      box,
+      args: this.#parse(app, args),
+    });
     return true;
+  }
+
+  /**
+   * Open the window a page starts with (an app route), synchronously and at
+   * its default size, so the server and the first client render agree. The
+   * app's component must already be provided (see app-components).
+   */
+  openInitial(appId: string, args?: AppArgs): void {
+    const app = this.app(appId);
+    if (!app || !this.component(appId)) return;
+    this.#windows.open({
+      id: app.id,
+      appId: app.id,
+      title: app.title,
+      icon: app.icon,
+      box: app.defaults,
+      args: this.#parse(app, args),
+    });
+  }
+
+  #parse(app: AppManifest, args: AppArgs | undefined): AppArgs | undefined {
+    return args && app.parseArgs ? app.parseArgs(args) : undefined;
   }
 
   /** What an app in `windowId` may ask of the desktop; one per window, so apps get a stable prop. */
@@ -84,7 +108,7 @@ export class Launcher {
   }
 
   async #load(appId: string, load: () => Promise<{ default: Component<AppProps> }>): Promise<boolean> {
-    if (this.#components[appId]) return true;
+    if (this.component(appId)) return true;
     this.loading += 1;
     try {
       this.#components[appId] = (await load()).default;
@@ -95,11 +119,5 @@ export class Launcher {
     } finally {
       this.loading -= 1;
     }
-  }
-
-  #readStatic(appId: string): boolean {
-    this.#html[appId] ??=
-      document.querySelector<HTMLTemplateElement>(`template[data-static-app="${appId}"]`)?.innerHTML ?? "";
-    return true;
   }
 }

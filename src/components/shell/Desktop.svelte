@@ -23,6 +23,13 @@
   import Taskbar from "./Taskbar.svelte";
   import WindowLayer from "./WindowLayer.svelte";
 
+  interface Props {
+    /** Opened at an app route: straight to the desktop, no boot sequence. */
+    deepLink?: boolean;
+  }
+
+  let { deepLink = false }: Props = $props();
+
   const { windows, settings, keymap, boot, viewport, launcher } = getOs();
 
   let icons = $state<ReturnType<typeof DesktopIcons>>();
@@ -40,14 +47,12 @@
     ...launcher.apps.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
     { id: "help", label: "Help", icon: "pixelarticons:info-box", iconify: true, separatorBefore: true },
     { id: "palette", label: "Command palette  Ctrl+K", icon: "pixelarticons:search", iconify: true },
-    { id: "plain", label: "View as plain page", icon: "pixelarticons:article", iconify: true },
   ];
 
   function handleStartSelect(id: string, origin: DOMRect) {
     if (id.startsWith("open:")) void launcher.open(id.slice("open:".length), { origin });
     else if (id === "help") void showHelpNote();
     else if (id === "palette") void palette?.open();
-    else if (id === "plain") window.location.assign(`${import.meta.env.BASE_URL}about/`);
   }
 
   function handleTaskbarToggle(id: string) {
@@ -87,6 +92,12 @@
     });
   });
 
+  // The inline bootstrap script covers the server-rendered desktop when a
+  // boot is about to play (see RootLayout); the boot screens take over from it.
+  $effect(() => {
+    if (boot.phase !== "pending") delete document.documentElement.dataset.boot;
+  });
+
   // The splash fades over the already-mounted desktop; Boot removes it on a timer.
   function leaveSplash() {
     boot.leaveSplash(prefersReducedMotion() ? 0 : durationMs("--dur-3", 240));
@@ -96,12 +107,13 @@
     settings.hydrate();
     settingsReady = true;
     helpNoteOpen = !isHelpNoteDismissed();
-    boot.start(settings.current.bootAnimation);
+    boot.start(settings.current.bootAnimation && !deepLink);
   });
 </script>
 
 {#if boot.phase === "pending"}
-  <div class="bg-boot-bg fixed inset-0 z-(--z-boot)" aria-hidden="true"></div>
+  <!-- Hidden unless the bootstrap script says a boot will play; never covers the page without JS. -->
+  <div class="boot-cover bg-boot-bg fixed inset-0 z-(--z-boot)" aria-hidden="true"></div>
 {:else if boot.phase === "bios"}
   <BootSequence onDone={() => boot.biosDone()} onSkip={() => boot.finish()} />
 {/if}
@@ -115,40 +127,38 @@
   />
 {/if}
 
-<!-- The desktop mounts under the splash so the splash can dissolve into it. -->
-{#if boot.phase !== "pending" && boot.phase !== "bios"}
-  <main
-    bind:this={mainEl}
-    class="bg-desktop relative h-screen w-screen overflow-hidden"
-    inert={boot.phase !== "desktop"}
-    aria-busy={launcher.loading > 0 || undefined}
-    oncontextmenu={(e) => menu?.openAt(e)}
-  >
-    <Wallpaper covered={screensaverOn || wallpaperCovered(windows.windows, viewport.mobile)} />
-    {#if !viewport.mobile}
-      <SystemBadge />
-    {/if}
-    <DesktopIcons bind:this={icons} />
-    {#if helpNoteOpen}
-      <HelpNote bind:this={helpNote} mobile={viewport.mobile} onDismiss={closeHelpNote} />
-    {/if}
-    <WindowLayer />
-    <CrtLayer />
-    <div bind:this={degaussRing} class="degauss-ring" aria-hidden="true"></div>
-    <DesktopMenu bind:this={menu} />
-  </main>
+<!-- Server-rendered, so it works without JS; the boot screens play over it. -->
+<main
+  bind:this={mainEl}
+  class="bg-desktop relative h-screen w-screen overflow-hidden"
+  inert={boot.running}
+  aria-busy={launcher.loading > 0 || undefined}
+  oncontextmenu={(e) => menu?.openAt(e)}
+>
+  <Wallpaper covered={screensaverOn || wallpaperCovered(windows.windows, viewport.mobile)} />
+  {#if !viewport.mobile}
+    <SystemBadge />
+  {/if}
+  <DesktopIcons bind:this={icons} />
+  {#if helpNoteOpen}
+    <HelpNote bind:this={helpNote} mobile={viewport.mobile} onDismiss={closeHelpNote} />
+  {/if}
+  <WindowLayer />
+  <CrtLayer />
+  <div bind:this={degaussRing} class="degauss-ring" aria-hidden="true"></div>
+  <DesktopMenu bind:this={menu} />
+</main>
 
-  <div class="contents" inert={boot.phase !== "desktop"}>
-    <Taskbar
-      windows={windows.windows}
-      activeId={windows.activeId}
-      menuItems={START_MENU_ITEMS}
-      mobile={viewport.mobile}
-      onToggleWindow={handleTaskbarToggle}
-      onMenuSelect={handleStartSelect}
-    />
-  </div>
+<div class="contents" inert={boot.running}>
+  <Taskbar
+    windows={windows.windows}
+    activeId={windows.activeId}
+    menuItems={START_MENU_ITEMS}
+    mobile={viewport.mobile}
+    onToggleWindow={handleTaskbarToggle}
+    onMenuSelect={handleStartSelect}
+  />
+</div>
 
-  <PaletteHost bind:this={palette} />
-  <ScreensaverHost bind:on={screensaverOn} />
-{/if}
+<PaletteHost bind:this={palette} />
+<ScreensaverHost bind:on={screensaverOn} />

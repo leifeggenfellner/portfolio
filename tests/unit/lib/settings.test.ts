@@ -123,6 +123,22 @@ describe("settings contract", () => {
     expect(root.getAttribute("data-theme")).toBe("light");
   });
 
+  it("bootstrap script covers the desktop for a boot only on a bootable page with the animation on", () => {
+    const root = document.documentElement;
+    const run = (bootable: boolean, stored: object | null) => {
+      root.removeAttribute("data-boot");
+      root.toggleAttribute("data-bootable", bootable);
+      if (stored) localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(stored));
+      else localStorage.removeItem(SETTINGS_STORAGE_KEY);
+      new Function(SETTINGS_BOOTSTRAP_SCRIPT)();
+      return root.getAttribute("data-boot");
+    };
+    expect(run(true, null)).toBe("pending");
+    expect(run(true, { bootAnimation: false })).toBeNull();
+    expect(run(false, null)).toBeNull();
+    root.removeAttribute("data-bootable");
+  });
+
   it("bootstrap script contains no literal less-than characters", () => {
     expect(SETTINGS_BOOTSTRAP_SCRIPT.includes("<")).toBe(false);
   });
