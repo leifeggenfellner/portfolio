@@ -58,7 +58,8 @@
 `enforce-architecture`, `generate-tests`,
 `accessibility-audit`, `animation-review`,
 `responsive-audit`, `tailwind-token-usage`, `refactor`,
-`file-structure-enforcement`, `design-system-compliance`.
+`file-structure-enforcement`, `design-system-compliance`,
+`three-asset-pipeline`, `three-best-practices` (vendored).
 
 See [`.claude/skills/`](./.claude/skills/) for full text.
 
