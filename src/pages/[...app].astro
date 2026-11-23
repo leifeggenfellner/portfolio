@@ -8,6 +8,7 @@ import "@apps/server";
 import { APPS } from "@apps/registry";
 import type { AppArgs } from "@lib/app-shell";
 import Os from "@shell/Os.svelte";
+import { pageTitle } from "@lib/site";
 import RootLayout from "@/layouts/RootLayout.astro";
 
 interface Props {
@@ -34,6 +35,6 @@ export async function getStaticPaths() {
 const { appId, args, title, description } = Astro.props;
 ---
 
-<RootLayout title={`${title} · RETRO//OS`} description={description}>
+<RootLayout title={pageTitle(title)} description={description}>
   <Os client:desktop initial={{ appId, args }} />
 </RootLayout>

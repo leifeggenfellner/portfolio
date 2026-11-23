@@ -6,6 +6,7 @@
  * server-rendered without hydration, so these pages ship no JavaScript.
  */
 import Wallpaper from "@effects/Wallpaper.svelte";
+import { pageTitle } from "@lib/site";
 import RootLayout from "./RootLayout.astro";
 
 interface Props {
@@ -39,7 +40,7 @@ const TITLE_BAR_CLASS = [
 ].join(" ");
 ---
 
-<RootLayout title={`${title} · RETRO//OS`} description={description} image={image} document>
+<RootLayout title={pageTitle(title)} description={description} image={image} document>
   <div class="bg-desktop relative min-h-dvh">
     <div class="fixed inset-0"><Wallpaper /></div>
     <div class="relative mx-auto flex max-w-3xl flex-col gap-3 px-4 py-6 sm:py-10">
