@@ -70,6 +70,23 @@ test.describe("terminal", () => {
     await expect(input).toHaveValue("");
   });
 
+  test("grows pipes until a key is pressed", async ({ page }) => {
+    const win = await openApp(page, "terminal");
+    const input = win.getByRole("textbox");
+    await run(input, "pipes 6");
+    const pipes = win.locator("[data-pipes]");
+    if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      await expect(win.getByRole("log")).toContainText("pipes: skipped, reduced motion is on.");
+      await expect(pipes).toHaveCount(0);
+      return;
+    }
+    await expect(pipes).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(pipes).toHaveCount(0);
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue("");
+  });
+
   test("changes settings, opens apps and exits", async ({ page }) => {
     const win = await openApp(page, "terminal");
     const input = win.getByRole("textbox");
