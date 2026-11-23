@@ -28,7 +28,14 @@ function context(overrides: Partial<ShellContext> = {}): ShellContext {
     ],
     whoami: ["Guest User", "engineer"],
     neofetch: [["OS", "RetroOS"]],
-    actions: { open: vi.fn(), setTheme: vi.fn(), setCrt: vi.fn(), setGridSpeed: vi.fn(), exit: vi.fn() },
+    actions: {
+      open: vi.fn(),
+      setTheme: vi.fn(),
+      setCrt: vi.fn(),
+      setGridSpeed: vi.fn(),
+      exit: vi.fn(),
+      panic: vi.fn(),
+    },
     now: () => new Date("2026-01-01T00:00:00Z"),
     ...overrides,
   };
@@ -114,6 +121,14 @@ describe("terminal shell", () => {
     expect(ctx.actions.exit).toHaveBeenCalled();
     expect(texts("history")).toEqual(["   1  ls", "   2  cat about.txt"]);
     expect(execute("sudo rm -rf /", ctx).lines[0]?.tone).toBe("dim");
+  });
+
+  it("panics on request, without listing panic in help or completion", () => {
+    const ctx = context();
+    expect(execute("panic", ctx).lines[0]?.tone).toBe("err");
+    expect(ctx.actions.panic).toHaveBeenCalledTimes(1);
+    expect(texts("help").join("\n")).not.toContain("panic");
+    expect(complete("pan", ctx).input).toBe("pan");
   });
 
   it("lists every command in help", () => {

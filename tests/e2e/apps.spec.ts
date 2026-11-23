@@ -109,6 +109,45 @@ test.describe("focus stack", () => {
   });
 });
 
+test.describe("crash containment", () => {
+  test("a crashing app shows its blue screen, and nothing else breaks", async ({ page }) => {
+    const contact = await openApp(page, "contact");
+    const term = await openApp(page, "terminal");
+    const input = term.getByRole("textbox");
+    await input.fill("panic");
+    await input.press("Enter");
+
+    const crash = term.getByRole("alert");
+    await expect(crash).toContainText("Terminal");
+    await expect(crash).toContainText("Error");
+    await expect(term.getByRole("button", { name: "Restart app" })).toBeFocused();
+
+    // The rest of the desktop still works.
+    await expect(contact).toBeVisible();
+    await openApp(page, "settings");
+    await page.keyboard.press("Escape");
+    await expect(page.locator('[data-window-id="settings"]')).toHaveCount(0);
+
+    await term.getByRole("button", { name: "Restart app" }).click();
+    await expect(crash).toHaveCount(0);
+    await expect(term.getByRole("textbox")).toBeVisible();
+
+    await term.getByRole("textbox").fill("panic");
+    await term.getByRole("textbox").press("Enter");
+    await term.getByRole("alert").getByRole("button", { name: "Close" }).click();
+    await expect(term).toHaveCount(0);
+  });
+
+  test("the blue screen has no axe violations", async ({ page }) => {
+    const term = await openApp(page, "terminal");
+    await term.getByRole("textbox").fill("panic");
+    await term.getByRole("textbox").press("Enter");
+    await expect(term.getByRole("alert")).toBeVisible();
+    const results = await new AxeBuilder({ page }).include('[data-window-id="terminal"]').analyze();
+    expect(results.violations).toEqual([]);
+  });
+});
+
 test.describe("minesweeper", () => {
   test("first click is safe, flags count down, the face restarts", async ({ page }) => {
     const win = await openApp(page, "minigame");

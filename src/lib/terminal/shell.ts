@@ -21,6 +21,8 @@ export interface ShellActions {
   setCrt(mode: CrtMode): void;
   setGridSpeed(speed: GridSpeed): void;
   exit(): void;
+  /** Crash the terminal on purpose, so its blue screen can be seen. */
+  panic(): void;
 }
 
 export interface ShellContext {
@@ -219,6 +221,18 @@ const HIDDEN: Record<string, string> = {
   emacs: "emacs: not installed.",
 };
 
+/** Hidden commands that act: they run like any other, but `help` and Tab don't know them. */
+const HIDDEN_COMMANDS: Record<string, Command> = {
+  panic: {
+    usage: "panic",
+    summary: "crash the terminal",
+    run: (_args, ctx) => {
+      ctx.actions.panic();
+      return err("kernel panic - not syncing: you asked for it");
+    },
+  },
+};
+
 export const COMMAND_NAMES: readonly string[] = Object.keys(COMMANDS);
 
 /** Split on whitespace, keeping single- or double-quoted runs together. */
@@ -237,7 +251,7 @@ export function prompt(ctx: Pick<ShellContext, "user" | "host" | "cwd" | "home">
 export function execute(input: string, ctx: ShellContext): ShellResult {
   const [name, ...args] = tokenize(input);
   if (!name) return { lines: [] };
-  const command = COMMANDS[name.toLowerCase()];
+  const command = COMMANDS[name.toLowerCase()] ?? HIDDEN_COMMANDS[name.toLowerCase()];
   if (command) return command.run(args, ctx);
   const egg = HIDDEN[name.toLowerCase()];
   if (egg) return { lines: [{ text: egg, tone: "dim" }] };

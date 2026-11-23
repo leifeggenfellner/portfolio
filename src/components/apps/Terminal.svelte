@@ -86,6 +86,13 @@
   let historyIndex = $state(0);
   let draft = "";
   let inputEl = $state<HTMLInputElement>();
+  // Set by the hidden `panic` command. The throw has to happen while rendering,
+  // where the window's error boundary can catch it; a click handler can't.
+  let panicked = $state(false);
+
+  function crash(): never {
+    throw new Error("Kernel panic: not syncing");
+  }
   let scroller = $state<HTMLElement>();
 
   const promptText = $derived(prompt({ user: PROFILE.handle, host: HOST, cwd, home: HOME }));
@@ -125,6 +132,7 @@
         setCrt: (mode) => settings.set("crt", mode),
         setGridSpeed: (speed) => settings.set("gridSpeed", speed),
         exit: () => shell.close(),
+        panic: () => (panicked = true),
       },
       now: () => new Date(),
     };
@@ -214,6 +222,8 @@
     inputEl?.focus({ preventScroll: true });
   });
 </script>
+
+{#if panicked}{crash()}{/if}
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div

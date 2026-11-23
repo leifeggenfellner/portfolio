@@ -115,6 +115,9 @@
   --boot-fg: var(--terminal-fg);
   --boot-muted: #9d8ac4;
   --boot-glow: color-mix(in srgb, var(--boot-fg) 60%, transparent);
+  /* An app's crash screen: the same deep blue in both themes. */
+  --crash-bg: #1d2a9e;
+  --crash-fg: #f2f0ff;
 
   /* ---- selection / status ---- */
   --selection-bg: var(--accent);
