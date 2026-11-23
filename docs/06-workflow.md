@@ -50,13 +50,13 @@ PR template lives at `.github/pull_request_template.md`.
 ## Review process
 
 1. Self-review the diff before requesting review.
-2. Run any **AI agent** relevant to the change
-   (see `.claude/agents/` or `.github/chatmodes/`):
-   - UI work → `retro-os-designer`, `interaction-designer`
-   - State / hooks → `ui-architect`
-   - Visual motion → `animation-engineer`
-   - New primitive → `accessibility-reviewer`, `test-engineer`
-3. Address agent findings in the same PR.
+2. Run the **skills** relevant to the change (see `.claude/skills/`):
+   - UI work → `design-system-compliance`, `responsive-audit`
+   - State / layering → `enforce-architecture`
+   - Visual motion → `animation-review`
+   - New primitive → `accessibility-audit`, `generate-tests`
+   - New app, dependency or 3D → `performance-audit`
+3. Address skill findings in the same PR.
 4. Human review focuses on: architecture fit, naming, edge
    cases, and the "is this the right thing to build" question.
 

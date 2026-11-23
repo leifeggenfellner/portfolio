@@ -12,5 +12,9 @@ description: Add missing tests for changed files in the current branch.
 3. For each `*.ts` in `lib/`: ensure a co-located or
    `tests/unit/lib/<name>.test.ts` covers every exported function.
 4. For each new app: add an E2E open/close case.
-5. Use `userEvent` over `fireEvent`. Prefer `getByRole`.
-6. Run `pnpm test:cov` and report coverage delta.
+5. Use `userEvent` over `fireEvent`. Prefer `getByRole`, in E2E too.
+   Test the contract, not the implementation.
+6. Keep tests deterministic: fake timers for animations (never a real
+   sleep), no `Math.random`. No snapshot tests for visual output; use
+   Playwright screenshots.
+7. Run `pnpm test:cov` and report coverage delta.

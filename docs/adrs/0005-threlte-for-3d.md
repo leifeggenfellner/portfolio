@@ -66,7 +66,7 @@ need their own ADR if a scene ever needs them.
   gzipped, more than the whole 90 KB budget for `/`
   (`docs/05-performance-a11y.md`). It may only be reached through
   a registry `load()` (or another dynamic `import()`), so it
-  ships as its own chunk on window open. `performance-auditor`
+  ships as its own chunk on window open. The `performance-audit` skill
   checks this for every 3D PR.
 - **Reduced motion.** Scenes use `renderMode="on-demand"` by
   default. Under `prefersReducedMotion()` (`src/lib/motion.ts`)

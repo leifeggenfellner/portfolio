@@ -14,7 +14,8 @@ description: Scan for raw colors / shadows / magic numbers that should be tokens
    ```
 2. For each hit, propose either:
    - migrating to an existing token (preferred), or
-   - adding a new token via `tailwind-theme-architect`.
+   - adding a new token to `tokens.css` (light and dark), following
+     `docs/03-tailwind-tokens.md`.
 3. Refuse "one-off" exceptions; if a value is used twice it
    needs a token.
 4. Output a table: file:line · current · proposed token.
