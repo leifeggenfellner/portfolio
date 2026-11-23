@@ -16,12 +16,10 @@
 
 <!-- Check the skills you ran (see .claude/skills). -->
 
-- [ ] `review-pr` (scope, naming, layering)
-- [ ] `design-system-compliance` (visual fidelity)
-- [ ] `animation-review` (motion + reduced-motion)
+- [ ] `review-pr` (tokens, mockups, motion, scope)
 - [ ] `accessibility-audit` (keyboard, ARIA, contrast)
+- [ ] `responsive-audit` (mobile, tablet, desktop)
 - [ ] `generate-tests` (unit / component / E2E)
-- [ ] `tailwind-token-usage` (tokens)
 - [ ] `performance-audit` (bundle + Vitals)
 
 ## Checklist

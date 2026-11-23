@@ -1,6 +1,6 @@
 ---
 name: responsive-audit
-description: Verify mobile + tablet + desktop adaptations.
+description: Check layout at phone, tablet and desktop widths, including the single-window mobile mode below 768px.
 ---
 
 # Skill — responsive audit

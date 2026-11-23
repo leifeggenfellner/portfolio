@@ -1,6 +1,6 @@
 ---
 name: generate-tests
-description: Add missing tests for changed files in the current branch.
+description: Add missing Vitest and Playwright tests for files changed on the current branch, following this repo's test layout.
 ---
 
 # Skill — generate tests
