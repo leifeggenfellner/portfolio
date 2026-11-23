@@ -62,9 +62,8 @@ anything.
 │   ├── setup.ts
 │   ├── unit/                   # Vitest
 │   └── e2e/                    # Playwright
-├── .claude/                    # Claude Code: agents + skills
+├── .claude/                    # Claude Code skills
 └── .github/
-    ├── chatmodes/              # Copilot chat modes (mirrors of Claude agents)
     └── workflows/              # ci.yml, deploy.yml (GH Pages)
 ```
 

@@ -69,9 +69,8 @@ src/
 tests/
   unit/           Vitest
   e2e/            Playwright (+ axe)
-.claude/          AI agents + skills (Claude Code)
+.claude/          AI skills (Claude Code)
 .github/
-  chatmodes/      Copilot mirrors of the Claude agents
   workflows/      ci.yml + GitHub Pages deploy
 ```
 
@@ -89,31 +88,14 @@ Start at [`docs/README.md`](./docs/README.md). Highlights:
 - [07 — Roadmap](./docs/07-roadmap.md)
 - [08 — Conventions](./docs/08-conventions.md)
 
-## AI agents
+## AI skills
 
-This repo ships **specialist agents** and **reusable skills**
-for AI-assisted development. They are defined twice so the team
-can use either Claude Code or GitHub Copilot:
-
-| Agent                      | Use it for                     |
-| -------------------------- | ------------------------------ |
-| `ui-architect`             | Layering, state, type safety   |
-| `retro-os-designer`        | Visual fidelity to the mockups |
-| `animation-engineer`       | Motion, boot, CRT              |
-| `accessibility-reviewer`   | Keyboard, ARIA, contrast       |
-| `test-engineer`            | Vitest + Playwright            |
-| `frontend-reviewer`        | Final PR pass                  |
-| `performance-auditor`      | Bundle, hydration, Vitals      |
-| `tailwind-theme-architect` | Tokens + themes                |
-| `interaction-designer`     | Microstates, shortcuts         |
-| `dx-infra`                 | Configs, CI, deploy            |
-
-Skills (reusable playbooks) live in [`.claude/skills/`](./.claude/skills/):
+Skills (reusable playbooks for Claude Code) live in [`.claude/skills/`](./.claude/skills/):
 `generate-primitive`, `generate-app`, `review-pr`,
 `enforce-architecture`, `generate-tests`, `accessibility-audit`,
 `animation-review`, `responsive-audit`, `tailwind-token-usage`,
 `refactor`, `file-structure-enforcement`, `design-system-compliance`,
-`three-asset-pipeline`, `three-best-practices` (vendored).
+`performance-audit`, `three-asset-pipeline`, `three-best-practices` (vendored).
 
 ## Deployment
 

@@ -73,8 +73,8 @@ below.
      lost.
 7. **Test**: pure helpers in `src/lib/` under Vitest; the scene
    via Playwright screenshot in `tests/e2e/`.
-8. Run `performance-auditor` (chunk stays off `/`) and
-   `accessibility-reviewer`, then `pnpm run ci`.
+8. Run the `performance-audit` (chunk stays off `/`) and
+   `accessibility-audit` skills, then `pnpm run ci`.
 
 ## Overrides to `three-best-practices`
 

@@ -35,4 +35,4 @@ description: Scaffold a new desktop "app" window end-to-end (component + registr
 - Importing another app.
 - Direct access to the window-manager from inside the app body
   (apps stay agnostic; ask the `shell` prop instead).
-- New colors / shadows without going through the theme architect.
+- New colors / shadows without a token in `tokens.css`.

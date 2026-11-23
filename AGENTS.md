@@ -31,26 +31,11 @@
 
 ## Default workflow for any change
 
-1. Identify the right agent (`.claude/agents/`).
-2. Apply that agent's checklist.
-3. For non-trivial changes, run `frontend-reviewer` and
-   `accessibility-reviewer` before merge.
+1. Pick the skills that match the change (catalog below).
+2. Follow their steps and checklists.
+3. For non-trivial changes, run `review-pr` and
+   `accessibility-audit` before merge.
 4. Run `pnpm run ci`. It must be green.
-
-## Agents catalog
-
-| Agent                      | When to invoke                        |
-| -------------------------- | ------------------------------------- |
-| `ui-architect`             | Anything crossing layer boundaries    |
-| `retro-os-designer`        | Anything visible changing visuals     |
-| `animation-engineer`       | Keyframes, transitions, motion        |
-| `accessibility-reviewer`   | Every UI PR before merge              |
-| `test-engineer`            | New behavior, new lib export, bug fix |
-| `frontend-reviewer`        | Every PR, final pass                  |
-| `performance-auditor`      | New island, new dep, large diff       |
-| `tailwind-theme-architect` | Tokens + themes + accents             |
-| `interaction-designer`     | New interactive surface, new shortcut |
-| `dx-infra`                 | Configs, CI, deploy, scripts          |
 
 ## Skills catalog
 
@@ -59,7 +44,7 @@
 `accessibility-audit`, `animation-review`,
 `responsive-audit`, `tailwind-token-usage`, `refactor`,
 `file-structure-enforcement`, `design-system-compliance`,
-`three-asset-pipeline`, `three-best-practices` (vendored).
+`performance-audit`, `three-asset-pipeline`, `three-best-practices` (vendored).
 
 See [`.claude/skills/`](./.claude/skills/) for full text.
 

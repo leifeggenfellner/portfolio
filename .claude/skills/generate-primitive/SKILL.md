@@ -30,9 +30,9 @@ When the user asks for a new primitive (e.g. `Tooltip`,
    - ARIA attribute assertions
    - disabled / variant paths
 5. Run `pnpm test --run` and `pnpm typecheck`.
-6. If the component introduces motion → invoke `animation-engineer`.
-7. If the component introduces a new color/shadow → invoke
-   `tailwind-theme-architect` to add the token first.
+6. If the component introduces motion → run `animation-review`.
+7. If the component introduces a new color/shadow → add the token
+   to `tokens.css` first (`docs/03-tailwind-tokens.md`).
 
 ## Acceptance
 

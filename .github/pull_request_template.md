@@ -12,18 +12,17 @@
 
 <!-- Required for any visible UI change. -->
 
-## Agent review
+## Skill review
 
-<!-- Check the agents you ran (see .claude/agents). -->
+<!-- Check the skills you ran (see .claude/skills). -->
 
-- [ ] `ui-architect` (layering, state, types)
-- [ ] `retro-os-designer` (visual fidelity)
-- [ ] `animation-engineer` (motion + reduced-motion)
-- [ ] `accessibility-reviewer` (keyboard, ARIA, contrast)
-- [ ] `test-engineer` (unit / component / E2E)
-- [ ] `tailwind-theme-architect` (tokens)
-- [ ] `performance-auditor` (bundle + Vitals)
-- [ ] `frontend-reviewer` (final pass)
+- [ ] `review-pr` (scope, naming, layering)
+- [ ] `design-system-compliance` (visual fidelity)
+- [ ] `animation-review` (motion + reduced-motion)
+- [ ] `accessibility-audit` (keyboard, ARIA, contrast)
+- [ ] `generate-tests` (unit / component / E2E)
+- [ ] `tailwind-token-usage` (tokens)
+- [ ] `performance-audit` (bundle + Vitals)
 
 ## Checklist
 
