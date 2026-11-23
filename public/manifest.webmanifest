@@ -1,0 +1,11 @@
+{
+  "name": "Leif Eggenfellner — RETRO//OS",
+  "short_name": "RETRO//OS",
+  "description": "A portfolio that is a working retro desktop.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#2a1a4a",
+  "theme_color": "#2a1a4a",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import svelte from "@astrojs/svelte";
@@ -68,6 +68,31 @@ export default defineConfig({
             );
             if (next !== html) await writeFile(path, next);
           }
+        },
+      },
+    },
+    {
+      // Offline support: writes dist/sw.js from src/pwa/sw.js with this
+      // build's version and every page and asset to precache.
+      name: "service-worker",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          const SKIP = /^(sw\.js|og\.png|robots\.txt|rss\.xml|sitemap.*\.xml)$/;
+          const files = (await readdir(dir, { recursive: true })).filter((f) => !SKIP.test(f)).sort();
+          const precache = [];
+          const version = createHash("sha256");
+          for (const file of files) {
+            const path = new URL(file, dir);
+            if (!(await stat(path)).isFile()) continue;
+            version.update(file).update(await readFile(path));
+            const url = file === "index.html" ? "" : file.replace(/(^|\/)index\.html$/, "$1");
+            precache.push(`${BASE}${url}`);
+          }
+          const template = await readFile(new URL("./src/pwa/sw.js", import.meta.url), "utf8");
+          const worker = template
+            .replace('"__VERSION__"', JSON.stringify(version.digest("hex").slice(0, 12)))
+            .replace("__PRECACHE__", JSON.stringify(precache));
+          await writeFile(new URL("sw.js", dir), worker);
         },
       },
     },

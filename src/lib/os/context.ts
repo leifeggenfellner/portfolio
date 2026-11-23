@@ -10,6 +10,7 @@ import { Keymap } from "./keymap.svelte";
 import { Launcher } from "./launcher.svelte";
 import { Navigation } from "./navigation.svelte";
 import { SettingsService } from "./settings.svelte";
+import { Updates } from "./updates.svelte";
 import { Viewport } from "./viewport.svelte";
 import { WindowManager } from "./window-manager.svelte";
 import type { AppArgs, AppManifest } from "@lib/app-shell";
@@ -23,6 +24,7 @@ export interface Os {
   viewport: Viewport;
   launcher: Launcher;
   navigation: Navigation;
+  updates: Updates;
 }
 
 const KEY = Symbol("os");
@@ -49,6 +51,7 @@ export function createOs(apps: readonly AppManifest[] = [], initial?: InitialWin
     viewport,
     launcher,
     navigation: new Navigation(windows, launcher, import.meta.env.BASE_URL),
+    updates: new Updates(),
   };
 }
 

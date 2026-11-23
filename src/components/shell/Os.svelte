@@ -21,6 +21,11 @@
   // Listen before the first sync, so the window a page opened with doesn't push a second entry.
   $effect(() => os.navigation.listen());
   $effect(() => os.navigation.sync());
+  // Offline support and updates (src/pwa/sw.js); not in dev, where it would cache the dev server.
+  $effect(() => {
+    const base = import.meta.env.BASE_URL;
+    if (import.meta.env.PROD) return os.updates.register(`${base}sw.js`, base);
+  });
 </script>
 
 <Desktop deepLink={Boolean(initial)} />

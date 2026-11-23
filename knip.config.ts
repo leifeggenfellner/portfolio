@@ -11,6 +11,8 @@ export default {
     "src/apps/*/manifest.ts",
     "src/apps/*/App.svelte",
     "scripts/*.mjs",
+    // Read by the service-worker integration in astro.config.ts.
+    "src/pwa/sw.js",
     "tests/**/*.{test,spec}.ts",
   ],
   project: ["src/**/*.{ts,svelte,astro}", "scripts/**/*.mjs"],

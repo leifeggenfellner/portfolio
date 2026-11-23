@@ -12,9 +12,11 @@
     menuItems: StartMenuItem[];
     onToggleWindow: (id: string) => void;
     onMenuSelect: (id: string, origin: DOMRect) => void;
+    /** A new build is ready (see the Updates service); the button reloads into it. */
+    onUpdate?: () => void;
   }
 
-  let { windows, activeId, menuItems, onToggleWindow, onMenuSelect }: Props = $props();
+  let { windows, activeId, menuItems, onToggleWindow, onMenuSelect, onUpdate }: Props = $props();
 
   let startWrap = $state<HTMLElement>();
   let menuOpen = $state(false);
@@ -98,6 +100,9 @@
     {/each}
   </div>
 
+  {#if onUpdate}
+    <RetroButton size="sm" class="phone:h-11 shrink-0" onclick={onUpdate}>Update ready</RetroButton>
+  {/if}
   <div class="bevel-in-thin text-text flex h-7 shrink-0 items-center px-2.5 font-mono text-[length:var(--fs-18)]">
     <time datetime={clockIso}>{clock}</time>
   </div>
