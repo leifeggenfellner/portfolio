@@ -16,7 +16,7 @@
     "size": "node scripts/check-bundle.mjs",
     "lighthouse": "lhci autorun",
     "astro": "astro",
-    "typecheck": "astro check && tsc --noEmit",
+    "typecheck": "astro check && svelte-check --fail-on-warnings && tsc --noEmit",
     "lint": "pnpm lint:js && pnpm lint:css && pnpm lint:md",
     "lint:js": "eslint . --cache --cache-location=.cache/eslint --max-warnings=0",
     "lint:css": "stylelint \"src/**/*.css\" --cache --cache-location=.cache/stylelint",

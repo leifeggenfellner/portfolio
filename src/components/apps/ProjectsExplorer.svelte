@@ -51,7 +51,8 @@
   let lastPointer = "mouse";
   let content = $state<HTMLElement>();
 
-  const project = $derived("project" in place ? PROJECTS.find((p) => p.slug === place.project) : undefined);
+  const slug = $derived("project" in place ? place.project : null);
+  const project = $derived(PROJECTS.find((p) => p.slug === slug));
   const entries = $derived("folder" in place ? entriesIn(place.folder) : []);
   const address = $derived(
     "project" in place ? `C:\\Projects\\${place.project}.prj` : place.folder === "projects" ? "C:\\Projects" : "C:\\",
