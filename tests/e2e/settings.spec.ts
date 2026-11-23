@@ -153,10 +153,7 @@ test("malformed storage falls back safely and Settings has no axe violations", a
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
   const dialog = await openSettings(page, testInfo.project.name === "mobile-iphone");
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-    .disableRules(["color-contrast"])
-    .analyze();
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   expect(results.violations).toEqual([]);
   expect(pageErrors).toEqual([]);
   await expect(dialog).toBeVisible();
