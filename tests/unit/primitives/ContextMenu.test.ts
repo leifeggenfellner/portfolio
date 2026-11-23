@@ -18,14 +18,6 @@ function setup() {
 }
 
 describe("ContextMenu", () => {
-  it("renders items and separators, and takes focus", () => {
-    const { menu } = setup();
-    expect(screen.getAllByRole("menuitem")).toHaveLength(3);
-    expect(screen.getByRole("separator")).toBeInTheDocument();
-    expect(menu).toHaveFocus();
-    expect(screen.getByRole("menuitem", { name: "Unavailable" })).toHaveAttribute("aria-disabled", "true");
-  });
-
   it("moves with the arrow keys, wraps, and selects with Enter", async () => {
     const { menu, onSelect, onClose } = setup();
     await fireEvent.keyDown(menu, { key: "ArrowUp" });

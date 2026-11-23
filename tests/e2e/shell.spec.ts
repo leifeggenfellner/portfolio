@@ -8,23 +8,27 @@ const taskbar = (page: Page) => page.getByRole("navigation", { name: "Taskbar" }
 test.describe("desktop shell", () => {
   test.skip(({ isMobile }) => isMobile, "desktop pointer and keyboard model");
 
-  test("a minimised window stays on the taskbar and restores from it", async ({ page }) => {
-    await openDesktop(page);
-    await icon(page, "Projects").dblclick();
-    const dialog = page.getByRole("dialog", { name: "Projects" });
-    await expect(dialog).toBeVisible();
+  test(
+    "a minimised window stays on the taskbar and restores from it",
+    { tag: ["@webkit", "@mobile"] },
+    async ({ page }) => {
+      await openDesktop(page);
+      await icon(page, "Projects").dblclick();
+      const dialog = page.getByRole("dialog", { name: "Projects" });
+      await expect(dialog).toBeVisible();
 
-    await dialog.getByRole("button", { name: "Minimize" }).click();
-    await expect(dialog).toBeHidden();
+      await dialog.getByRole("button", { name: "Minimize" }).click();
+      await expect(dialog).toBeHidden();
 
-    const button = taskbar(page).getByRole("button", { name: "Projects" });
-    await expect(button).toBeVisible();
-    await button.click();
-    await expect(dialog).toBeVisible();
-    await expect(dialog).toBeFocused();
-  });
+      const button = taskbar(page).getByRole("button", { name: "Projects" });
+      await expect(button).toBeVisible();
+      await button.click();
+      await expect(dialog).toBeVisible();
+      await expect(dialog).toBeFocused();
+    },
+  );
 
-  test("keyboard focus follows windows as they open and close", async ({ page }) => {
+  test("keyboard focus follows windows as they open and close", { tag: ["@webkit"] }, async ({ page }) => {
     await openDesktop(page);
     await icon(page, "Me.txt").focus();
     await page.keyboard.press("Enter");
@@ -86,19 +90,23 @@ test.describe("desktop shell", () => {
   });
 });
 
-test("the help note shows once, stays dismissed and reopens from Help", async ({ page }, testInfo) => {
-  await openDesktop(page, { withNote: true });
-  const note = page.getByRole("complementary", { name: "read me" });
-  await expect(note).toBeVisible();
+test(
+  "the help note shows once, stays dismissed and reopens from Help",
+  { tag: ["@mobile"] },
+  async ({ page }, testInfo) => {
+    await openDesktop(page, { withNote: true });
+    const note = page.getByRole("complementary", { name: "read me" });
+    await expect(note).toBeVisible();
 
-  await note.getByRole("button", { name: "Dismiss note" }).click();
-  await expect(note).toBeHidden();
-  await page.reload();
-  await expect(taskbar(page)).toBeVisible();
-  await expect(note).toBeHidden();
+    await note.getByRole("button", { name: "Dismiss note" }).click();
+    await expect(note).toBeHidden();
+    await page.reload();
+    await expect(taskbar(page)).toBeVisible();
+    await expect(note).toBeHidden();
 
-  await taskbar(page).getByRole("button", { name: "Start" }).click();
-  await page.getByRole("menuitem", { name: "Help" }).click({ force: testInfo.project.name === "mobile-iphone" });
-  await expect(note).toBeVisible();
-  await expect(note).toBeFocused();
-});
+    await taskbar(page).getByRole("button", { name: "Start" }).click();
+    await page.getByRole("menuitem", { name: "Help" }).click({ force: testInfo.project.name === "mobile-iphone" });
+    await expect(note).toBeVisible();
+    await expect(note).toBeFocused();
+  },
+);

@@ -50,7 +50,7 @@ test.describe("without JavaScript", () => {
     }
   });
 
-  test("the desktop is there, and its icons are links to each app", async ({ page }) => {
+  test("the desktop is there, and its icons are links to each app", { tag: ["@mobile"] }, async ({ page }) => {
     await page.goto("/");
     await page.getByRole("link", { name: "Terminal" }).click();
     await expect(page).toHaveURL(/\/terminal\/$/);
@@ -59,7 +59,7 @@ test.describe("without JavaScript", () => {
 });
 
 test.describe("app pages with JavaScript", () => {
-  test("open straight to the desktop with the window, no boot", async ({ page }) => {
+  test("open straight to the desktop with the window, no boot", { tag: ["@mobile"] }, async ({ page }) => {
     await page.goto("/projects/retro-os/");
     const explorer = page.getByRole("dialog", { name: "Projects" });
     await expect(explorer.getByRole("heading", { name: "Retro" })).toBeVisible();

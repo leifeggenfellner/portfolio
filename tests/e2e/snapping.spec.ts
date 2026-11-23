@@ -28,7 +28,7 @@ async function dragTitleTo(page: Page, win: Locator, x: number, y: number) {
   };
 }
 
-test("dragging to the left edge shows a preview and snaps to the left half", async ({ page }) => {
+test("dragging to the left edge shows a preview and snaps to the left half", { tag: ["@webkit"] }, async ({ page }) => {
   const win = await openApp(page, "about");
   const before = await box(win);
   const { preview, drop } = await dragTitleTo(page, win, 2, 400);

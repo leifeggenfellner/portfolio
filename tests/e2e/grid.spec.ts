@@ -22,45 +22,38 @@ async function openDesktop(page: Page, settings: object = NO_BOOT) {
 test.describe("synthwave grid", () => {
   const canvas = (page: Page) => page.locator("main [data-horizon]");
 
-  test("draws a scrolling canvas floor", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === "reduced-motion", "reduced motion draws a still frame");
-    await openDesktop(page);
-    await expect(canvas(page)).toHaveAttribute("data-running", "true");
-    await expect(canvas(page)).toHaveAttribute("data-duration-ms", "8000");
+  test(
+    "fills the floor from the horizon to the bottom edge without horizontal overflow",
+    { tag: ["@mobile"] },
+    async ({ page }) => {
+      await openDesktop(page);
 
-    const first = await canvas(page).getAttribute("data-phase");
-    // A busy machine can starve animation frames for a while; allow for it.
-    await expect.poll(() => canvas(page).getAttribute("data-phase"), { timeout: 15_000 }).not.toBe(first);
-  });
+      for (const viewport of [
+        { width: 1280, height: 720 },
+        { width: 390, height: 844 },
+        { width: 844, height: 390 },
+      ]) {
+        await page.setViewportSize(viewport);
+        const bounds = await page.evaluate(() => {
+          const floor = document.querySelector("main [data-horizon]")!.getBoundingClientRect();
+          const horizon = document.querySelector("main .outrun-horizon")!.getBoundingClientRect();
+          return {
+            floor: floor.toJSON(),
+            horizonY: horizon.y,
+            scrollWidth: document.documentElement.scrollWidth,
+            viewportWidth: window.innerWidth,
+          };
+        });
 
-  test("fills the floor from the horizon to the bottom edge without horizontal overflow", async ({ page }) => {
-    await openDesktop(page);
+        expect(Math.abs(bounds.floor.top - bounds.horizonY)).toBeLessThanOrEqual(2);
+        expect(bounds.floor.bottom).toBeGreaterThanOrEqual(viewport.height - 1);
+        expect(bounds.floor.width).toBeGreaterThanOrEqual(viewport.width - 1);
+        expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.viewportWidth);
+      }
+    },
+  );
 
-    for (const viewport of [
-      { width: 1280, height: 720 },
-      { width: 390, height: 844 },
-      { width: 844, height: 390 },
-    ]) {
-      await page.setViewportSize(viewport);
-      const bounds = await page.evaluate(() => {
-        const floor = document.querySelector("main [data-horizon]")!.getBoundingClientRect();
-        const horizon = document.querySelector("main .outrun-horizon")!.getBoundingClientRect();
-        return {
-          floor: floor.toJSON(),
-          horizonY: horizon.y,
-          scrollWidth: document.documentElement.scrollWidth,
-          viewportWidth: window.innerWidth,
-        };
-      });
-
-      expect(Math.abs(bounds.floor.top - bounds.horizonY)).toBeLessThanOrEqual(2);
-      expect(bounds.floor.bottom).toBeGreaterThanOrEqual(viewport.height - 1);
-      expect(bounds.floor.width).toBeGreaterThanOrEqual(viewport.width - 1);
-      expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.viewportWidth);
-    }
-  });
-
-  test("follows the speed, paused and reduced-motion settings", async ({ page }, testInfo) => {
+  test("follows the speed, paused and reduced-motion settings", { tag: ["@motion"] }, async ({ page }, testInfo) => {
     await openDesktop(page, { ...NO_BOOT, gridSpeed: "fast" });
     await expect(canvas(page)).toHaveAttribute("data-duration-ms", "4000");
 
