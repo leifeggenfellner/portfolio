@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FORTUNES, monitorSays, wrap } from "@lib/terminal/toys";
+import { FORTUNES, monitorSays, wrap } from "@apps/terminal/toys";
 
 describe("wrap", () => {
   it("breaks on spaces within the width", () => {

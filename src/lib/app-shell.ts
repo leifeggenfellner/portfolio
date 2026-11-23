@@ -19,6 +19,8 @@ export interface AppProps {
 
 interface AppCommon {
   id: string;
+  /** Position on the desktop, the Start menu and other app lists. */
+  order: number;
   title: string;
   icon: string;
   defaults: { x: number; y: number; w: number; h: number };
