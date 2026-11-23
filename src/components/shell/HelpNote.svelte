@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Icon from "@iconify/svelte";
+  import Icon from "@primitives/Icon.svelte";
   import { cx } from "@lib/cx";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { SHORTCUTS } from "@lib/os/shortcuts";
@@ -69,6 +69,6 @@
     class="focus-ring absolute top-1 right-1 flex h-7 w-7 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-(--note-text)"
     onclick={onDismiss}
   >
-    <Icon icon="pixelarticons:close" width="16" height="16" aria-hidden="true" />
+    <Icon icon="pixelarticons:close" />
   </button>
 </aside>
