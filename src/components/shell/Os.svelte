@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { APPS } from "@apps/registry.svelte";
+  import { APPS } from "@apps/registry";
   import { createOs, setOs } from "@lib/os/context";
   import Desktop from "./Desktop.svelte";
 

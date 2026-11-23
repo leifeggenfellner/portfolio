@@ -5,14 +5,14 @@
   import type { AppProps } from "@lib/app-shell";
   import { intents } from "@lib/store/intents";
   import { getOs } from "@lib/os/context";
-  import { dir, file } from "@lib/terminal/fs";
-  import type { FsNode } from "@lib/terminal/fs";
-  import { complete, execute, prompt } from "@lib/terminal/shell";
-  import type { Line, ShellContext, TerminalEffect } from "@lib/terminal/shell";
+  import { dir, file } from "./fs";
+  import type { FsNode } from "./fs";
+  import { complete, execute, prompt } from "./shell";
+  import type { Line, ShellContext, TerminalEffect } from "./shell";
   import { prefersReducedMotion } from "@lib/motion";
   import { onMount, tick } from "svelte";
-  import MatrixRain from "./terminal/MatrixRain.svelte";
-  import PipesCanvas from "./terminal/PipesCanvas.svelte";
+  import MatrixRain from "./MatrixRain.svelte";
+  import PipesCanvas from "./PipesCanvas.svelte";
 
   let { shell }: AppProps = $props();
   const { settings } = getOs();

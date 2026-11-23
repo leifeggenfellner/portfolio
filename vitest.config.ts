@@ -13,7 +13,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
       "@primitives": path.resolve(__dirname, "src/components/primitives"),
       "@shell": path.resolve(__dirname, "src/components/shell"),
-      "@apps": path.resolve(__dirname, "src/components/apps"),
+      "@apps": path.resolve(__dirname, "src/apps"),
       "@effects": path.resolve(__dirname, "src/components/effects"),
       "@lib": path.resolve(__dirname, "src/lib"),
       "@styles": path.resolve(__dirname, "src/styles"),
@@ -29,9 +29,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
-      include: ["src/components/primitives/**", "src/lib/**"],
+      include: ["src/components/primitives/**", "src/lib/**", "src/apps/*/*.ts"],
       // Astro components render at build time and can't be parsed for v8 coverage.
-      exclude: ["**/*.astro"],
+      exclude: ["**/*.astro", "src/apps/*/manifest.ts"],
       thresholds: { lines: 80, functions: 80, branches: 75, statements: 80 },
     },
   },

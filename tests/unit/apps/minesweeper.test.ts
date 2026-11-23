@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { chord, minesLeft, neighbours, newGame, placeMines, reveal, toggleFlag } from "@lib/minesweeper";
-import type { Game } from "@lib/minesweeper";
+import { chord, minesLeft, neighbours, newGame, placeMines, reveal, toggleFlag } from "@apps/minigame/logic";
+import type { Game } from "@apps/minigame/logic";
 
 /** A 3×3 board with one mine in the top-left corner, already in play. */
 function cornerMine(): Game {

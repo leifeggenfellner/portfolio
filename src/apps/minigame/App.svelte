@@ -3,11 +3,11 @@
   import { cx } from "@lib/cx";
   import { getOs } from "@lib/os/context";
   import { inTextField } from "@lib/os/keymap.svelte";
-  import { BEGINNER, chord, minesLeft, newGame, reveal, toggleFlag } from "@lib/minesweeper";
-  import type { Cell, Game } from "@lib/minesweeper";
+  import { BEGINNER, chord, minesLeft, newGame, reveal, toggleFlag } from "./logic";
+  import type { Cell, Game } from "./logic";
   import PixelArt from "@primitives/PixelArt.svelte";
   import RetroButton from "@primitives/RetroButton.svelte";
-  import { CROSS, FACES, FLAG, MINE } from "./minesweeper/sprites";
+  import { CROSS, FACES, FLAG, MINE } from "./sprites";
 
   // Minesweeper needs nothing from the shell.
   let { shell: _shell }: AppProps = $props();

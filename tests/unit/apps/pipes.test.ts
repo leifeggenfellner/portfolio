@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createPipes, opposite, pipeCount, seededRandom } from "@lib/terminal/pipes";
-import type { Piece } from "@lib/terminal/pipes";
+import { createPipes, opposite, pipeCount, seededRandom } from "@apps/terminal/pipes";
+import type { Piece } from "@apps/terminal/pipes";
 
 const DX = [0, 1, 0, -1];
 const DY = [-1, 0, 1, 0];

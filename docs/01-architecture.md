@@ -83,10 +83,10 @@ anything.
 | Future `posts/[slug]` | static           | MDX content, no JS needed      |
 | Future `projects/...` | `client:visible` | Reveal animation when scrolled |
 
-The Desktop subscribes to the window-manager store and
-dynamic-imports each Svelte app on first open (see
-`registry.svelte.ts`), so opening the Terminal does not download
-Minesweeper. Apps receive an `AppShell` prop
+The kernel's `Launcher` (`src/lib/os/launcher.svelte.ts`)
+dynamic-imports each Svelte app on first open (see each
+`src/apps/<id>/manifest.ts`), so opening the Terminal does not
+download Minesweeper. Apps receive an `AppShell` prop
 (`src/lib/app-shell.ts`) to open other apps or close their own
 window; they never import the shell layer.
 

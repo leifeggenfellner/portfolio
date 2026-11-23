@@ -74,7 +74,7 @@ Coding conventions, one screen.
 ## Performance constraints
 
 - No expensive work in render. `useMemo` real cost only.
-- Dynamic-import every interactive app (see `registry.svelte.ts`).
+- Dynamic-import every interactive app (its manifest's `load`).
 - No icon libraries — use emoji glyphs or hand-authored SVG
   sprites.
 

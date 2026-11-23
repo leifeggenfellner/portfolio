@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/svelte";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import Settings from "@apps/Settings.svelte";
+import Settings from "@apps/settings/App.svelte";
 import { createOs, osContext } from "@lib/os/context";
 import { DEFAULT_SETTINGS } from "@lib/settings";
 
