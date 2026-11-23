@@ -73,4 +73,27 @@ test.describe("synthwave grid", () => {
     await page.getByRole("radio", { name: "Paused" }).check();
     await expect(canvas(page)).toHaveAttribute("data-running", "false");
   });
+
+  test("stops while a window covers the wallpaper, and resumes when it doesn't", async ({
+    page,
+    isMobile,
+  }, testInfo) => {
+    test.skip(testInfo.project.name === "reduced-motion", "reduced motion never runs the floor");
+    await openDesktop(page);
+    await expect(canvas(page)).toHaveAttribute("data-running", "true");
+
+    await page.locator('button[data-app-id="about"]').focus();
+    await page.keyboard.press("Enter");
+    const win = page.locator('[data-window-id="about"]');
+    await expect(win).toBeVisible();
+    // On mobile every window is full screen; on desktop it takes a maximise.
+    if (!isMobile) {
+      await expect(canvas(page)).toHaveAttribute("data-running", "true");
+      await win.getByRole("button", { name: "Maximize" }).click();
+    }
+    await expect(canvas(page)).toHaveAttribute("data-running", "false");
+
+    await win.getByRole("button", { name: "Minimize" }).click();
+    await expect(canvas(page)).toHaveAttribute("data-running", "true");
+  });
 });

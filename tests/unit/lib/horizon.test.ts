@@ -3,10 +3,12 @@ import {
   columnBases,
   columnSpacing,
   columnXAt,
+  horizonBudget,
   parseDuration,
   rowAlpha,
   rowDepths,
   rowY,
+  wallpaperCovered,
   withAlpha,
 } from "@lib/horizon";
 
@@ -62,5 +64,33 @@ describe("horizon geometry", () => {
     expect(parseDuration("8s", 0)).toBe(8000);
     expect(parseDuration("400ms", 0)).toBe(400);
     expect(parseDuration("", 123)).toBe(123);
+  });
+});
+
+describe("horizon budget", () => {
+  it("draws at full rate and up to 2x resolution on a capable desktop", () => {
+    expect(horizonBudget({ coarsePointer: false, cores: 8 })).toEqual({ fps: 60, maxDpr: 2 });
+    expect(horizonBudget({ coarsePointer: false, cores: undefined })).toEqual({ fps: 60, maxDpr: 2 });
+  });
+
+  it("halves the rate and drops to 1x on touch devices and machines with few cores", () => {
+    expect(horizonBudget({ coarsePointer: true, cores: 8 })).toEqual({ fps: 30, maxDpr: 1 });
+    expect(horizonBudget({ coarsePointer: false, cores: 4 })).toEqual({ fps: 30, maxDpr: 1 });
+  });
+});
+
+describe("wallpaperCovered", () => {
+  const win = (maximized: boolean, minimized = false) => ({ maximized, minimized });
+
+  it("is covered by a visible maximised window on desktop", () => {
+    expect(wallpaperCovered([win(false), win(true)], false)).toBe(true);
+    expect(wallpaperCovered([win(false)], false)).toBe(false);
+    expect(wallpaperCovered([win(true, true)], false)).toBe(false);
+  });
+
+  it("is covered by any visible window on mobile, where windows are full screen", () => {
+    expect(wallpaperCovered([win(false)], true)).toBe(true);
+    expect(wallpaperCovered([win(false, true)], true)).toBe(false);
+    expect(wallpaperCovered([], true)).toBe(false);
   });
 });
