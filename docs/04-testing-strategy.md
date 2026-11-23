@@ -36,9 +36,23 @@
 
 ### Accessibility
 
-- Axe via `@axe-core/playwright` in every E2E test on first
-  paint. `color-contrast` is triaged separately because of the
-  CRT/vaporwave aesthetic (see [05-performance-a11y.md](./05-performance-a11y.md)).
+- Axe via `@axe-core/playwright` with `color-contrast` on, for
+  the desktop, every app window (both themes) and every document
+  page. Wait for a window's opening animation to finish first, or
+  axe measures it while the wallpaper still shows through.
+- Text drawn straight on the wallpaper is measured against the real
+  pixels in `contrast.spec.ts`, since axe can't see through
+  gradients and scanlines (see
+  [contrast-exceptions.md](./contrast-exceptions.md)).
+
+### Stability
+
+- The WebKit projects run with at most 2 workers
+  (`playwright.config.ts`): headless WebKit starves timers and
+  animation frames when many instances share the CPU.
+- Assertions that wait on canvas frames allow 15 s.
+- The bar: five full local runs in a row with no failure and no
+  retry.
 
 ### Visual regression (future)
 

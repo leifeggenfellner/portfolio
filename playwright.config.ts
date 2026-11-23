@@ -25,8 +25,10 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },
-    { name: "webkit-desktop", use: { ...devices["Desktop Safari"] } },
-    { name: "mobile-iphone", use: { ...devices["iPhone 14"] } },
+    // Headless WebKit starves timers and animation frames when many instances
+    // share the CPU, which made its tests flaky under full parallel load.
+    { name: "webkit-desktop", use: { ...devices["Desktop Safari"] }, workers: 2 },
+    { name: "mobile-iphone", use: { ...devices["iPhone 14"] }, workers: 2 },
     {
       name: "reduced-motion",
       use: {

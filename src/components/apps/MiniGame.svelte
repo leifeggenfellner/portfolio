@@ -298,7 +298,7 @@
     <!-- w-0 min-w-full: as wide as the board, never wider. -->
     <!-- One row: the status wraps within 3/4 of the width; the button keeps its place. -->
     <div class="flex w-0 min-w-full items-start justify-between gap-2">
-      <p class="text-13 text-text-dim max-w-3/4 leading-snug text-pretty" aria-live="polite">{status}</p>
+      <p class="text-13 text-text max-w-3/4 leading-snug text-pretty" aria-live="polite">{status}</p>
       <RetroButton size="sm" class="shrink-0" active={flagMode} onclick={() => (flagMode = !flagMode)}>
         <PixelArt rows={FLAG} palette={FLAG_PALETTE} size={12} />
         Flag mode

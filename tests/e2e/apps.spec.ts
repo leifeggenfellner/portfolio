@@ -246,16 +246,27 @@ test.describe("static apps", () => {
   });
 });
 
-test("every app window passes axe", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "chromium-desktop", "one engine is enough for the audit");
-  for (const id of ["about", "projects", "terminal", "skills", "contact", "minigame", "settings"]) {
-    await openApp(page, id);
-    const results = await new AxeBuilder({ page })
-      .include(`[data-window-id="${id}"]`)
-      .withTags(["wcag2a", "wcag2aa"])
-      .disableRules(["color-contrast"])
-      .analyze();
-    expect(results.violations, id).toEqual([]);
-    await page.keyboard.press("Escape");
-  }
-});
+for (const theme of ["light", "dark"]) {
+  test(`every app window passes axe, contrast included (${theme})`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "chromium-desktop", "one engine is enough for the audit");
+    // beforeEach already seeded storage, so set the theme there and reload.
+    await page.evaluate((value) => {
+      const key = "retro-os:settings";
+      const stored = JSON.parse(localStorage.getItem(key) ?? "{}");
+      localStorage.setItem(key, JSON.stringify({ ...stored, theme: value }));
+    }, theme);
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    for (const id of ["about", "projects", "terminal", "skills", "contact", "minigame", "settings"]) {
+      const win = await openApp(page, id);
+      // A window fades in over the wallpaper; measure contrast once it is opaque.
+      await expect.poll(() => win.evaluate((el) => el.getAnimations().length)).toBe(0);
+      const results = await new AxeBuilder({ page })
+        .include(`[data-window-id="${id}"]`)
+        .withTags(["wcag2a", "wcag2aa"])
+        .analyze();
+      expect(results.violations, id).toEqual([]);
+      await page.keyboard.press("Escape");
+    }
+  });
+}
