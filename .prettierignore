@@ -1,1 +1,3 @@
 .impeccable/
+# Vendored agent skill; kept byte-identical to upstream.
+.claude/skills/three-best-practices/
