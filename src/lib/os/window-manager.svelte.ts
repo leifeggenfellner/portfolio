@@ -12,6 +12,7 @@
  *   was before).
  */
 import { snapBox } from "@lib/window-bounds";
+import type { AppArgs } from "@lib/app-shell";
 import type { Viewport, WindowBox } from "@lib/window-bounds";
 
 export type SnapSide = "left" | "right";
@@ -25,6 +26,7 @@ export interface OpenWindow {
   title: string;
   icon?: string;
   box: WindowBox;
+  args?: AppArgs;
 }
 
 /** Where the first window sits in the stacking order; the next goes one above. */
@@ -39,6 +41,8 @@ export class AppWindow {
   box = $state<WindowBox>({ x: 0, y: 0, w: 0, h: 0 });
   layout = $state<Layout>({ kind: "floating" });
   minimized = $state(false);
+  /** The latest launch arguments, handed to the app. */
+  args = $state.raw<AppArgs | undefined>();
 
   constructor(init: OpenWindow) {
     this.id = init.id;
@@ -46,6 +50,7 @@ export class AppWindow {
     this.title = init.title;
     this.icon = init.icon;
     this.box = { ...init.box };
+    this.args = init.args;
   }
 
   get maximized(): boolean {
@@ -89,9 +94,11 @@ export class WindowManager {
     return WINDOW_Z_BASE + Math.max(this.#stack.length - 1, 0);
   }
 
-  /** Open a window, or bring an open one forward without moving it. */
+  /** Open a window, or bring an open one forward without moving it (new arguments still reach it). */
   open(init: OpenWindow): void {
-    if (!this.get(init.id)) this.windows.push(new AppWindow(init));
+    const existing = this.get(init.id);
+    if (!existing) this.windows.push(new AppWindow(init));
+    else if (init.args) existing.args = init.args;
     this.focus(init.id);
   }
 

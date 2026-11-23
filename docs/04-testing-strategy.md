@@ -12,7 +12,7 @@
 
 ### Unit (Vitest, `happy-dom`)
 
-- `lib/store/window-manager` — every action.
+- `lib/os/window-manager` — stacking, focus hand-off, layout transitions.
 - `lib/hooks/*` — return values + cleanup.
 - Component logic for primitives: render, keyboard, ARIA roles,
   state transitions, disabled paths.

@@ -43,7 +43,7 @@
   ];
 
   function handleStartSelect(id: string, origin: DOMRect) {
-    if (id.startsWith("open:")) void launcher.open(id.slice("open:".length), origin);
+    if (id.startsWith("open:")) void launcher.open(id.slice("open:".length), { origin });
     else if (id === "help") void showHelpNote();
     else if (id === "palette") void palette?.open();
     else if (id === "plain") window.location.assign(`${import.meta.env.BASE_URL}about/`);
