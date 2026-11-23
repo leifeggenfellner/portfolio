@@ -354,7 +354,7 @@ const HIDDEN_COMMANDS: Record<string, Command> = {
   },
 };
 
-export const COMMAND_NAMES: readonly string[] = Object.keys(COMMANDS);
+const COMMAND_NAMES: readonly string[] = Object.keys(COMMANDS);
 
 /** Split on whitespace, keeping single- or double-quoted runs together. */
 export function tokenize(input: string): string[] {

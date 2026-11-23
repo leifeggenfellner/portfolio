@@ -12,7 +12,7 @@ import { provideAppComponent } from "@lib/os/app-components";
 import { APPS } from "./registry";
 
 /** The app whose route `pathname` is, if any. */
-export function appForPath(pathname: string, base = "/") {
+function appForPath(pathname: string, base = "/") {
   const path = `/${pathname.slice(base.length).replace(/^\/+/, "")}`.replace(/\/?$/, "/");
   return APPS.find((app) => path.startsWith(app.route));
 }

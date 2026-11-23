@@ -7,6 +7,7 @@ import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
 import astro from "eslint-plugin-astro";
 import importPlugin from "eslint-plugin-import";
+import svelte from "eslint-plugin-svelte";
 
 /** Forbid upward / sideways imports per docs/01-architecture.md */
 const LAYER_RULES = {
@@ -119,6 +120,22 @@ export default [
       "no-alert": "error",
       eqeqeq: ["error", "always", { null: "ignore" }],
       curly: ["error", "multi-line"],
+    },
+  },
+
+  // Svelte components and rune modules: the plugin's recommended rules, with
+  // TypeScript in <script lang="ts">. Before this, .svelte files weren't
+  // linted at all, so the layer rules below didn't reach components.
+  ...svelte.configs.recommended,
+  {
+    files: ["**/*.svelte", "**/*.svelte.ts"],
+    languageOptions: {
+      parserOptions: { parser: tsparser, extraFileExtensions: [".svelte"] },
+      globals: { ...globals.browser },
+    },
+    rules: {
+      "no-undef": "off",
+      "no-unused-vars": "off",
     },
   },
 
