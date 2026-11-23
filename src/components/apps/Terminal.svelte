@@ -8,7 +8,9 @@
   import type { FsNode } from "@lib/terminal/fs";
   import { complete, execute, prompt } from "@lib/terminal/shell";
   import type { Line, ShellContext } from "@lib/terminal/shell";
+  import { prefersReducedMotion } from "@lib/motion";
   import { onMount, tick } from "svelte";
+  import MatrixRain from "./terminal/MatrixRain.svelte";
 
   let { shell }: AppProps = $props();
 
@@ -90,6 +92,7 @@
   // Set by the hidden `panic` command. The throw has to happen while rendering,
   // where the window's error boundary can catch it; a click handler can't.
   let panicked = $state(false);
+  let raining = $state(false);
 
   function crash(): never {
     throw new Error("Kernel panic: not syncing");
@@ -136,6 +139,7 @@
         panic: () => (panicked = true),
       },
       now: () => new Date(),
+      random: Math.random,
     };
   }
 
@@ -154,6 +158,10 @@
     if (result.clear) entries = [];
     if (result.cwd) cwd = result.cwd;
     print(result.lines);
+    if (result.effect === "matrix") {
+      if (prefersReducedMotion()) print([{ text: "matrix: skipped, reduced motion is on.", tone: "dim" }]);
+      else raining = true;
+    }
     void scrollToEnd();
   }
 
@@ -228,7 +236,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div
-  class="bg-terminal-bg text-terminal-fg font-mono text-18 flex h-full min-h-0 cursor-text flex-col leading-tight [text-shadow:0_0_6px_var(--terminal-glow)] selection:bg-terminal-fg selection:text-terminal-bg"
+  class="bg-terminal-bg text-terminal-fg font-mono text-18 relative flex h-full min-h-0 cursor-text flex-col leading-tight [text-shadow:0_0_6px_var(--terminal-glow)] selection:bg-terminal-fg selection:text-terminal-bg"
   onclick={focusInput}
 >
   <div bind:this={scroller} class="retro-scroll min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-1">
@@ -259,4 +267,12 @@
       />
     </form>
   </div>
+  {#if raining}
+    <MatrixRain
+      onDone={() => {
+        raining = false;
+        inputEl?.focus({ preventScroll: true });
+      }}
+    />
+  {/if}
 </div>

@@ -42,6 +42,34 @@ test.describe("terminal", () => {
     await expect(input).toHaveValue("neofetch ");
   });
 
+  test("tells fortunes, lets the monitor talk and has a manual", async ({ page }) => {
+    const win = await openApp(page, "terminal");
+    const input = win.getByRole("textbox");
+    const log = win.getByRole("log");
+    await run(input, "fortune");
+    await run(input, "cowsay hello there");
+    await expect(log).toContainText("< hello there >");
+    await run(input, "man matrix");
+    await expect(log).toContainText("MATRIX(1)");
+  });
+
+  test("rains until a key is pressed, and that key doesn't reach the prompt", async ({ page }) => {
+    const win = await openApp(page, "terminal");
+    const input = win.getByRole("textbox");
+    await run(input, "matrix");
+    const rain = win.locator("[data-matrix]");
+    if (await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)) {
+      await expect(win.getByRole("log")).toContainText("matrix: skipped, reduced motion is on.");
+      await expect(rain).toHaveCount(0);
+      return;
+    }
+    await expect(rain).toBeVisible();
+    await page.keyboard.press("q");
+    await expect(rain).toHaveCount(0);
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue("");
+  });
+
   test("changes settings, opens apps and exits", async ({ page }) => {
     const win = await openApp(page, "terminal");
     const input = win.getByRole("textbox");
