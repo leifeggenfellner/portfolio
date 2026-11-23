@@ -20,9 +20,6 @@ Claude Code only discovers skills in that folder layout, and
 matches tasks to them by `description`. Templates live outside
 `agents/` and `skills/` so they are not loaded as real ones.
 
-The same definitions are mirrored to `.github/chatmodes/` for
-GitHub Copilot Chat, so the team can work in either client.
-
 ## How to use
 
 - In Claude Code, type `@<agent-name>` to scope a request to
@@ -35,4 +32,3 @@ GitHub Copilot Chat, so the team can work in either client.
 1. Copy `templates/agent.md` to `agents/<name>.md`, or
    `templates/skill.md` to `skills/<name>/SKILL.md`.
 2. Keep them surgical — one job, one persona.
-3. Mirror to `.github/chatmodes/<same-name>.chatmode.md`.
