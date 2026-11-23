@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { dir, file, formatPath, listDir, nodeAt, resolvePath } from "@lib/terminal/fs";
-import { complete, execute, prompt, tokenize } from "@lib/terminal/shell";
-import type { ShellContext } from "@lib/terminal/shell";
+import { dir, file, formatPath, listDir, nodeAt, resolvePath } from "@apps/terminal/fs";
+import { complete, execute, prompt, tokenize } from "@apps/terminal/shell";
+import type { ShellContext } from "@apps/terminal/shell";
 
 const root = dir({
   home: dir({

@@ -19,8 +19,8 @@ const LAYER_RULES = {
   "src/components/effects/**": [
     { group: ["@apps/*", "@shell/*"], message: "Effects must not depend on apps or shell." },
   ],
-  "src/components/apps/**": [
-    { group: ["@apps/*"], message: "Apps must not import other apps. Compose via the shell." },
+  "src/apps/*/**": [
+    { group: ["@apps/*", "../*"], message: "Apps must not import other apps. Compose via the shell." },
     { group: ["@shell/*"], message: "Apps must not depend on the shell. The shell wires apps." },
   ],
   "src/lib/**": [

@@ -43,10 +43,10 @@ Visual side-effects with no business logic.
 - `CrtLayer` — scanlines / vignette / glow / noise
 - `BootSequence` — cinematic startup
 
-### Apps (`src/components/apps/`)
+### Apps (`src/apps/<id>/`)
 
-Composed portfolio surfaces. Each is a default export consumed
-by the shell via `registry.ts`. Apps may import primitives and
+Composed portfolio surfaces, one folder each with a manifest,
+consumed by the shell via the generated `src/apps/registry.ts`. Apps may import primitives and
 hooks but never other apps.
 
 - About, ProjectsExplorer, Terminal, SkillsMatrix, ContactTerminal, MiniGame

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getOs } from "@lib/os/context";
-  import { createPipes } from "@lib/terminal/pipes";
-  import type { Dir, Piece } from "@lib/terminal/pipes";
+  import { createPipes } from "./pipes";
+  import type { Dir, Piece } from "./pipes";
   import { onMount } from "svelte";
 
   interface Props {

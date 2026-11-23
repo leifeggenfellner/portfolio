@@ -20,7 +20,7 @@
       "@/*": ["./src/*"],
       "@primitives/*": ["./src/components/primitives/*"],
       "@shell/*": ["./src/components/shell/*"],
-      "@apps/*": ["./src/components/apps/*"],
+      "@apps/*": ["./src/apps/*"],
       "@effects/*": ["./src/components/effects/*"],
       "@lib/*": ["./src/lib/*"],
       "@styles/*": ["./src/styles/*"],
