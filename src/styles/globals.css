@@ -43,6 +43,8 @@
   --color-terminal-prompt: var(--terminal-prompt);
   --color-terminal-accent: var(--terminal-accent);
   --color-terminal-err: var(--terminal-err);
+  --color-crash-bg: var(--crash-bg);
+  --color-crash-fg: var(--crash-fg);
   --color-led-bg: var(--led-bg);
   --color-led-fg: var(--led-fg);
   --color-boot-bg: var(--boot-bg);

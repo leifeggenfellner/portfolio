@@ -92,7 +92,15 @@ window; they never import the shell layer.
 
 ## Error boundaries
 
-- Planned: wrap each app in a `<svelte:boundary>` that renders a
-  "blue screen" fallback inside the window chrome, so one
-  crashing app never takes down the desktop. Not built yet; today
-  only a failed app import is caught (and logged) by the Desktop.
+- Every window's content sits in its own `<svelte:boundary>`
+  (`shell/AppFrame.svelte`). An error while an app renders or runs an
+  effect swaps the app for a blue screen (`shell/AppCrash.svelte`)
+  inside the same window chrome, with "Restart app" (recreates the
+  app) and "Close". Other windows, the taskbar and the Start menu
+  keep working.
+- Errors in event handlers and async callbacks are not caught by
+  boundaries (a Svelte rule), so apps keep those paths simple.
+- A failed app import is caught and logged by the Desktop; the
+  window doesn't open.
+- The Terminal's hidden `panic` command crashes it on purpose; the
+  e2e suite uses it to exercise the boundary.
