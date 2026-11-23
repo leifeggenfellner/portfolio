@@ -20,19 +20,18 @@
   const items = $derived(paletteItems(apps, PROJECTS));
 
   let query = $state("");
-  let active = $state(0);
+  // Typing starts the list over at its best match; arrow keys move it from there.
+  let active = $derived.by(() => {
+    void query;
+    return 0;
+  });
   let inputEl = $state<HTMLInputElement>();
   let listEl = $state<HTMLElement>();
   let panelEl = $state<HTMLElement>();
 
   const results = $derived(searchPalette(items, query));
-  const activeId = $derived(results[active] ? `palette-option-${results[active].id}` : undefined);
-
-  // Typing starts the list over at its best match.
-  $effect(() => {
-    void query;
-    active = 0;
-  });
+  const current = $derived(results[active]);
+  const activeId = $derived(current ? `palette-option-${current.id}` : undefined);
 
   function move(to: number) {
     if (!results.length) return;
