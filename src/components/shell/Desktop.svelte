@@ -23,6 +23,7 @@
   import type { MenuEntry } from "@primitives/ContextMenu.svelte";
   import RetroWindow from "@primitives/RetroWindow.svelte";
   import { clampWindowPosition, fitWindowToViewport } from "@lib/window-bounds";
+  import AppFrame from "./AppFrame.svelte";
   import HelpNote from "./HelpNote.svelte";
   import type { StartMenuItem } from "./StartMenu.svelte";
   import Taskbar from "./Taskbar.svelte";
@@ -498,12 +499,14 @@
           onMax={() => windowManager.toggleMax(w.id)}
           onClose={() => windowManager.close(w.id)}
         >
-          {#if app.kind === "static"}
-            {@html staticHtml[w.appId] ?? ""}
-          {:else if svelteComponents[w.appId]}
-            {@const AppComp = svelteComponents[w.appId]}
-            <AppComp shell={shellFor(w.id)} />
-          {/if}
+          <AppFrame appId={w.appId} title={w.title} onClose={() => windowManager.close(w.id)}>
+            {#if app.kind === "static"}
+              {@html staticHtml[w.appId] ?? ""}
+            {:else if svelteComponents[w.appId]}
+              {@const AppComp = svelteComponents[w.appId]}
+              <AppComp shell={shellFor(w.id)} />
+            {/if}
+          </AppFrame>
         </RetroWindow>
       {/if}
     {/each}
