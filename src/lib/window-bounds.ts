@@ -48,3 +48,32 @@ export function clampWindowPosition(x: number, y: number, width: number, viewpor
     y: Math.min(Math.max(y, 0), maxY),
   };
 }
+
+/** Where a dragged window snaps: the left or right half, or the whole desktop. */
+export type SnapZone = "left" | "right" | "max";
+
+/** How close (px) to an edge the pointer must be to snap there. */
+export const SNAP_EDGE_PX = 12;
+
+/** The snap target under the pointer while dragging, if any. The top edge wins in the corners. */
+export function snapZoneAt(x: number, y: number, viewport: Viewport): SnapZone | null {
+  if (y <= SNAP_EDGE_PX) return "max";
+  if (x <= SNAP_EDGE_PX) return "left";
+  if (x >= viewport.width - SNAP_EDGE_PX) return "right";
+  return null;
+}
+
+/** The box a window takes when snapped to one half of the desktop. */
+export function snapBox(zone: "left" | "right", viewport: Viewport): WindowBox {
+  const w = Math.floor(viewport.width / 2);
+  return { x: zone === "left" ? 0 : viewport.width - w, y: 0, w, h: viewport.height };
+}
+
+/**
+ * Where a snapped window goes when it is dragged out of its snap: back to
+ * its old size, placed so the pointer keeps its relative spot on the title bar.
+ */
+export function unsnapX(pointerX: number, snapped: WindowBox, restoreWidth: number): number {
+  const along = snapped.w > 0 ? (pointerX - snapped.x) / snapped.w : 0.5;
+  return Math.round(pointerX - restoreWidth * Math.min(Math.max(along, 0), 1));
+}

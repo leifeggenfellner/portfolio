@@ -25,7 +25,8 @@
   import ContextMenu from "@primitives/ContextMenu.svelte";
   import type { MenuEntry } from "@primitives/ContextMenu.svelte";
   import RetroWindow from "@primitives/RetroWindow.svelte";
-  import { clampWindowPosition, fitWindowToViewport } from "@lib/window-bounds";
+  import { clampWindowPosition, fitWindowToViewport, snapBox, snapZoneAt, unsnapX } from "@lib/window-bounds";
+  import type { SnapZone } from "@lib/window-bounds";
   import AppFrame from "./AppFrame.svelte";
   import HelpNote from "./HelpNote.svelte";
   import type { StartMenuItem } from "./StartMenu.svelte";
@@ -317,6 +318,83 @@
     if (!(e.target as Element).closest("button[data-app-id]")) selectedIcon = null;
   }
 
+  // ---- Snapping (desktop only; mobile windows are already full screen) ----
+  let snapPreview = $state<SnapZone | null>(null);
+
+  function desktopArea() {
+    return { width: window.innerWidth, height: window.innerHeight - taskbarHeight };
+  }
+
+  /** Dragging a snapped window out of its half gives it back its old size, under the pointer. */
+  function handleDragStart(id: string, clientX: number) {
+    const win = wmState.windows.find((w) => w.id === id);
+    if (!win?.snapped) return;
+    windowManager.unsnap(id, { x: unsnapX(clientX, win, win.snapped.restore.w), y: win.y });
+  }
+
+  function handleDragMove(clientX: number, clientY: number) {
+    snapPreview = isMobile ? null : snapZoneAt(clientX, clientY, desktopArea());
+  }
+
+  function handleDragEnd(id: string, clientX: number, clientY: number) {
+    snapPreview = null;
+    if (isMobile) return;
+    const zone = snapZoneAt(clientX, clientY, desktopArea());
+    if (zone) snapWindow(id, zone);
+  }
+
+  function snapWindow(id: string, zone: SnapZone) {
+    const win = wmState.windows.find((w) => w.id === id);
+    if (!win) return;
+    if (zone === "max") {
+      if (!win.maximized) windowManager.toggleMax(id);
+    } else {
+      windowManager.snap(id, zone, snapBox(zone, desktopArea()));
+    }
+  }
+
+  /** Arrow keys on a title bar, or Alt+Shift+arrow: snap left/right, maximise, restore. */
+  function handleSnapKey(id: string, direction: "left" | "right" | "up" | "down") {
+    if (isMobile) return;
+    const win = wmState.windows.find((w) => w.id === id);
+    if (!win) return;
+    if (direction === "up") snapWindow(id, "max");
+    else if (direction === "down") {
+      if (win.maximized) windowManager.toggleMax(id);
+      else windowManager.unsnap(id);
+    } else {
+      if (win.maximized) windowManager.toggleMax(id);
+      snapWindow(id, direction);
+    }
+  }
+
+  // Alt+Shift+arrow snaps the active window, unless focus is in a text field,
+  // where that combination selects text on a Mac.
+  $effect(() => {
+    if (phase !== "desktop") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey || !wmState.activeId) return;
+      const direction = ({ ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const)[
+        e.key as "ArrowLeft"
+      ];
+      const target = e.target as HTMLElement;
+      if (!direction || target.closest("input, textarea, [contenteditable]")) return;
+      e.preventDefault();
+      handleSnapKey(wmState.activeId, direction);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  // Just under the dragged (top) window, above the rest; window z-indexes keep growing.
+  const snapPreviewZ = $derived(Math.max(0, ...wmState.windows.map((w) => w.z)) - 1);
+
+  const snapPreviewBox = $derived.by(() => {
+    if (!snapPreview) return null;
+    const area = { width: viewportWidth, height: viewportHeight - taskbarHeight };
+    return snapPreview === "max" ? { x: 0, y: 0, w: area.width, h: area.height } : snapBox(snapPreview, area);
+  });
+
   function moveWindow(id: string, width: number, x: number, y: number) {
     const next = clampWindowPosition(x, y, width, {
       width: viewportWidth,
@@ -567,6 +645,10 @@
           originFor={() => origins.get(w.id) ?? null}
           minimizeTargetFor={() => taskbarButtonRect(w.id)}
           onFocus={() => windowManager.focus(w.id)}
+          onDragStart={(x) => handleDragStart(w.id, x)}
+          onDragMove={handleDragMove}
+          onDragEnd={(x, y) => handleDragEnd(w.id, x, y)}
+          onSnapKey={(direction) => handleSnapKey(w.id, direction)}
           onMove={(x, y) => moveWindow(w.id, w.w, x, y)}
           onResize={(ww, hh) => windowManager.resize(w.id, ww, hh)}
           onMin={() => windowManager.minimize(w.id)}
@@ -584,6 +666,19 @@
         </RetroWindow>
       {/if}
     {/each}
+
+    {#if snapPreviewBox}
+      <div
+        class="snap-preview pointer-events-none absolute"
+        style:z-index={snapPreviewZ}
+        style:left="{snapPreviewBox.x}px"
+        style:top="{snapPreviewBox.y}px"
+        style:width="{snapPreviewBox.w}px"
+        style:height="{snapPreviewBox.h}px"
+        aria-hidden="true"
+        data-snap-preview={snapPreview}
+      ></div>
+    {/if}
 
     <CrtLayer />
     <div bind:this={degaussRing} class="degauss-ring" aria-hidden="true"></div>
