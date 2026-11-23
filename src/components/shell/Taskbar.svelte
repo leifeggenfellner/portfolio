@@ -10,12 +10,11 @@
     windows: readonly AppWindow[];
     activeId: string | null;
     menuItems: StartMenuItem[];
-    mobile?: boolean;
     onToggleWindow: (id: string) => void;
     onMenuSelect: (id: string, origin: DOMRect) => void;
   }
 
-  let { windows, activeId, menuItems, mobile = false, onToggleWindow, onMenuSelect }: Props = $props();
+  let { windows, activeId, menuItems, onToggleWindow, onMenuSelect }: Props = $props();
 
   let startWrap = $state<HTMLElement>();
   let menuOpen = $state(false);
@@ -60,7 +59,7 @@
       aria-pressed={undefined}
       aria-haspopup="menu"
       aria-expanded={menuOpen}
-      class={cx("gap-1.5 px-2.5", mobile && "h-11")}
+      class="phone:h-11 gap-1.5 px-2.5"
       onclick={() => (menuOpen = !menuOpen)}
     >
       <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" class="shrink-0">
@@ -88,15 +87,13 @@
         active={activeId === w.id && !w.minimized}
         title={w.title}
         aria-label={w.title}
-        class={cx("min-w-0 shrink justify-start", mobile ? "h-11 w-11 px-0" : "w-44")}
+        class="phone:h-11 phone:w-11 phone:px-0 w-44 min-w-0 shrink justify-start"
         onclick={() => onToggleWindow(w.id)}
       >
         {#if w.icon}
           <img src={w.icon} alt="" width="16" height="16" class="h-4 w-4 shrink-0 object-contain" />
         {/if}
-        {#if !mobile}
-          <span class={cx("max-w-34 truncate font-normal", w.minimized && "text-text-dim")}>{w.title}</span>
-        {/if}
+        <span class={cx("phone:hidden max-w-34 truncate font-normal", w.minimized && "text-text-dim")}>{w.title}</span>
       </RetroButton>
     {/each}
   </div>

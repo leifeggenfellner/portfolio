@@ -109,6 +109,8 @@
 
 /* ---- dark-mode variant: `dark:` triggers on [data-theme="dark"] ---- */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* The phone layout, in CSS so server-rendered markup already has it. Matches MOBILE_QUERY (src/lib/os/viewport.svelte.ts). */
+@custom-variant phone (@media (width <= 768px));
 
 /* ---- base reset / globals ---- */
 *,

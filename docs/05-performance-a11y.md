@@ -26,11 +26,14 @@ Enforced in CI:
   (`lighthouserc.mobile.json`, `lighthouserc.desktop.json`).
   Results go in the job summary; the full reports are uploaded as
   an artifact.
-- **Mobile LCP in CI is gated at the 2.5 s target.** The desktop
-  is server-rendered (ADR 0006), so the LCP element is in the
-  first HTML instead of appearing once the island hydrates. It was
-  a 3 s guard while the desktop was client-only and measured about
-  2.5 s on shared CI runners.
+- **Mobile LCP in CI is a 3 s guard, not the 2.5 s target.** On a
+  first visit the LCP element is the boot splash heading, which
+  appears once the boot reaches it, about 1.6 s in a throttled
+  browser and 1.9 s in Lighthouse's simulation locally; shared CI
+  runners measure about 0.7 s slower. The desktop under the boot is
+  server-rendered (ADR 0006), but anything it loads early competes
+  with the boot in the simulation: icons don't prefetch their
+  pages, and the help note waits for the boot to finish.
 
 The image budget and real-device INP are still checked by hand.
 

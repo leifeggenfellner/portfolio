@@ -52,10 +52,11 @@
       <div class="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
         <span class={LABEL_CLASS}>To</span>
         <div class="flex items-center gap-2">
+          <!-- The name, not the address: the address goes in the mail app (and Copy), not on screen. -->
           <span class="bevel-in-thin bg-surface-2 text-18 min-w-0 flex-1 truncate px-2 py-1 font-mono leading-tight">
-            {PROFILE.email}
+            {PROFILE.name}
           </span>
-          <RetroButton size="sm" onclick={copyAddress}>{copied ? "Copied" : "Copy"}</RetroButton>
+          <RetroButton size="sm" onclick={copyAddress}>{copied ? "Copied" : "Copy email"}</RetroButton>
         </div>
         <label for="contact-from" class={LABEL_CLASS}>From</label>
         <input
