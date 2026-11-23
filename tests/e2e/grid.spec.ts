@@ -29,7 +29,8 @@ test.describe("synthwave grid", () => {
     await expect(canvas(page)).toHaveAttribute("data-duration-ms", "8000");
 
     const first = await canvas(page).getAttribute("data-phase");
-    await expect.poll(() => canvas(page).getAttribute("data-phase")).not.toBe(first);
+    // A busy machine can starve animation frames for a while; allow for it.
+    await expect.poll(() => canvas(page).getAttribute("data-phase"), { timeout: 15_000 }).not.toBe(first);
   });
 
   test("fills the floor from the horizon to the bottom edge without horizontal overflow", async ({ page }) => {

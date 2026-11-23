@@ -16,14 +16,11 @@ const HELP_NOTE_KEY = "retro-os:help-note";
 
 /**
  * Skip the boot and, unless asked, the help note, so each test starts on a
- * quiet desktop. Parallel headless WebKit starves Web Animations, which can
- * stall Svelte exit transitions for seconds, so WebKit runs without motion;
- * Chromium covers the motion path.
+ * quiet desktop. WebKit used to run without motion here because parallel
+ * headless WebKit starved its animations; capping its workers in
+ * playwright.config.ts fixed that, so every engine now runs the motion path.
  */
 export async function openDesktop(page: Page, { withNote = false, settings = {} as Record<string, unknown> } = {}) {
-  if (page.context().browser()?.browserType().name() === "webkit") {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-  }
   await page.addInitScript(
     ({ settingsKey, noteKey, dismissNote, extra }) => {
       if (sessionStorage.getItem("shell-seeded") === "true") return;

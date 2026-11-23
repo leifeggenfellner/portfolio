@@ -23,9 +23,6 @@ test("desktop icons open with the keyboard", async ({ page }) => {
 test("has no critical a11y violations on first paint", async ({ page }) => {
   await page.goto("/");
   await skipBoot(page);
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa"])
-    .disableRules(["color-contrast"]) // CRT/vaporwave triages contrast separately
-    .analyze();
+  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
   expect(results.violations).toEqual([]);
 });
