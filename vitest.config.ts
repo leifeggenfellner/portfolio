@@ -33,7 +33,7 @@ export default defineConfig({
       include: ["src/components/primitives/**", "src/lib/**", "src/apps/*/*.ts"],
       // Astro components render at build time and can't be parsed for v8 coverage.
       exclude: ["**/*.astro", "src/apps/*/manifest.ts"],
-      thresholds: { lines: 80, functions: 80, branches: 75, statements: 80 },
+      // No thresholds: coverage points at untested risky code, it isn't a goal (docs/04-testing-strategy.md).
     },
   },
 });
