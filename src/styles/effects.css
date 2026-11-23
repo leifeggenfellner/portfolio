@@ -813,3 +813,27 @@
   background: color-mix(in srgb, var(--cyan) 16%, transparent);
   box-shadow: inset 0 0 24px color-mix(in srgb, var(--cyan) 35%, transparent);
 }
+
+/* ---- boot cover ----
+   Server-rendered with the desktop but hidden; the inline bootstrap script
+   shows it (html[data-boot="pending"]) only when a boot sequence will play,
+   so the desktop never flashes before the BIOS and never hides without JS. */
+.boot-cover {
+  display: none;
+}
+
+:root[data-boot="pending"] .boot-cover {
+  display: block;
+}
+
+/* ---- phone windows ----
+   Full screen above the taskbar, in CSS rather than script, so the
+   server-rendered window of an app's page already fits before hydration.
+   Matches MOBILE_QUERY in src/lib/os/viewport.svelte.ts. */
+@media (width <= 768px) {
+  [data-window-id] {
+    inset: 0 0 auto !important;
+    width: 100% !important;
+    height: calc(100% - var(--taskbar-height)) !important;
+  }
+}

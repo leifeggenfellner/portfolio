@@ -11,12 +11,12 @@
 
   let { on = $bindable(false) }: Props = $props();
 
-  const { settings, keymap, boot } = getOs();
+  const { settings, keymap, boot, viewport } = getOs();
 
-  // Only on the desktop, and never over a half-written draft.
+  // Only on the desktop, never on a phone (kept light there), and never over a half-written draft.
   $effect(() => {
     const timeoutMs = screensaverDelayMs(settings.current.screensaver);
-    if (timeoutMs === null || boot.phase !== "desktop") return;
+    if (timeoutMs === null || boot.phase !== "desktop" || viewport.mobile) return;
     const stop = watchIdle({
       timeoutMs,
       onIdle: () => (on = true),

@@ -185,22 +185,27 @@ function toInlineScriptJson(value: unknown): string {
   return JSON.stringify(value).replaceAll("<", "\\u003C");
 }
 
-/** Runs before first paint so stored settings apply without a flash of the defaults. */
+/**
+ * Runs before first paint so stored settings apply without a flash of the
+ * defaults. On a page marked `data-bootable` (the desktop at `/`) it also
+ * sets `data-boot="pending"` unless the boot animation is off, so CSS covers
+ * the server-rendered desktop until the boot sequence takes over. Without
+ * JavaScript none of this runs and the desktop shows as rendered.
+ */
 export const SETTINGS_BOOTSTRAP_SCRIPT = `(() => {
+  const root = document.documentElement;
+  let parsed = null;
   try {
-    const key = ${toInlineScriptJson(SETTINGS_STORAGE_KEY)};
-    if (!("localStorage" in globalThis)) {
-      return;
-    }
-    const raw = globalThis.localStorage.getItem(key);
-    if (raw === null) {
-      return;
-    }
-    const parsed = JSON.parse(raw);
+    const raw = globalThis.localStorage.getItem(${toInlineScriptJson(SETTINGS_STORAGE_KEY)});
+    parsed = raw === null ? null : JSON.parse(raw);
+  } catch {}
+  if (root.hasAttribute("data-bootable") && !(parsed && parsed.bootAnimation === false)) {
+    root.setAttribute("data-boot", "pending");
+  }
+  try {
     if (parsed === null || Array.isArray(parsed) || typeof parsed !== "object") {
       return;
     }
-    const root = document.documentElement;
     const rules = ${toInlineScriptJson(ROOT_ATTRIBUTES)};
     for (const rule of rules) {
       const candidate = parsed[rule.key];

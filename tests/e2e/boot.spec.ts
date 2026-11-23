@@ -16,7 +16,7 @@ async function visit(page: Page, { returning }: { returning: boolean }) {
 
 const bios = (page: Page) => page.locator(".boot-frame");
 const splash = (page: Page) => page.locator(".outrun-splash-root");
-const desktopIcon = (page: Page) => page.locator("main ul").getByRole("button", { name: "Settings" });
+const desktopIcon = (page: Page) => page.locator("main ul").getByRole("link", { name: "Settings" });
 
 test("a first visit plays the BIOS, then the splash, then the desktop", async ({ page }, testInfo) => {
   test.skip(

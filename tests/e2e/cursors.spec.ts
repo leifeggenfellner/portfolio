@@ -13,7 +13,7 @@ test("pixel-art cursors on a fine pointer, each with a keyword fallback", async 
   // [element, keyword the image falls back to]
   const cases: [Locator, string][] = [
     [page.locator("main"), "default"],
-    [page.locator('button[data-app-id="about"]'), "pointer"],
+    [page.locator('[data-app-id="about"]'), "pointer"],
   ];
   const term = await openApp(page, "terminal");
   cases.push([term.getByRole("textbox"), "text"], [term.getByRole("toolbar", { name: "Window header" }), "move"]);
@@ -27,7 +27,7 @@ test("pixel-art cursors on a fine pointer, each with a keyword fallback", async 
 
 test("the System cursor setting and touch devices keep the platform cursors", async ({ page, isMobile }) => {
   await openDesktop(page, { settings: isMobile ? {} : { cursors: "system" } });
-  for (const el of [page.locator("main"), page.locator('button[data-app-id="about"]')]) {
+  for (const el of [page.locator("main"), page.locator('[data-app-id="about"]')]) {
     expect(await cursorOf(el)).not.toContain("url(");
   }
 });

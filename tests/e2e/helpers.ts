@@ -42,7 +42,7 @@ export async function openDesktop(page: Page, { withNote = false, settings = {} 
 
 /** Open a desktop app from its icon with the keyboard, which works on every project. */
 export async function openApp(page: Page, appId: string) {
-  await page.locator(`button[data-app-id="${appId}"]`).focus();
+  await page.locator(`[data-app-id="${appId}"]`).focus();
   await page.keyboard.press("Enter");
   const win = page.locator(`[data-window-id="${appId}"]`);
   await expect(win).toBeVisible();

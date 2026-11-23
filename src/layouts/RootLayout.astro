@@ -18,6 +18,8 @@ interface Props {
   image?: string;
   /** A scrolling document page rather than the full-viewport desktop. */
   document?: boolean;
+  /** The desktop at `/`, where the boot sequence may play. */
+  bootable?: boolean;
 }
 
 const {
@@ -25,6 +27,7 @@ const {
   description = "Full-stack developer in Tromsø. This portfolio is a working retro desktop: a real terminal, a file explorer, Minesweeper and a synthwave horizon.",
   image,
   document = false,
+  bootable = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
@@ -35,7 +38,7 @@ const ogImageAlt = "The RETRO//OS desktop: pixel icons over a synthwave sunset a
 
 <!doctype html>
 <!-- The defaults; the bootstrap script swaps in stored settings before first paint. -->
-<html lang="en" {...rootAttributes(DEFAULT_SETTINGS)}>
+<html lang="en" {...rootAttributes(DEFAULT_SETTINGS)} data-bootable={bootable ? "" : undefined}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />

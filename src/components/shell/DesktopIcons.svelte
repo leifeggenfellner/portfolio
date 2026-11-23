@@ -16,24 +16,40 @@
 
   /** Focus the first icon, e.g. when the help note closes. */
   export function focusFirst() {
-    list?.querySelector<HTMLElement>("button")?.focus();
+    list?.querySelector<HTMLElement>("[data-app-id]")?.focus();
   }
+
+  const href = (route: string) => `${import.meta.env.BASE_URL}${route.slice(1)}`;
 
   function open(appId: string, button: HTMLElement) {
     void launcher.open(appId, { origin: button.getBoundingClientRect() });
   }
 
-  // A mouse click selects and a double-click opens, as on a period desktop.
-  // Enter/Space fire a click with detail 0, so the keyboard opens in one press;
-  // touch has no double-tap convention here, so a tap opens.
+  // Icons are links to each app's page, which is all they do without JS.
+  // With it, a click selects and a double-click opens, as on a period
+  // desktop. Enter fires a click with detail 0, so the keyboard opens in one
+  // press; touch has no double-tap convention here, so a tap opens. A
+  // modified click (new tab, new window) is left to the browser.
   function handleClick(appId: string, e: MouseEvent & { currentTarget: HTMLElement }) {
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
     selected = appId;
     if (viewport.mobile || e.detail === 0) open(appId, e.currentTarget);
   }
 
+  // Space opens too, as it did when icons were buttons.
+  function handleKeydown(e: KeyboardEvent & { currentTarget: HTMLElement }) {
+    if (e.key === " ") {
+      e.preventDefault();
+      open(e.currentTarget.dataset.appId ?? "", e.currentTarget);
+      return;
+    }
+    moveSelection(e);
+  }
+
   // Arrow keys walk the icon column; the selection follows focus.
-  function handleKeydown(e: KeyboardEvent) {
-    const buttons = [...(list?.querySelectorAll<HTMLElement>("button[data-app-id]") ?? [])];
+  function moveSelection(e: KeyboardEvent) {
+    const buttons = [...(list?.querySelectorAll<HTMLElement>("[data-app-id]") ?? [])];
     const index = buttons.indexOf(document.activeElement as HTMLElement);
     if (index < 0) return;
     const next = {
@@ -53,7 +69,7 @@
 
   // A press anywhere but an icon clears the selection.
   function handleDocumentPointerDown(e: PointerEvent) {
-    if (!(e.target as Element).closest("button[data-app-id]")) selected = null;
+    if (!(e.target as Element).closest("[data-app-id]")) selected = null;
   }
 </script>
 
@@ -66,8 +82,8 @@
 >
   {#each launcher.apps as app (app.id)}
     <li>
-      <button
-        type="button"
+      <a
+        href={href(app.route)}
         data-app-id={app.id}
         data-selected={selected === app.id}
         ondblclick={(e) => open(app.id, e.currentTarget)}
@@ -78,7 +94,7 @@
       >
         <img src={app.icon} alt="" aria-hidden="true" class={ICON_IMG_CLASS} width="32" height="32" decoding="async" />
         <span>{app.label ?? app.title.split(" ")[0]}</span>
-      </button>
+      </a>
     </li>
   {/each}
 </ul>

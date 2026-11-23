@@ -1,23 +1,13 @@
 ---
 /**
- * Home — the desktop IS the hero. We hydrate the desktop island
- * with `client:load` because the boot animation and interactivity
- * are immediate.
- *
- * Static apps render server-side as Astro components into inert
- * <template> elements. Desktop reads their innerHTML on window
- * open — zero JS for content. Interactive apps are dynamic-imported
- * Svelte components (see registry.svelte.ts).
+ * Home: the desktop with no window open. Server-rendered, so it works
+ * without JavaScript (icons are links to each app's page); the island then
+ * hydrates and the boot sequence may play over it.
  */
-import About from "@apps/about/About.astro";
-import SkillsMatrix from "@apps/skills/SkillsMatrix.astro";
 import Os from "@shell/Os.svelte";
 import RootLayout from "@/layouts/RootLayout.astro";
 ---
 
-<RootLayout>
-  <Os client:load />
-
-  <template data-static-app="about"><About /></template>
-  <template data-static-app="skills"><SkillsMatrix /></template>
+<RootLayout bootable>
+  <Os client:desktop />
 </RootLayout>

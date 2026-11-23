@@ -16,7 +16,7 @@ async function seedSettings(page: Page, settings: object) {
 async function openDesktop(page: Page, settings: object = NO_BOOT) {
   await seedSettings(page, settings);
   await page.goto("/");
-  await expect(page.locator("main ul").getByRole("button", { name: "Settings" })).toBeVisible();
+  await expect(page.locator("main ul").getByRole("link", { name: "Settings" })).toBeVisible();
 }
 
 test.describe("synthwave grid", () => {
@@ -70,7 +70,7 @@ test.describe("synthwave grid", () => {
     }
 
     await expect(canvas(page)).toHaveAttribute("data-running", "true");
-    await page.locator("main ul").getByRole("button", { name: "Settings" }).dblclick({ force: true });
+    await page.locator("main ul").getByRole("link", { name: "Settings" }).dblclick({ force: true });
     await page.getByRole("radio", { name: "Paused" }).check();
     await expect(canvas(page)).toHaveAttribute("data-running", "false");
   });
@@ -83,7 +83,7 @@ test.describe("synthwave grid", () => {
     await openDesktop(page);
     await expect(canvas(page)).toHaveAttribute("data-running", "true");
 
-    await page.locator('button[data-app-id="about"]').focus();
+    await page.locator('[data-app-id="about"]').focus();
     await page.keyboard.press("Enter");
     const win = page.locator('[data-window-id="about"]');
     await expect(win).toBeVisible();
