@@ -4,18 +4,30 @@
  * every mount (and every test) gets its own.
  */
 import { getContext, setContext } from "svelte";
+import { Boot } from "./boot.svelte";
+import { Keymap } from "./keymap.svelte";
 import { SettingsService } from "./settings.svelte";
+import { Viewport } from "./viewport.svelte";
 import { WindowManager } from "./window-manager.svelte";
 
 export interface Os {
   windows: WindowManager;
   settings: SettingsService;
+  keymap: Keymap;
+  boot: Boot;
+  viewport: Viewport;
 }
 
 const KEY = Symbol("os");
 
 export function createOs(): Os {
-  return { windows: new WindowManager(), settings: new SettingsService() };
+  return {
+    windows: new WindowManager(),
+    settings: new SettingsService(),
+    keymap: new Keymap(),
+    boot: new Boot(),
+    viewport: new Viewport(),
+  };
 }
 
 export function setOs(os: Os): Os {

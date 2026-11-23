@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { stopOnInput } from "@lib/stop-on-input";
+  import { getOs } from "@lib/os/context";
   import { onMount } from "svelte";
 
   interface Props {
@@ -15,6 +15,22 @@
   const FRAME_MS = 50;
 
   let canvas = $state<HTMLCanvasElement>();
+
+  // Any key or click stops the rain, and is swallowed so it doesn't also
+  // type into the prompt or close the window.
+  const { keymap } = getOs();
+  let stopped = false;
+  function stop() {
+    if (stopped) return;
+    stopped = true;
+    onDone();
+  }
+  $effect(() => keymap.bind({ id: "toy:stop", keys: ["*"], scope: "modal", run: stop }));
+  function stopOnPointer(e: PointerEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    stop();
+  }
 
   onMount(() => {
     const el = canvas!;
@@ -59,17 +75,16 @@
     }
     raf = requestAnimationFrame(frame);
 
-    // The key that stops the rain is swallowed, so it doesn't also type into the prompt.
-    const stopListening = stopOnInput(onDone);
     const observer = new ResizeObserver(resize);
     observer.observe(el);
 
     return () => {
       cancelAnimationFrame(raf);
       observer.disconnect();
-      stopListening();
     };
   });
 </script>
+
+<svelte:window onpointerdowncapture={stopOnPointer} />
 
 <canvas bind:this={canvas} class="absolute inset-0 h-full w-full" aria-hidden="true" data-matrix></canvas>

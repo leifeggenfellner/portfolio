@@ -9,7 +9,7 @@
   import Wallpaper from "@effects/Wallpaper.svelte";
   import type { AppProps, AppShell } from "@lib/app-shell";
   import { APP_VERSION, BUILD_DATE } from "@lib/build-info";
-  import { FIRST_SPLASH_MS, hasVisited, markVisited, RETURN_SPLASH_MS } from "@lib/boot";
+  import { FIRST_SPLASH_MS, RETURN_SPLASH_MS } from "@lib/boot";
   import { degauss } from "@lib/degauss";
   import { isDrafting, watchIdle } from "@lib/idle";
   import { wallpaperCovered } from "@lib/horizon";
@@ -17,6 +17,7 @@
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import type { PaletteItem } from "@lib/palette";
   import { getOs } from "@lib/os/context";
+  import { inTextField } from "@lib/os/keymap.svelte";
   import { applySettingsToRoot, screensaverDelayMs } from "@lib/settings";
   import type { Settings } from "@lib/settings";
   import { intents } from "@lib/store/intents";
@@ -30,9 +31,6 @@
   import HelpNote from "./HelpNote.svelte";
   import type { StartMenuItem } from "./StartMenu.svelte";
   import Taskbar from "./Taskbar.svelte";
-
-  const MOBILE_QUERY = "(max-width: 768px)";
-  const FALLBACK_TASKBAR_HEIGHT = 36;
 
   const MAIN_CLASS = "relative h-screen w-screen overflow-hidden bg-desktop";
   const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop) [--focus-ring-color:var(--desktop-text)]";
@@ -49,18 +47,14 @@
     "[text-shadow:0_0_14px_color-mix(in_srgb,var(--magenta)_60%,transparent)]",
   ].join(" ");
 
-  // pending: server render and pre-hydration (a dark power-on screen)
-  // bios → splash → leaving → desktop on a first visit; splash onward when returning.
-  type BootPhase = "pending" | "bios" | "splash" | "leaving" | "desktop";
-  let phase = $state<BootPhase>("pending");
-  let returning = $state(false);
-  let isMobile = $state(false);
-  const { windows: windowManager, settings } = getOs();
+  const { windows: windowManager, settings, keymap, boot, viewport } = getOs();
   const prefs = $derived(settings.current);
+  const phase = $derived(boot.phase);
+  const isMobile = $derived(viewport.mobile);
+  const viewportWidth = $derived(viewport.width);
+  const viewportHeight = $derived(viewport.height);
+  const taskbarHeight = $derived(viewport.taskbarHeight);
   let settingsReady = $state(false);
-  let viewportWidth = $state(0);
-  let viewportHeight = $state(0);
-  let taskbarHeight = $state(FALLBACK_TASKBAR_HEIGHT);
   let selectedIcon = $state<string | null>(null);
   let helpNoteOpen = $state(false);
   let helpNote = $state<ReturnType<typeof HelpNote>>();
@@ -150,16 +144,6 @@
     } else if (id === "cascade") {
       windowManager.cascade();
     }
-  }
-
-  function syncViewport() {
-    isMobile = window.matchMedia(MOBILE_QUERY).matches;
-    viewportWidth = window.innerWidth;
-    viewportHeight = window.innerHeight;
-    const cssHeight = Number.parseFloat(
-      getComputedStyle(document.documentElement).getPropertyValue("--taskbar-height"),
-    );
-    taskbarHeight = Number.isNaN(cssHeight) ? FALLBACK_TASKBAR_HEIGHT : cssHeight;
   }
 
   function readStaticTemplate(appId: string): string {
@@ -267,18 +251,19 @@
     }
   }
 
-  // Ctrl+K (Cmd+K on a Mac) toggles the palette anywhere on the desktop.
-  $effect(() => {
-    if (phase !== "desktop") return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() !== "k" || !(e.ctrlKey || e.metaKey) || e.altKey || screensaverOn) return;
-      e.preventDefault();
-      if (paletteOpen) closePalette();
-      else void openPalette();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
+  $effect(() =>
+    keymap.bind({
+      id: "palette",
+      keys: ["Mod+K", "Mod+Shift+K"],
+      scope: "desktop",
+      description: "Open or close the command palette",
+      when: () => boot.phase === "desktop",
+      run: () => {
+        if (paletteOpen) closePalette();
+        else void openPalette();
+      },
+    }),
+  );
 
   // A mouse click selects and a double-click opens, as on a period desktop.
   // Enter/Space fire a click with detail 0, so the keyboard opens in one press;
@@ -349,22 +334,17 @@
 
   // Alt+Shift+arrow snaps the active window, unless focus is in a text field,
   // where that combination selects text on a Mac.
-  $effect(() => {
-    if (phase !== "desktop") return;
-    const onKey = (e: KeyboardEvent) => {
-      const activeId = windowManager.activeId;
-      if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey || !activeId) return;
-      const direction = ({ ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const)[
-        e.key as "ArrowLeft"
-      ];
-      const target = e.target as HTMLElement;
-      if (!direction || target.closest("input, textarea, [contenteditable]")) return;
-      e.preventDefault();
-      handleSnapKey(activeId, direction);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
+  const SNAP_KEYS = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const;
+  $effect(() =>
+    keymap.bind({
+      id: "snap",
+      keys: Object.keys(SNAP_KEYS).map((key) => `Alt+Shift+${key}`),
+      scope: "window",
+      description: "Snap the active window left or right, maximise, restore",
+      when: (e) => boot.phase === "desktop" && windowManager.activeId !== null && !inTextField(e),
+      run: (e) => handleSnapKey(windowManager.activeId ?? "", SNAP_KEYS[e.key as keyof typeof SNAP_KEYS]),
+    }),
+  );
 
   // Just under the dragged (top) window, above the rest.
   const snapPreviewZ = $derived(windowManager.topZ - 1);
@@ -382,19 +362,6 @@
     });
     windowManager.move(id, next.x, next.y);
   }
-
-  // Viewport listeners — owns matchMedia + resize.
-  $effect(() => {
-    syncViewport();
-    const media = window.matchMedia(MOBILE_QUERY);
-    const onChange = () => syncViewport();
-    media.addEventListener("change", onChange);
-    window.addEventListener("resize", onChange);
-    return () => {
-      media.removeEventListener("change", onChange);
-      window.removeEventListener("resize", onChange);
-    };
-  });
 
   // Focus memory: the window manager keeps the last element focused inside
   // each window's body, so a window that becomes active again hands focus
@@ -467,15 +434,6 @@
   $effect(() => {
     const timeoutMs = screensaverDelayMs(prefs.screensaver);
     if (timeoutMs === null || phase !== "desktop") return;
-    // The key that wakes the screen is swallowed, as on a real machine, so it
-    // can't also close a window or type into the terminal. Registered before
-    // the idle watcher so it still sees the screensaver as on.
-    const swallow = (e: KeyboardEvent) => {
-      if (!screensaverOn) return;
-      e.preventDefault();
-      e.stopPropagation();
-    };
-    window.addEventListener("keydown", swallow, { capture: true });
     const stop = watchIdle({
       timeoutMs,
       onIdle: () => (screensaverOn = true),
@@ -484,59 +442,53 @@
     });
     return () => {
       stop();
-      window.removeEventListener("keydown", swallow, { capture: true });
       screensaverOn = false;
     };
   });
 
-  function finishBoot() {
-    markVisited();
-    phase = "desktop";
-  }
+  // The key that wakes the screen is swallowed, as on a real machine, so it
+  // can't also close a window or type into the terminal.
+  $effect(() => {
+    if (!screensaverOn) return;
+    return keymap.bind({ id: "screensaver", keys: ["*"], scope: "modal", run: () => {} });
+  });
 
-  // The splash fades over the already-mounted desktop. Removal is timed, not
-  // tied to the fade finishing, so a starved animation can never leave the
-  // boot screen covering the desktop.
+  // One skip binding for every boot phase, so a key pressed at any point
+  // lands on the desktop instead of advancing to the next phase.
+  $effect(() => {
+    if (!boot.running) return;
+    return keymap.bind({
+      id: "boot:skip",
+      keys: ["Escape", "Enter", " "],
+      scope: "modal",
+      description: "Skip the boot sequence",
+      run: () => boot.finish(),
+    });
+  });
+
+  // The splash fades over the already-mounted desktop; Boot removes it on a timer.
   function leaveSplash() {
-    if (phase !== "splash") return;
-    phase = "leaving";
-    window.setTimeout(finishBoot, prefersReducedMotion() ? 0 : durationMs("--dur-3", 240));
+    boot.leaveSplash(prefersReducedMotion() ? 0 : durationMs("--dur-3", 240));
   }
 
   onMount(() => {
     settings.hydrate();
     settingsReady = true;
     helpNoteOpen = !isHelpNoteDismissed();
-
-    if (!settings.current.bootAnimation) {
-      finishBoot();
-      return;
-    }
-    returning = hasVisited();
-    phase = returning ? "splash" : "bios";
-
-    // One skip handler for every boot phase, so a key pressed at any point
-    // lands on the desktop instead of advancing to the next phase.
-    const onSkipKey = (e: KeyboardEvent) => {
-      if (phase === "desktop" || !["Escape", "Enter", " "].includes(e.key)) return;
-      e.preventDefault();
-      finishBoot();
-    };
-    window.addEventListener("keydown", onSkipKey);
-    return () => window.removeEventListener("keydown", onSkipKey);
+    boot.start(settings.current.bootAnimation);
   });
 </script>
 
 {#if phase === "pending"}
   <div class="bg-boot-bg fixed inset-0 z-(--z-boot)" aria-hidden="true"></div>
 {:else if phase === "bios"}
-  <BootSequence onDone={() => (phase = "splash")} onSkip={finishBoot} />
+  <BootSequence onDone={() => boot.biosDone()} onSkip={() => boot.finish()} />
 {/if}
 
 {#if phase === "splash" || phase === "leaving"}
   <LoadingSplash
-    durationMs={returning ? RETURN_SPLASH_MS : FIRST_SPLASH_MS}
-    sunRise={!returning}
+    durationMs={boot.returning ? RETURN_SPLASH_MS : FIRST_SPLASH_MS}
+    sunRise={!boot.returning}
     leaving={phase === "leaving"}
     onDone={leaveSplash}
   />
