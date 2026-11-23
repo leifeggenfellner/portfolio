@@ -30,7 +30,7 @@
 
   let { deepLink = false }: Props = $props();
 
-  const { windows, settings, keymap, boot, viewport, launcher } = getOs();
+  const { windows, settings, keymap, boot, viewport, launcher, announcer } = getOs();
 
   let icons = $state<ReturnType<typeof DesktopIcons>>();
   let menu = $state<ReturnType<typeof DesktopMenu>>();
@@ -78,7 +78,10 @@
     const prefs = settings.current;
     applySettingsToRoot(document.documentElement, prefs);
     // Degauss on a theme switch, but not when settings first load.
-    if (lastTheme && lastTheme !== prefs.theme && mainEl && degaussRing) void degauss(mainEl, degaussRing);
+    if (lastTheme && lastTheme !== prefs.theme) {
+      announcer.announce(`${prefs.theme === "dark" ? "Dark" : "Light"} theme`);
+      if (mainEl && degaussRing) void degauss(mainEl, degaussRing);
+    }
     lastTheme = prefs.theme;
   });
 
@@ -158,6 +161,9 @@
     onMenuSelect={handleStartSelect}
   />
 </div>
+
+<!-- The desktop's one live region (see the Announcer in src/lib/os). -->
+<p class="sr-only" aria-live="polite" aria-atomic="true" data-announcer>{announcer.message}</p>
 
 <PaletteHost bind:this={palette} />
 <ScreensaverHost bind:on={screensaverOn} />
