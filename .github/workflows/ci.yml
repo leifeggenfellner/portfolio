@@ -59,6 +59,9 @@ jobs:
       - name: Prettier
         run: pnpm exec prettier --check --cache --cache-location=.cache/prettier .
 
+      - name: Generated docs are current
+        run: pnpm docs:check
+
       - name: actionlint
         uses: raven-actions/actionlint@v2
 

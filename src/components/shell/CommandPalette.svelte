@@ -3,13 +3,13 @@
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { PROJECTS } from "@content/projects";
   import { paletteItems, searchPalette } from "@lib/palette";
-  import type { PaletteItem } from "@lib/palette";
+  import type { PaletteApp, PaletteItem } from "@lib/palette";
   import { onMount, tick } from "svelte";
   import { expoOut } from "svelte/easing";
   import type { TransitionConfig } from "svelte/transition";
 
   interface Props {
-    apps: readonly { id: string; title: string }[];
+    apps: readonly PaletteApp[];
     onRun: (item: PaletteItem) => void;
     onClose: () => void;
   }

@@ -77,7 +77,7 @@
         class={cx(ICON_BUTTON_BASE, viewport.mobile ? "w-full" : "w-19")}
       >
         <img src={app.icon} alt="" aria-hidden="true" class={ICON_IMG_CLASS} width="32" height="32" decoding="async" />
-        <span>{app.title.split(" ")[0]}</span>
+        <span>{app.label ?? app.title.split(" ")[0]}</span>
       </button>
     </li>
   {/each}

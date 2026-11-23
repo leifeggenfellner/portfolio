@@ -25,6 +25,8 @@ export interface ChoiceSpec<V extends string = string> extends SpecBase {
   attribute?: `data-${string}`;
   /** Shown as one checkbox instead of radios: checked is the first value. */
   checkbox?: boolean;
+  /** Offer every value in the command palette under this short name. */
+  palette?: string;
 }
 
 export type SettingSpec = ToggleSpec | ChoiceSpec;
@@ -40,6 +42,7 @@ export const SETTINGS_SCHEMA = {
   theme: choice({
     group: "Appearance",
     label: "Theme",
+    palette: "Theme",
     attribute: "data-theme",
     default: "light",
     options: [
@@ -61,6 +64,7 @@ export const SETTINGS_SCHEMA = {
   crt: choice({
     group: "Appearance",
     label: "CRT effect",
+    palette: "CRT",
     attribute: "data-crt",
     default: "subtle",
     options: [
@@ -72,6 +76,7 @@ export const SETTINGS_SCHEMA = {
   gridSpeed: choice({
     group: "Desktop",
     label: "Grid speed",
+    palette: "Grid speed",
     attribute: "data-grid-speed",
     default: "normal",
     options: [

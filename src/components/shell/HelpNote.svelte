@@ -2,6 +2,7 @@
   import Icon from "@iconify/svelte";
   import { cx } from "@lib/cx";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
+  import { SHORTCUTS } from "@lib/os/shortcuts";
   import { expoOut } from "svelte/easing";
   import type { TransitionConfig } from "svelte/transition";
 
@@ -56,8 +57,9 @@
       <li>Right-click the desktop for more.</li>
       <li>The taskbar brings back anything you minimise.</li>
       <li>Drag a window to a screen edge to snap it.</li>
-      <li><kbd class={KEY_CLASS}>Esc</kbd> skips the boot and closes windows.</li>
-      <li><kbd class={KEY_CLASS}>Ctrl</kbd> + <kbd class={KEY_CLASS}>K</kbd> finds anything.</li>
+      <li><kbd class={KEY_CLASS}>{SHORTCUTS.closeWindow.label}</kbd> skips the boot and closes windows.</li>
+      <li><kbd class={KEY_CLASS}>{SHORTCUTS.palette.label}</kbd> finds anything.</li>
+      <li>The Terminal's <kbd class={KEY_CLASS}>man keys</kbd> lists every shortcut.</li>
     {/if}
     <li>
       Rather skip the desktop? <a

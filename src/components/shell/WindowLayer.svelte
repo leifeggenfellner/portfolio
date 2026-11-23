@@ -3,6 +3,7 @@
   import { focusTargetFor, windowElement } from "@lib/os/focus";
   import { getOs } from "@lib/os/context";
   import { inTextField } from "@lib/os/keymap.svelte";
+  import { bindingFor } from "@lib/os/shortcuts";
   import { clampWindowPosition, snapBox, snapZoneAt, unsnapX } from "@lib/window-bounds";
   import type { SnapZone } from "@lib/window-bounds";
   import RetroWindow from "@primitives/RetroWindow.svelte";
@@ -50,10 +51,7 @@
   const SNAP_KEYS = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const;
   $effect(() =>
     keymap.bind({
-      id: "snap",
-      keys: Object.keys(SNAP_KEYS).map((key) => `Alt+Shift+${key}`),
-      scope: "window",
-      description: "Snap the active window left or right, maximise, restore",
+      ...bindingFor("snap"),
       when: (e) => boot.phase === "desktop" && windows.activeId !== null && !inTextField(e),
       run: (e) => handleSnapKey(windows.activeId ?? "", SNAP_KEYS[e.key as keyof typeof SNAP_KEYS]),
     }),
