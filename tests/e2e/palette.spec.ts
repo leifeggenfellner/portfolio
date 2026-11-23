@@ -10,7 +10,7 @@ test.beforeEach(async ({ page }) => {
 const palette = (page: Page) => page.getByRole("dialog", { name: "Run" });
 const search = (page: Page) => page.getByRole("combobox", { name: /search apps/i });
 
-test("Ctrl+K opens the palette, fuzzy search and Enter open an app", async ({ page }) => {
+test("Ctrl+K opens the palette, fuzzy search and Enter open an app", { tag: ["@webkit"] }, async ({ page }) => {
   await page.keyboard.press("Control+k");
   await expect(search(page)).toBeFocused();
   await search(page).fill("mnswp");

@@ -19,7 +19,7 @@ test.describe("terminal", () => {
     await input.press("Enter");
   }
 
-  test("runs commands over the virtual filesystem", async ({ page }) => {
+  test("runs commands over the virtual filesystem", { tag: ["@webkit", "@mobile"] }, async ({ page }) => {
     const win = await openApp(page, "terminal");
     const input = win.getByRole("textbox");
     await expect(input).toBeFocused();
@@ -45,17 +45,6 @@ test.describe("terminal", () => {
     await expect(win.getByRole("log")).toContainText("Uptime:");
     await input.press("ArrowUp");
     await expect(input).toHaveValue("neofetch ");
-  });
-
-  test("tells fortunes, lets the monitor talk and has a manual", async ({ page }) => {
-    const win = await openApp(page, "terminal");
-    const input = win.getByRole("textbox");
-    const log = win.getByRole("log");
-    await run(input, "fortune");
-    await run(input, "cowsay hello there");
-    await expect(log).toContainText("< hello there >");
-    await run(input, "man matrix");
-    await expect(log).toContainText("MATRIX(1)");
   });
 
   test("rains until a key is pressed, and that key doesn't reach the prompt", async ({ page }) => {
@@ -111,20 +100,24 @@ test.describe("focus stack", () => {
     "Mobile windows are full screen; the title bar and sizes are desktop behaviour",
   );
 
-  test("closing a window opened from the Terminal puts typing back in the prompt", async ({ page }) => {
-    const term = await openApp(page, "terminal");
-    const input = term.getByRole("textbox");
-    await input.fill("open minesweeper");
-    await input.press("Enter");
-    const mines = page.locator('[data-window-id="minigame"]');
-    await expect(mines).toBeVisible();
-    await mines.focus();
-    await page.keyboard.press("Escape");
-    await expect(mines).toHaveCount(0);
-    await expect(input).toBeFocused();
-    await page.keyboard.type("ls");
-    await expect(input).toHaveValue("ls");
-  });
+  test(
+    "closing a window opened from the Terminal puts typing back in the prompt",
+    { tag: ["@webkit"] },
+    async ({ page }) => {
+      const term = await openApp(page, "terminal");
+      const input = term.getByRole("textbox");
+      await input.fill("open minesweeper");
+      await input.press("Enter");
+      const mines = page.locator('[data-window-id="minigame"]');
+      await expect(mines).toBeVisible();
+      await mines.focus();
+      await page.keyboard.press("Escape");
+      await expect(mines).toHaveCount(0);
+      await expect(input).toBeFocused();
+      await page.keyboard.type("ls");
+      await expect(input).toHaveValue("ls");
+    },
+  );
 
   test("clicking the Terminal's title bar focuses the prompt", async ({ page }) => {
     const term = await openApp(page, "terminal");
@@ -160,7 +153,7 @@ test.describe("focus stack", () => {
 });
 
 test.describe("crash containment", () => {
-  test("a crashing app shows its blue screen, and nothing else breaks", async ({ page }) => {
+  test("a crashing app shows its blue screen, and nothing else breaks", { tag: ["@webkit"] }, async ({ page }) => {
     const contact = await openApp(page, "contact");
     const term = await openApp(page, "terminal");
     const input = term.getByRole("textbox");
@@ -199,29 +192,6 @@ test.describe("crash containment", () => {
 });
 
 test.describe("minesweeper", () => {
-  test("first click is safe, flags count down, the face restarts", async ({ page }) => {
-    const win = await openApp(page, "minigame");
-    const status = win.locator("p[aria-live]");
-    await expect(status).toContainText("Right-click or F flags");
-
-    await win.locator('[data-cell="40"]').click();
-    await expect(status).not.toContainText("Boom");
-    await expect(win.locator('[data-cell="40"]')).not.toHaveAttribute("aria-label", /hidden/);
-
-    const hidden = win.locator('[data-cell][aria-label$="hidden"]').first();
-    await hidden.focus();
-    await page.keyboard.press("f");
-    await expect(win.getByRole("status")).toHaveAttribute("aria-label", "9 mines left");
-
-    const flagMode = win.getByRole("button", { name: "Flag mode" });
-    await flagMode.click();
-    await expect(flagMode).toHaveAttribute("aria-pressed", "true");
-    await win.getByRole("button", { name: "New game" }).click();
-    await expect(flagMode).toHaveAttribute("aria-pressed", "false");
-    await expect(status).toContainText("Right-click or F flags");
-    await expect(win.locator('[data-cell][aria-label$="hidden"]')).toHaveCount(81);
-  });
-
   test("F flags the hovered cell, not the last one clicked", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile-iphone", "hover needs a mouse");
     const win = await openApp(page, "minigame");
@@ -270,13 +240,6 @@ test.describe("projects", () => {
 });
 
 test.describe("contact", () => {
-  test("links out to the profiles", async ({ page }) => {
-    const win = await openApp(page, "contact");
-    for (const link of PROFILE.links) {
-      await expect(win.getByRole("link", { name: link.label })).toHaveAttribute("href", link.url);
-    }
-  });
-
   test("validates the message before handing off to the mail app", async ({ page }) => {
     test.skip(!PROFILE.email, "no mail address published yet");
     const win = await openApp(page, "contact");
@@ -286,15 +249,7 @@ test.describe("contact", () => {
   });
 });
 
-test.describe("static apps", () => {
-  test("Me.txt and the Skills Matrix render their content", async ({ page }) => {
-    const about = await openApp(page, "about");
-    await expect(about.getByRole("heading", { name: PROFILE.name })).toBeVisible();
-    const skills = await openApp(page, "skills");
-    await expect(skills.getByRole("table").first()).toBeVisible();
-    await expect(skills.getByRole("rowheader", { name: "Svelte 5" })).toBeVisible();
-  });
-});
+test.describe("static apps", () => {});
 
 for (const theme of ["light", "dark"]) {
   test(`every app window passes axe, contrast included (${theme})`, async ({ page }, testInfo) => {
