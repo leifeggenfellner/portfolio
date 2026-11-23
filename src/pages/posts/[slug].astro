@@ -1,0 +1,95 @@
+---
+import notesIcon from "@/assets/icons/apps/pixel/about.svg?url";
+import { getCollection, render } from "astro:content";
+import { publishedPosts } from "@lib/feed";
+import DocumentLayout from "@/layouts/DocumentLayout.astro";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("posts");
+  const published = new Set(
+    publishedPosts(
+      entries.map((entry) => ({ slug: entry.id, ...entry.data })),
+      import.meta.env.DEV,
+    ).map((post) => post.slug),
+  );
+  return entries
+    .filter((entry) => published.has(entry.id))
+    .map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const dateFormat = new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" });
+---
+
+<DocumentLayout
+  title={entry.data.title}
+  description={entry.data.description ?? entry.data.title}
+  windowTitle={`${entry.id}.txt`}
+  icon={notesIcon}
+>
+  <article>
+    <header>
+      <h1 class="font-chrome text-32 leading-none">{entry.data.title}</h1>
+      <p class="text-16 text-text-dim mt-2 font-mono">
+        <time datetime={entry.data.date.toISOString().slice(0, 10)}>{dateFormat.format(entry.data.date)}</time>
+        {entry.data.tags.length > 0 && <> · {entry.data.tags.join(", ")}</>}
+      </p>
+    </header>
+    <div class="post-body text-15 mt-6 flex max-w-[65ch] flex-col gap-4 leading-relaxed text-pretty">
+      <Content />
+    </div>
+  </article>
+</DocumentLayout>
+
+<style>
+  /* Markdown output has no classes; style its elements from the tokens. */
+  .post-body :global(h2) {
+    font-family: var(--font-chrome);
+    font-size: var(--fs-24);
+    line-height: 1.1;
+    margin-top: var(--sp-3);
+  }
+
+  .post-body :global(h3) {
+    font-family: var(--font-chrome);
+    font-size: var(--fs-18);
+  }
+
+  .post-body :global(a) {
+    color: var(--link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .post-body :global(ul),
+  .post-body :global(ol) {
+    padding-left: var(--sp-5);
+  }
+
+  .post-body :global(ul) {
+    list-style: square;
+  }
+
+  .post-body :global(ol) {
+    list-style: decimal;
+  }
+
+  .post-body :global(code) {
+    font-family: var(--font-mono);
+    font-size: var(--fs-18);
+  }
+
+  .post-body :global(pre) {
+    overflow-x: auto;
+    padding: var(--sp-3);
+    background: var(--terminal-bg);
+    color: var(--terminal-fg);
+  }
+
+  .post-body :global(blockquote) {
+    border-left: 3px solid var(--bevel-shadow);
+    padding-left: var(--sp-3);
+    color: var(--text-dim);
+  }
+</style>

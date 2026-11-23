@@ -43,6 +43,7 @@
           `tech: ${p.tech.join(", ")}`,
           ...(p.url ? [`live: ${p.url}`] : []),
           ...(p.repo ? [`repo: ${p.repo}`] : []),
+          `page: ${new URL(`${import.meta.env.BASE_URL}projects/${p.slug}/`, window.location.origin)}`,
         ],
         "projects",
       );
