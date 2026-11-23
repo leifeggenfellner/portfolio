@@ -1,9 +1,8 @@
 <script lang="ts">
   import Icon from "@primitives/Icon.svelte";
   import { cx } from "@lib/cx";
-  import { durationMs, prefersReducedMotion } from "@lib/motion";
+  import { motion } from "@lib/motion";
   import { SHORTCUTS } from "@lib/os/shortcuts";
-  import { expoOut } from "svelte/easing";
   import type { TransitionConfig } from "svelte/transition";
 
   interface Props {
@@ -22,13 +21,11 @@
 
   const KEY_CLASS = "bevel-out-thin bg-surface text-text font-mono text-[length:var(--fs-15)] px-1 leading-none";
 
-  function noteOut(_node: Element): TransitionConfig {
-    if (prefersReducedMotion()) return { duration: 0 };
-    return {
-      duration: durationMs("--dur-2", 160),
-      easing: expoOut,
+  function noteOut(node: Element): TransitionConfig {
+    return motion(node, {
+      duration: ["--dur-2", 160],
       css: (t) => `transform: rotate(-1.5deg) scale(${0.96 + 0.04 * t}); opacity: ${t};`,
-    };
+    });
   }
 </script>
 
