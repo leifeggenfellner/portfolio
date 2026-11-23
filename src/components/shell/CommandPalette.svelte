@@ -1,11 +1,10 @@
 <script lang="ts">
   import { fuzzyMatch } from "@lib/fuzzy";
-  import { durationMs, prefersReducedMotion } from "@lib/motion";
+  import { motion } from "@lib/motion";
   import { PROJECTS } from "virtual:content/projects";
   import { paletteItems, searchPalette } from "@lib/palette";
   import type { PaletteApp, PaletteItem } from "@lib/palette";
   import { onMount, tick } from "svelte";
-  import { expoOut } from "svelte/easing";
   import type { TransitionConfig } from "svelte/transition";
 
   interface Props {
@@ -73,13 +72,11 @@
   }
 
   // Drops in from just above; leaves faster than it arrives.
-  function paletteMotion(_node: Element, { leaving }: { leaving: boolean }): TransitionConfig {
-    if (prefersReducedMotion()) return { duration: 0 };
-    return {
-      duration: leaving ? durationMs("--dur-1", 80) : durationMs("--dur-2", 160),
-      easing: expoOut,
+  function paletteMotion(node: Element, { leaving }: { leaving: boolean }): TransitionConfig {
+    return motion(node, {
+      duration: leaving ? ["--dur-1", 80] : ["--dur-2", 160],
       css: (t, u) => `transform: translateY(${u * -8}px); opacity: ${t};`,
-    };
+    });
   }
 
   onMount(() => inputEl?.focus());
