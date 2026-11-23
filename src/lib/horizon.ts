@@ -9,7 +9,7 @@
  */
 
 /** Depth between consecutive rows. Smaller is denser. */
-export const ROW_STEP = 0.5;
+const ROW_STEP = 0.5;
 /** Rows closer than this many pixels to the horizon are not drawn. */
 const MIN_ROW_GAP_PX = 2;
 

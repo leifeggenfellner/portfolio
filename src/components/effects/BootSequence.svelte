@@ -91,6 +91,7 @@
       <div class="boot-log retro-scroll">
         {#each printed as line, i (i)}
           <div class="boot-line">
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -- the boot script's own fixed lines, highlighted; no user input -->
             {@html formatLine(line)}{#if i === printed.length - 1}<span class={reduced ? "" : "boot-caret"}>▌</span
               >{/if}
           </div>

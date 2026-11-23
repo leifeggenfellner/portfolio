@@ -3,7 +3,7 @@
  * one set of listeners. Before `listen()` (and on the server) it reports a
  * desktop-sized default, so server and first client render agree.
  */
-export const MOBILE_QUERY = "(max-width: 768px)";
+const MOBILE_QUERY = "(max-width: 768px)";
 const FALLBACK_TASKBAR_HEIGHT = 36;
 
 export class Viewport {

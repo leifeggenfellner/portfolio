@@ -55,7 +55,6 @@ export const profileSchema = z.object({
 });
 
 export type Profile = z.infer<typeof profileSchema>;
-export type TimelineEntry = z.infer<typeof timelineEntrySchema>;
 
 /**
  * A Skills Matrix group. Each skill names where it can be seen in practice,
@@ -66,6 +65,7 @@ export const skillGroupSchema = z.object({
   skills: z.array(z.object({ name: z.string(), evidence: z.string() })),
 });
 
+/** @public Used by the virtual:content/skills declaration (src/content/virtual.d.ts), which knip doesn't follow. */
 export type SkillGroup = z.infer<typeof skillGroupSchema>;
 
 export const postSchema = z.object({

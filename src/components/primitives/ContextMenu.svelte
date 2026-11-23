@@ -114,7 +114,6 @@
   });
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
   bind:this={menuEl}
   class="context-menu"
@@ -123,7 +122,7 @@
   style="left: {x}px; top: {y}px;"
   onkeydown={handleKeydown}
 >
-  {#each items as entry, i}
+  {#each items as entry, i (i)}
     {#if "separator" in entry && entry.separator}
       <div class="context-menu__separator" role="separator"></div>
     {:else}

@@ -19,7 +19,9 @@ export class Launcher {
   #viewport: Viewport;
   // Where each window should grow from next time it appears: the icon or
   // taskbar button that summoned it. Read once by the window's intro.
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- read once when a window opens, never rendered
   #origins = new Map<string, DOMRect>();
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- a stable object per window, never rendered
   #shells = new Map<string, AppShell>();
 
   constructor(apps: readonly AppManifest[], windows: WindowManager, viewport: Viewport) {
