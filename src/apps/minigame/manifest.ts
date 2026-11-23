@@ -6,6 +6,7 @@ export default {
   id: "minigame",
   order: 5,
   title: "Minesweeper",
+  description: "Minesweeper on a retro desktop, playable with mouse, touch or keyboard.",
   icon,
   defaults: { x: 500, y: 60, w: 300, h: 470 },
   load: () => import("./App.svelte"),

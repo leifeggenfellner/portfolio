@@ -6,6 +6,7 @@ export default {
   id: "skills",
   order: 3,
   title: "Skills Matrix",
+  description: "Leif Eggenfellner's skills, without self-ratings: each one names where it has been used.",
   icon,
   defaults: { x: 340, y: 200, w: 520, h: 360 },
   load: () => import("./App.svelte"),
