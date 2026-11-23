@@ -11,12 +11,6 @@ describe("AppFrame", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the app while it works", () => {
-    render(CrashHarness, { failing: () => false, onClose: vi.fn() });
-    expect(screen.getByText("app is running")).toBeInTheDocument();
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  });
-
   it("swaps a crashing app for its blue screen and leaves the rest alone", () => {
     render(CrashHarness, { failing: () => true, onClose: vi.fn() });
     const crash = screen.getByRole("alert");

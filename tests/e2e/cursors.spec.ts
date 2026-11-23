@@ -25,20 +25,13 @@ test("pixel-art cursors on a fine pointer, each with a keyword fallback", async 
   }
 });
 
-test("the System cursor setting and touch devices keep the platform cursors", async ({ page, isMobile }) => {
-  await openDesktop(page, { settings: isMobile ? {} : { cursors: "system" } });
-  for (const el of [page.locator("main"), page.locator('[data-app-id="about"]')]) {
-    expect(await cursorOf(el)).not.toContain("url(");
-  }
-});
-
-test("Settings toggles the pixel-art cursors", async ({ page, isMobile }) => {
-  test.skip(isMobile, "touch devices keep the platform cursor");
-  await openDesktop(page);
-  const settings = await openApp(page, "settings");
-  const toggle = settings.getByRole("checkbox", { name: "Pixel-art cursors" });
-  await expect(toggle).toBeChecked();
-  await toggle.uncheck();
-  await expect(page.locator("html")).toHaveAttribute("data-cursors", "system");
-  expect(await cursorOf(page.locator("main"))).not.toContain("url(");
-});
+test(
+  "the System cursor setting and touch devices keep the platform cursors",
+  { tag: ["@mobile"] },
+  async ({ page, isMobile }) => {
+    await openDesktop(page, { settings: isMobile ? {} : { cursors: "system" } });
+    for (const el of [page.locator("main"), page.locator('[data-app-id="about"]')]) {
+      expect(await cursorOf(el)).not.toContain("url(");
+    }
+  },
+);

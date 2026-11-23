@@ -30,6 +30,12 @@
 6. **Never** use `any`, `as unknown as`, or `@ts-ignore`
    without a one-line justification comment.
 
+## Tests
+
+Lean: a test for real logic or a real failure mode, and for the flows
+that would break the site; never for wiring, markup, styling or copy.
+No coverage targets. See `docs/04-testing-strategy.md`.
+
 ## Default workflow for any change
 
 1. Pick the skills that match the change (catalog below).

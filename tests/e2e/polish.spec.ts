@@ -10,18 +10,7 @@ async function toggleThemeFromDesktop(page: Page) {
 test.describe("degauss", () => {
   test.skip(({ isMobile }) => isMobile, "uses the desktop context menu");
 
-  test("plays on a theme switch", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === "reduced-motion", "covered by the reduced-motion test");
-    // Parallel headless WebKit starves Web Animations (see helpers.ts); Chromium covers the motion.
-    test.skip(testInfo.project.name === "webkit-desktop", "headless WebKit stalls Web Animations");
-    await openDesktop(page);
-    await toggleThemeFromDesktop(page);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-    await expect(page.locator("html")).toHaveAttribute("data-degaussing", "");
-    await expect(page.locator("html")).not.toHaveAttribute("data-degaussing", "");
-  });
-
-  test("is skipped under reduced motion", async ({ page }) => {
+  test("is skipped under reduced motion", { tag: ["@motion"] }, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await openDesktop(page);
     await toggleThemeFromDesktop(page);
