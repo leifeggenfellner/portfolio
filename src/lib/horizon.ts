@@ -91,3 +91,32 @@ export function parseDuration(value: string, fallback: number): number {
   if (Number.isNaN(n)) return fallback;
   return value.trim().endsWith("ms") ? n : n * 1000;
 }
+
+export interface HorizonBudget {
+  /** Frames drawn per second; the loop skips the frames in between. */
+  fps: number;
+  /** Cap on the canvas backing-store scale. */
+  maxDpr: number;
+}
+
+/**
+ * Drawing budget for the floor. Touch devices and machines with few cores
+ * draw at half rate and at 1x resolution; the floor scrolls slowly, so the
+ * difference is hard to see but halves (or better) its cost.
+ */
+export function horizonBudget(device: { coarsePointer: boolean; cores: number | undefined }): HorizonBudget {
+  const lowPower = device.coarsePointer || (device.cores !== undefined && device.cores <= 4);
+  return lowPower ? { fps: 30, maxDpr: 1 } : { fps: 60, maxDpr: 2 };
+}
+
+/**
+ * Whether the desktop wallpaper is hidden behind a window, so its floor need
+ * not be drawn: a maximised window covers it, and on mobile every window is
+ * full screen.
+ */
+export function wallpaperCovered(
+  windows: readonly { minimized: boolean; maximized: boolean }[],
+  mobile: boolean,
+): boolean {
+  return windows.some((w) => !w.minimized && (mobile || w.maximized));
+}
