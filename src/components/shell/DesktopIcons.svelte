@@ -20,7 +20,7 @@
   }
 
   function open(appId: string, button: HTMLElement) {
-    void launcher.open(appId, button.getBoundingClientRect());
+    void launcher.open(appId, { origin: button.getBoundingClientRect() });
   }
 
   // A mouse click selects and a double-click opens, as on a period desktop.

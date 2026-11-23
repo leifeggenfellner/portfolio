@@ -155,7 +155,7 @@
             {@html launcher.html(w.appId)}
           {:else}
             {@const AppComponent = launcher.component(w.appId)}
-            <AppComponent shell={launcher.shellFor(w.id)} />
+            <AppComponent shell={launcher.shellFor(w.id)} args={w.args} />
           {/if}
         </AppFrame>
       </RetroWindow>
