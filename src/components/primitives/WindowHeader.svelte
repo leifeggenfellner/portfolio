@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Icon from "@iconify/svelte";
+  import Icon from "./Icon.svelte";
   import RetroButton from "./RetroButton.svelte";
 
   interface Props {
@@ -85,7 +85,7 @@
   >
     {#if onMin}
       <RetroButton variant="icon" class={sysBtnClass} aria-label="Minimize" title="Minimize" onclick={onMin}>
-        <Icon icon="ic:baseline-minimize" width="16" height="16" />
+        <Icon icon="ui:minimize" />
       </RetroButton>
     {/if}
     {#if onMax}
@@ -96,12 +96,12 @@
         title={maximized ? "Restore" : "Maximize"}
         onclick={onMax}
       >
-        <Icon icon={maximized ? "pixelarticons:card-stack" : "pixelarticons:card-sharp"} width="16" height="16" />
+        <Icon icon={maximized ? "pixelarticons:card-stack" : "pixelarticons:card-sharp"} />
       </RetroButton>
     {/if}
     {#if onClose}
       <RetroButton variant="icon" class={sysBtnClass} aria-label="Close" title="Close" onclick={onClose}>
-        <Icon icon="pixelarticons:close" width="16" height="16" />
+        <Icon icon="pixelarticons:close" />
       </RetroButton>
     {/if}
   </div>

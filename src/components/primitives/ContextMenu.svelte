@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Icon from "@iconify/svelte";
+  import type { IconName } from "@lib/icons";
+  import Icon from "./Icon.svelte";
 
   export interface MenuItem {
     id: string;
     label: string;
-    icon?: string;
+    icon?: IconName;
     disabled?: boolean;
     separator?: false;
   }
@@ -141,7 +142,7 @@
       >
         {#if item.icon}
           <span class="context-menu__icon" aria-hidden="true">
-            <Icon icon={item.icon} width="14" height="14" />
+            <Icon icon={item.icon} size={14} />
           </span>
         {/if}
         <span class="context-menu__label">{item.label}</span>

@@ -62,6 +62,9 @@ jobs:
       - name: Generated docs are current
         run: pnpm docs:check
 
+      - name: Generated icons are current
+        run: node scripts/build-icons.mjs --check
+
       - name: actionlint
         uses: raven-actions/actionlint@v2
 

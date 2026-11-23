@@ -1,5 +1,6 @@
 <script lang="ts">
-  import Icon from "@iconify/svelte";
+  import type { IconName } from "@lib/icons";
+  import Icon from "@primitives/Icon.svelte";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { onMount } from "svelte";
   import { expoOut } from "svelte/easing";
@@ -8,9 +9,10 @@
   export interface StartMenuItem {
     id: string;
     label: string;
-    /** Image URL (app icon) or an Iconify name (system entries). */
-    icon?: string;
-    iconify?: boolean;
+    /** An app's pixel icon (image URL)… */
+    image?: string;
+    /** …or a UI icon, for system entries. */
+    icon?: IconName;
     separatorBefore?: boolean;
   }
 
@@ -130,10 +132,10 @@
         onpointerenter={() => focusItem(i)}
       >
         <span class="flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden="true">
-          {#if item.icon && item.iconify}
-            <Icon icon={item.icon} width="16" height="16" />
-          {:else if item.icon}
-            <img src={item.icon} alt="" width="16" height="16" class="h-4 w-4 object-contain" />
+          {#if item.icon}
+            <Icon icon={item.icon} />
+          {:else if item.image}
+            <img src={item.image} alt="" width="16" height="16" class="h-4 w-4 object-contain" />
           {/if}
         </span>
         <span>{item.label}</span>

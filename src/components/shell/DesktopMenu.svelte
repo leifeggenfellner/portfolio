@@ -16,7 +16,7 @@
   const dark = $derived(settings.current.theme === "dark");
 
   const items = $derived<MenuEntry[]>([
-    ...launcher.apps.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: "pixelarticons:folder" })),
+    ...launcher.apps.map((a): MenuEntry => ({ id: `open:${a.id}`, label: a.title, icon: "pixelarticons:folder" })),
     { separator: true as const },
     { id: "theme:toggle", label: dark ? "Light Theme" : "Dark Theme", icon: dark ? "lucide:sun" : "lucide:moon" },
     { id: "cascade", label: "Cascade Windows", icon: "pixelarticons:layout" },
