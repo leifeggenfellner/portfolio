@@ -51,6 +51,10 @@
   (`playwright.config.ts`): headless WebKit starves timers and
   animation frames when many instances share the CPU.
 - Assertions that wait on canvas frames allow 15 s.
+- WebKit tests run with reduced motion (`tests/e2e/helpers.ts`):
+  even with fewer workers, starved Web Animations can leave a
+  closed window's exit transition unfinished. Chromium covers the
+  motion path.
 - The bar: five full local runs in a row with no failure and no
   retry.
 
