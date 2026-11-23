@@ -9,4 +9,5 @@ export default {
   icon,
   defaults: { x: 180, y: 110, w: 620, h: 420 },
   load: () => import("./App.svelte"),
+  parseArgs: ({ project }) => (project ? { project } : undefined),
 } satisfies AppManifest;

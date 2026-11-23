@@ -6,7 +6,7 @@
 import { fitWindowToViewport } from "@lib/window-bounds";
 import type { Viewport } from "./viewport.svelte";
 import type { WindowManager } from "./window-manager.svelte";
-import type { AppManifest, AppProps, AppShell } from "@lib/app-shell";
+import type { AppArgs, AppManifest, AppProps, AppShell } from "@lib/app-shell";
 import type { Component } from "svelte";
 
 export class Launcher {
@@ -48,11 +48,15 @@ export class Launcher {
     return this.#origins.get(windowId) ?? null;
   }
 
-  /** Open an app (or bring its window forward). Resolves false if its code failed to load. */
-  async open(appId: string, origin?: DOMRect): Promise<boolean> {
+  /**
+   * Open an app (or bring its window forward) with optional arguments, which
+   * the app's manifest checks first. Resolves false if its code failed to load.
+   */
+  async open(appId: string, { args, origin }: { args?: AppArgs; origin?: DOMRect } = {}): Promise<boolean> {
     const app = this.app(appId);
     if (!app) return false;
     if (origin) this.setOrigin(app.id, origin);
+    const parsed = args && app.kind === "svelte" ? app.parseArgs?.(args) : undefined;
     if (app.kind === "svelte" ? !(await this.#load(app.id, app.load)) : !this.#readStatic(app.id)) return false;
     // Read the screen live: a resize event may not have landed yet.
     const box = this.#viewport.mobile
@@ -61,7 +65,7 @@ export class Launcher {
           width: window.innerWidth,
           height: window.innerHeight - this.#viewport.taskbarHeight,
         });
-    this.#windows.open({ id: app.id, appId: app.id, title: app.title, icon: app.icon, box });
+    this.#windows.open({ id: app.id, appId: app.id, title: app.title, icon: app.icon, box, args: parsed });
     return true;
   }
 
@@ -71,7 +75,7 @@ export class Launcher {
     if (!shell) {
       shell = {
         apps: this.apps.map(({ id, title, icon }) => ({ id, title, icon })),
-        open: (appId) => void this.open(appId),
+        open: (appId, args) => void this.open(appId, { args }),
         close: () => this.#windows.close(windowId),
       };
       this.#shells.set(windowId, shell);

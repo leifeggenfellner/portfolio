@@ -1,9 +1,9 @@
 <script lang="ts">
   import { tick } from "svelte";
+  import type { AppArgs } from "@lib/app-shell";
   import { focusWindow } from "@lib/os/focus";
   import { getOs } from "@lib/os/context";
   import type { PaletteItem } from "@lib/palette";
-  import { intents } from "@lib/store/intents";
 
   const { windows, launcher, keymap, boot, settings } = getOs();
 
@@ -35,8 +35,8 @@
   }
 
   /** Open (or bring forward) an app's window and put focus where it works. */
-  async function launchAndFocus(appId: string) {
-    if (!(await launcher.open(appId))) return;
+  async function launchAndFocus(appId: string, args?: AppArgs) {
+    if (!(await launcher.open(appId, { args }))) return;
     await tick();
     focusWindow(windows, appId);
   }
@@ -53,13 +53,8 @@
     isOpen = false;
     returnFocus = null;
     if (action.kind === "app") void launchAndFocus(action.appId);
-    else if (action.kind === "project") {
-      intents.showProject(action.slug);
-      void launchAndFocus("projects");
-    } else {
-      intents.runInTerminal(action.command);
-      void launchAndFocus("terminal");
-    }
+    else if (action.kind === "project") void launchAndFocus("projects", { project: action.slug });
+    else void launchAndFocus("terminal", { command: action.command });
   }
 
   $effect(() =>

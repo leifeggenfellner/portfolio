@@ -47,12 +47,14 @@ describe("stacking and focus", () => {
     expect(wm.activeId).toBe("b");
   });
 
-  it("brings an open window forward on reopen instead of duplicating or moving it", () => {
+  it("brings an open window forward on reopen, handing it the new arguments, without duplicating or moving it", () => {
     const wm = withWindows("a", "b");
     wm.minimize("a");
-    wm.open({ id: "a", appId: "a", title: "a", box: { x: 9, y: 9, w: 1, h: 1 } });
+    const args = { project: "retro-os" };
+    wm.open({ id: "a", appId: "a", title: "a", box: { x: 9, y: 9, w: 1, h: 1 }, args });
     expect(wm.windows).toHaveLength(2);
     expect(wm.get("a")).toMatchObject({ minimized: false, box: { x: 100 } });
+    expect(wm.get("a")?.args).toBe(args);
     expect(wm.activeId).toBe("a");
   });
 });

@@ -3,18 +3,17 @@
   import { PROJECTS } from "@content/projects";
   import { SKILL_GROUPS } from "@content/skills";
   import type { AppProps } from "@lib/app-shell";
-  import { intents } from "@lib/store/intents";
   import { getOs } from "@lib/os/context";
   import { dir, file } from "./fs";
   import type { FsNode } from "./fs";
   import { complete, execute, prompt } from "./shell";
   import type { Line, ShellContext, TerminalEffect } from "./shell";
   import { prefersReducedMotion } from "@lib/motion";
-  import { onMount, tick } from "svelte";
+  import { onMount, tick, untrack } from "svelte";
   import MatrixRain from "./MatrixRain.svelte";
   import PipesCanvas from "./PipesCanvas.svelte";
 
-  let { shell }: AppProps = $props();
+  let { shell, args }: AppProps = $props();
   const { settings } = getOs();
 
   const HOST = "retro";
@@ -96,7 +95,7 @@
   // where the window's error boundary can catch it; a click handler can't.
   let panicked = $state(false);
   // The toy playing over the pane, if any.
-  let effect = $state<TerminalEffect | null>(null);
+  let toy = $state<TerminalEffect | null>(null);
 
   function crash(): never {
     throw new Error("Kernel panic: not syncing");
@@ -165,13 +164,13 @@
     if (result.effect) {
       if (prefersReducedMotion())
         print([{ text: `${result.effect.name}: skipped, reduced motion is on.`, tone: "dim" }]);
-      else effect = result.effect;
+      else toy = result.effect;
     }
     void scrollToEnd();
   }
 
   function endEffect() {
-    effect = null;
+    toy = null;
     inputEl?.focus({ preventScroll: true });
   }
 
@@ -239,10 +238,13 @@
       { text: "type 'help' to list commands, or try 'cat about.txt'.", tone: "dim" },
     ]);
     inputEl?.focus({ preventScroll: true });
-    // The command palette can ask for a command; run it as if typed.
-    return intents.subscribe(() => {
-      const command = intents.take("terminal");
-      if (!command) return;
+  });
+
+  // A launch can ask for a command (the palette); run it as if typed, once per launch.
+  $effect(() => {
+    const command = args?.command;
+    if (!command) return;
+    untrack(() => {
       input = command;
       submit();
     });
@@ -284,9 +286,9 @@
       />
     </form>
   </div>
-  {#if effect?.name === "matrix"}
+  {#if toy?.name === "matrix"}
     <MatrixRain onDone={endEffect} />
-  {:else if effect?.name === "pipes"}
-    <PipesCanvas count={effect.count} onDone={endEffect} />
+  {:else if toy?.name === "pipes"}
+    <PipesCanvas count={toy.count} onDone={endEffect} />
   {/if}
 </div>

@@ -3,11 +3,11 @@
   import folderIcon from "@/assets/icons/apps/pixel/projects.svg?url";
   import { PROJECTS } from "@content/projects";
   import type { AppProps } from "@lib/app-shell";
-  import { intents } from "@lib/store/intents";
   import { cx } from "@lib/cx";
   import RetroButton from "@primitives/RetroButton.svelte";
+  import { untrack } from "svelte";
 
-  let { shell }: AppProps = $props();
+  let { shell, args }: AppProps = $props();
 
   type Folder = "root" | "projects";
   type Place = { folder: Folder } | { project: string };
@@ -73,13 +73,11 @@
     content?.scrollTo({ top: 0 });
   }
 
-  // The command palette can ask for a project; show it, opened or already open.
-  $effect(() =>
-    intents.subscribe(() => {
-      const slug = intents.take("project");
-      if (slug && PROJECTS.some((p) => p.slug === slug)) go({ project: slug });
-    }),
-  );
+  // A launch can ask for a project (the palette, later a URL); show it, opened or already open.
+  $effect(() => {
+    const slug = args?.project;
+    if (slug && PROJECTS.some((p) => p.slug === slug)) untrack(() => go({ project: slug }));
+  });
 
   function goBack() {
     const previous = back.at(-1);
