@@ -154,9 +154,7 @@
     <div bind:this={content} class="retro-scroll min-h-0 overflow-auto">
       {#if project}
         <article class="flex flex-col">
-          <header
-            class="flex items-end gap-3 bg-[linear-gradient(135deg,var(--title-active-from),var(--title-active-to))] px-4 pt-8 pb-3 text-(--title-active-text)"
-          >
+          <header class="flex items-end gap-3 title-bar title-bar-diagonal px-4 pt-8 pb-3">
             <img src={diskIcon} alt="" width="48" height="48" class="pixelated" />
             <div class="min-w-0">
               <h2 class="font-chrome text-24 leading-none">{project.name}</h2>

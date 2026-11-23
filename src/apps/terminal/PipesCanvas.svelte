@@ -44,9 +44,10 @@
       return;
     }
     const styles = getComputedStyle(el);
-    const bg = styles.getPropertyValue("--terminal-bg").trim() || "#0a0618";
+    // Tokens only: the page CSS that defines them is always loaded before a toy runs.
+    const bg = styles.getPropertyValue("--terminal-bg").trim();
     const colors = COLOR_TOKENS.map((token) => styles.getPropertyValue(token).trim()).filter(Boolean);
-    const palette = colors.length ? colors : ["#3cff9c"];
+    const palette = colors.length ? colors : [styles.getPropertyValue("--terminal-fg").trim()];
 
     let pipes = createPipes({ cols: 1, rows: 1, count, colors: palette.length, random: Math.random });
     function resize() {

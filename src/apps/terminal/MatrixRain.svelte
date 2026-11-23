@@ -40,8 +40,9 @@
       return;
     }
     const styles = getComputedStyle(el);
-    const fg = styles.getPropertyValue("--terminal-fg").trim() || "#3cff9c";
-    const bg = styles.getPropertyValue("--terminal-bg").trim() || "#0a0618";
+    // Tokens only: the page CSS that defines them is always loaded before a toy runs.
+    const fg = styles.getPropertyValue("--terminal-fg").trim();
+    const bg = styles.getPropertyValue("--terminal-bg").trim();
     const font = styles.getPropertyValue("--font-mono").trim() || "monospace";
 
     let drops: number[] = [];

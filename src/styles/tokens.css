@@ -95,6 +95,9 @@
   --title-inactive-from: #9484b5;
   --title-inactive-to: #b8acd2;
   --title-inactive-text: #e7dffa;
+  --title-text-shadow: rgba(0, 0, 0, 0.35);
+  /* An inactive window sits lower: a short hard shadow instead of --win-shadow. */
+  --win-shadow-inactive: rgba(0, 0, 0, 0.18);
 
   /* ---- desktop ---- */
   --desktop-bg: #2a1a4a;

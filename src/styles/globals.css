@@ -184,6 +184,47 @@ button {
   box-shadow: inset 1px 1px 0 var(--bevel-shadow) !important;
 }
 
+/* ---- component layer: the shared chrome, defined once ----
+   Utilities (not plain classes) so variants work (`focus:title-bar`,
+   `data-[active=true]:title-bar`) and precedence stays with Tailwind's
+   layers. Everything reads tokens. */
+@utility title-bar {
+  background-image: linear-gradient(var(--title-bar-angle, 90deg), var(--title-active-from), var(--title-active-to));
+  color: var(--title-active-text);
+}
+@utility title-bar-inactive {
+  background-image: linear-gradient(
+    var(--title-bar-angle, 90deg),
+    var(--title-inactive-from),
+    var(--title-inactive-to)
+  );
+  color: var(--title-inactive-text);
+}
+/* Direction modifiers for the same gradient: a vertical stripe, a diagonal banner. */
+@utility title-bar-down {
+  --title-bar-angle: to bottom;
+}
+@utility title-bar-diagonal {
+  --title-bar-angle: 135deg;
+}
+@utility title-text-shadow {
+  text-shadow: 1px 1px 0 var(--title-text-shadow);
+}
+/* The framed app icon at the left of a title bar. */
+@utility title-icon {
+  background: var(--title-icon-bg);
+  box-shadow: 1px 1px 0 var(--title-icon-shadow);
+  outline: 1px solid var(--title-icon-border);
+  outline-offset: -2px;
+}
+@utility window-shadow-inactive {
+  box-shadow: 2px 2px 0 var(--win-shadow-inactive);
+}
+/* Neon text on the wallpaper, e.g. the system badge. */
+@utility desktop-glow {
+  text-shadow: 0 0 14px color-mix(in srgb, var(--magenta) 60%, transparent);
+}
+
 /* ---- focus ring (period-correct dotted) ---- */
 .focus-ring:focus-visible {
   outline: 1px dotted var(--focus-ring-color);

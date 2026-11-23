@@ -17,7 +17,7 @@
     "lighthouse": "lhci autorun",
     "astro": "astro",
     "typecheck": "astro check && svelte-check --fail-on-warnings && tsc --noEmit",
-    "lint": "pnpm lint:js && pnpm lint:css && pnpm lint:md",
+    "lint": "pnpm lint:js && pnpm lint:css && pnpm lint:md && pnpm lint:styles",
     "lint:js": "eslint . --cache --cache-location=.cache/eslint --max-warnings=0",
     "lint:css": "stylelint \"src/**/*.css\" --cache --cache-location=.cache/stylelint",
     "lint:md": "markdownlint-cli2 \"**/*.{md,mdx}\" \"#node_modules\" \"#dist\" \"#.astro\" \"#retro-os\" \"#.claude\" \"#.github\" \"#.direnv\" \"#test-results\" \"#playwright-report\"",
@@ -36,7 +36,8 @@
     "ci": "pnpm typecheck && pnpm lint && pnpm docs:check && node scripts/build-icons.mjs --check && pnpm format:check && pnpm test:cov && pnpm build && pnpm size",
     "prepare": "lefthook install || true",
     "clean": "rm -rf dist .astro node_modules/.vite node_modules/.vitest node_modules/.cache coverage playwright-report .cache",
-    "icons": "node scripts/build-icons.mjs"
+    "icons": "node scripts/build-icons.mjs",
+    "lint:styles": "node scripts/check-styles.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^6.0.1",
