@@ -219,3 +219,17 @@
   data-running={running}
   data-duration-ms={durationMs}
 ></canvas>
+
+<style>
+  /* Canvas floor: spans from the horizon line to the bottom edge. */
+  .horizon-canvas {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 3;
+    display: block;
+    width: 100%;
+    height: var(--grid-horizon-bottom);
+    pointer-events: none;
+  }
+</style>
