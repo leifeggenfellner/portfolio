@@ -5,7 +5,7 @@
   const BADGE_CLASS = [
     "phone:hidden pointer-events-none absolute top-3.5 right-4 z-(--z-desktop)",
     "text-right text-white/85",
-    "[text-shadow:0_0_14px_color-mix(in_srgb,var(--magenta)_60%,transparent)]",
+    "desktop-glow",
   ].join(" ");
 
   const { settings } = getOs();

@@ -227,7 +227,7 @@
       : `left:${x}px;top:${y}px;width:${w}px;${h ? `height:${h}px;` : ""}z-index:${z};`,
   );
 
-  const shadowClass = $derived(active ? "shadow-window" : "[box-shadow:2px_2px_0_rgba(0,0,0,.18)]");
+  const shadowClass = $derived(active ? "shadow-window" : "window-shadow-inactive");
 </script>
 
 {#if !minimized}

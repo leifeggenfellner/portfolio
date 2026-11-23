@@ -30,30 +30,20 @@
 
   const headerClass = [
     "group no-select font-chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5 pointer-coarse:h-12",
-    "bg-[linear-gradient(90deg,var(--title-inactive-from),var(--title-inactive-to))]",
-    "text-[var(--title-inactive-text)]",
-    "data-[active=true]:bg-[linear-gradient(90deg,var(--title-active-from),var(--title-active-to))]",
-    "data-[active=true]:text-[var(--title-active-text)]",
+    "title-bar-inactive data-[active=true]:title-bar",
   ].join(" ");
 
   const iconClass = [
     "h-4 w-4 object-contain",
-    "[filter:grayscale(1)_opacity(0.6)]",
-    "group-data-[active=true]:[filter:none]",
+    "grayscale opacity-60",
+    "group-data-[active=true]:grayscale-0 group-data-[active=true]:opacity-100",
   ].join(" ");
 
-  const iconWrapClass = [
-    "bevel-in flex h-5 w-5 shrink-0 items-center justify-center",
-    "bg-[var(--title-icon-bg)]",
-    "[box-shadow:1px_1px_0_var(--title-icon-shadow)]",
-    "[outline:1px_solid_var(--title-icon-border)]",
-    "[outline-offset:-2px]",
-  ].join(" ");
+  const iconWrapClass = ["bevel-in title-icon flex h-5 w-5 shrink-0 items-center justify-center"].join(" ");
 
   const titleClass = [
     "text-15 flex-1 overflow-hidden text-ellipsis whitespace-nowrap",
-    "[text-shadow:none]",
-    "group-data-[active=true]:[text-shadow:1px_1px_0_rgba(0,0,0,0.35)]",
+    "group-data-[active=true]:title-text-shadow",
   ].join(" ");
 
   // Touch screens get 44px targets; a mouse keeps the period-sized buttons.

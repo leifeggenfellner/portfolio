@@ -56,6 +56,9 @@ jobs:
       - name: Markdownlint
         run: pnpm lint:md
 
+      - name: No raw colours in components
+        run: pnpm lint:styles
+
       - name: Prettier
         run: pnpm exec prettier --check --cache --cache-location=.cache/prettier .
 
