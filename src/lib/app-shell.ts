@@ -27,13 +27,22 @@ export interface AppProps {
   args?: AppArgs;
 }
 
+/** A ready-made launch, listed in the command palette, e.g. a terminal command. */
+export interface AppCommand {
+  label: string;
+  args: AppArgs;
+}
+
 interface AppCommon {
   id: string;
   /** Position on the desktop, the Start menu and other app lists. */
   order: number;
   title: string;
   icon: string;
+  /** Short name under the desktop icon; the title's first word if absent. */
+  label?: string;
   defaults: { x: number; y: number; w: number; h: number };
+  commands?: readonly AppCommand[];
 }
 
 /** Static app — pre-rendered Astro HTML, injected via {@html}. Zero JS. */

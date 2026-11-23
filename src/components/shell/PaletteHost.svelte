@@ -3,6 +3,7 @@
   import type { AppArgs } from "@lib/app-shell";
   import { focusWindow } from "@lib/os/focus";
   import { getOs } from "@lib/os/context";
+  import { bindingFor } from "@lib/os/shortcuts";
   import type { PaletteItem } from "@lib/palette";
 
   const { windows, launcher, keymap, boot, settings } = getOs();
@@ -15,8 +16,6 @@
   let session = $state(0);
   // Where focus was when the palette opened, to go back to when it closes.
   let returnFocus: HTMLElement | null = null;
-
-  const apps = launcher.apps.map(({ id, title, icon }) => ({ id, title, icon }));
 
   export async function open() {
     if (isOpen) return;
@@ -44,25 +43,19 @@
   function run(item: PaletteItem) {
     const { action } = item;
     if (action.kind === "setting") {
-      if (action.key === "theme") settings.set("theme", action.value);
-      else if (action.key === "crt") settings.set("crt", action.value);
-      else settings.set("gridSpeed", action.value);
+      // Values come from that key's own schema options, so they fit.
+      settings.set(action.key, action.value as never);
       close();
       return;
     }
     isOpen = false;
     returnFocus = null;
-    if (action.kind === "app") void launchAndFocus(action.appId);
-    else if (action.kind === "project") void launchAndFocus("projects", { project: action.slug });
-    else void launchAndFocus("terminal", { command: action.command });
+    void launchAndFocus(action.appId, action.args);
   }
 
   $effect(() =>
     keymap.bind({
-      id: "palette",
-      keys: ["Mod+K", "Mod+Shift+K"],
-      scope: "desktop",
-      description: "Open or close the command palette",
+      ...bindingFor("palette"),
       when: () => boot.phase === "desktop",
       run: () => (isOpen ? close() : void open()),
     }),
@@ -71,6 +64,6 @@
 
 {#if isOpen && CommandPalette}
   {#key session}
-    <CommandPalette {apps} onRun={run} onClose={close} />
+    <CommandPalette apps={launcher.apps} onRun={run} onClose={close} />
   {/key}
 {/if}
