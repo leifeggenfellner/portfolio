@@ -2,10 +2,12 @@
   import { cx } from "@lib/cx";
   import { getOs } from "@lib/os/context";
 
-  const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop) [--focus-ring-color:var(--desktop-text)]";
-  const ICON_GRID_DESKTOP =
-    "left-4 flex max-h-[calc(100dvh-2rem-var(--taskbar-height))] flex-col flex-wrap content-start gap-3";
-  const ICON_GRID_MOBILE = "left-3 right-3 grid grid-cols-4 gap-3";
+  // A wrapping column on a desktop, a four-up grid on a phone; CSS, so the server HTML is already right.
+  const ICON_GRID = [
+    "absolute top-4 z-(--z-desktop) [--focus-ring-color:var(--desktop-text)]",
+    "left-4 flex max-h-[calc(100dvh-2rem-var(--taskbar-height))] flex-col flex-wrap content-start gap-3",
+    "phone:left-3 phone:right-3 phone:grid phone:max-h-none phone:grid-cols-4",
+  ].join(" ");
   const ICON_BUTTON_BASE = "focus-ring icon-label text-12 flex flex-col items-center gap-1 p-1 text-white";
   const ICON_IMG_CLASS = "icon-glow h-(--desktop-icon-size) w-(--desktop-icon-size) object-contain";
 
@@ -25,7 +27,8 @@
     void launcher.open(appId, { origin: button.getBoundingClientRect() });
   }
 
-  // Icons are links to each app's page, which is all they do without JS.
+  // Icons are links to each app's page, which is all they do without JS
+  // (so not prefetched: with JS they open a window in place, never the page).
   // With it, a click selects and a double-click opens, as on a period
   // desktop. Enter fires a click with detail 0, so the keyboard opens in one
   // press; touch has no double-tap convention here, so a tap opens. A
@@ -75,22 +78,19 @@
 
 <svelte:document onpointerdown={handleDocumentPointerDown} />
 
-<ul
-  bind:this={list}
-  aria-label="Desktop"
-  class={cx(ICON_GRID_BASE, viewport.mobile ? ICON_GRID_MOBILE : ICON_GRID_DESKTOP)}
->
+<ul bind:this={list} aria-label="Desktop" class={ICON_GRID}>
   {#each launcher.apps as app (app.id)}
     <li>
       <a
         href={href(app.route)}
         data-app-id={app.id}
+        data-astro-prefetch="false"
         data-selected={selected === app.id}
         ondblclick={(e) => open(app.id, e.currentTarget)}
         onclick={(e) => handleClick(app.id, e)}
         onfocus={() => (selected = app.id)}
         onkeydown={handleKeydown}
-        class={cx(ICON_BUTTON_BASE, viewport.mobile ? "w-full" : "w-19")}
+        class={cx(ICON_BUTTON_BASE, "phone:w-full w-19")}
       >
         <img src={app.icon} alt="" aria-hidden="true" class={ICON_IMG_CLASS} width="32" height="32" decoding="async" />
         <span>{app.label ?? app.title.split(" ")[0]}</span>
