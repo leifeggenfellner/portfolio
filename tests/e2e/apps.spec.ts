@@ -55,6 +55,60 @@ test.describe("terminal", () => {
   });
 });
 
+test.describe("focus stack", () => {
+  test.skip(
+    ({ isMobile }) => isMobile,
+    "Mobile windows are full screen; the title bar and sizes are desktop behaviour",
+  );
+
+  test("closing a window opened from the Terminal puts typing back in the prompt", async ({ page }) => {
+    const term = await openApp(page, "terminal");
+    const input = term.getByRole("textbox");
+    await input.fill("open minesweeper");
+    await input.press("Enter");
+    const mines = page.locator('[data-window-id="minigame"]');
+    await expect(mines).toBeVisible();
+    await mines.focus();
+    await page.keyboard.press("Escape");
+    await expect(mines).toHaveCount(0);
+    await expect(input).toBeFocused();
+    await page.keyboard.type("ls");
+    await expect(input).toHaveValue("ls");
+  });
+
+  test("clicking the Terminal's title bar focuses the prompt", async ({ page }) => {
+    const term = await openApp(page, "terminal");
+    const input = term.getByRole("textbox");
+    await page.locator('nav[aria-label="Taskbar"] button').first().focus();
+    await expect(input).not.toBeFocused();
+    await term.getByText("Terminal", { exact: true }).first().click();
+    await expect(input).toBeFocused();
+  });
+
+  test("re-activating a window restores the element focused inside it", async ({ page }) => {
+    const contact = await openApp(page, "contact");
+    const subject = contact.getByLabel("Subject");
+    await subject.focus();
+    await openApp(page, "settings");
+    await page.keyboard.press("Escape");
+    await expect(page.locator('[data-window-id="settings"]')).toHaveCount(0);
+    await expect(subject).toBeFocused();
+  });
+
+  test("opens the Terminal large, but never past the viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 820, height: 560 });
+    const term = await openApp(page, "terminal");
+    // Measured once the opening transition has settled.
+    await expect(async () => {
+      const box = await term.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(820);
+      expect(box!.width).toBeGreaterThan(700);
+    }).toPass();
+  });
+});
+
 test.describe("minesweeper", () => {
   test("first click is safe, flags count down, the face restarts", async ({ page }) => {
     const win = await openApp(page, "minigame");

@@ -49,7 +49,7 @@ export const APPS: AppManifest[] = [
     id: "terminal",
     title: "Terminal",
     icon: terminalIcon,
-    defaults: { x: 260, y: 160, w: 540, h: 340 },
+    defaults: { x: 220, y: 90, w: 720, h: 460 },
     load: () => import("@apps/Terminal.svelte"),
   },
   {
