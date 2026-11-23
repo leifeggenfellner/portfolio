@@ -52,6 +52,12 @@ export default [
 
   js.configs.recommended,
 
+  // Node scripts run from package.json and CI.
+  {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: { globals: globals.node },
+  },
+
   {
     files: ["**/*.ts"],
     languageOptions: {
