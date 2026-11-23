@@ -36,6 +36,7 @@ function context(overrides: Partial<ShellContext> = {}): ShellContext {
       exit: vi.fn(),
       panic: vi.fn(),
     },
+    random: () => 0,
     now: () => new Date("2026-01-01T00:00:00Z"),
     ...overrides,
   };
@@ -123,6 +124,41 @@ describe("terminal shell", () => {
     expect(execute("sudo rm -rf /", ctx).lines[0]?.tone).toBe("dim");
   });
 
+  it("tells fortunes from the injected random source", () => {
+    expect(texts("fortune", context({ random: () => 0 }))).toHaveLength(1);
+    expect(texts("fortune", context({ random: () => 0 }))).not.toEqual(
+      texts("fortune", context({ random: () => 0.99 })),
+    );
+  });
+
+  it("lets the monitor speak, with a joke when given nothing to say", () => {
+    expect(texts("cowsay hi there").join("\n")).toContain("< hi there >");
+    expect(texts("cowsay").join("\n")).toContain("wrong animal");
+  });
+
+  it("asks the terminal for the matrix effect", () => {
+    expect(execute("matrix", context()).effect).toBe("matrix");
+    expect(execute("cmatrix", context()).effect).toBe("matrix");
+  });
+
+  it("prints a manual page for every listed command", () => {
+    for (const name of ["ls", "cd", "cat", "open", "theme", "fortune", "man"]) {
+      const page = texts(`man ${name}`);
+      expect(page[0]).toBe(`${name.toUpperCase()}(1)`);
+      expect(page.length).toBeGreaterThan(3);
+    }
+    expect(execute("man", context()).lines[0]?.tone).toBe("err");
+    expect(texts("man nope")).toEqual(["no manual entry for nope"]);
+    expect(texts("man panic")).toEqual(["no manual entry for panic"]);
+  });
+
+  it("keeps the train and the rain out of help", () => {
+    expect(texts("sl").join("\n")).toContain("you meant 'ls'");
+    const help = texts("help").join("\n");
+    for (const name of ["fortune", "cowsay", "matrix", "man"]) expect(help).toContain(name);
+    for (const name of ["sl", "cmatrix", "panic"]) expect(help).not.toMatch(new RegExp(`^  ${name} `, "m"));
+  });
+
   it("panics on request, without listing panic in help or completion", () => {
     const ctx = context();
     expect(execute("panic", ctx).lines[0]?.tone).toBe("err");
@@ -159,6 +195,12 @@ describe("terminal completion", () => {
   it("completes app ids for open and values for settings", () => {
     expect(complete("open mini", context()).input).toBe("open minigame ");
     expect(complete("theme d", context()).input).toBe("theme dark ");
+  });
+
+  it("completes command names after man, and knows the new commands", () => {
+    expect(complete("man fort", context()).input).toBe("man fortune ");
+    expect(complete("cow", context()).input).toBe("cowsay ");
+    expect(complete("mat", context()).input).toBe("matrix ");
   });
 
   it("leaves the input alone when nothing matches", () => {
