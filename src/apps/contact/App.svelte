@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PROFILE } from "@content/profile";
+  import { PROFILE } from "virtual:content/profile";
   import type { AppProps } from "@lib/app-shell";
   import { mailtoUrl } from "@lib/mailto";
   import RetroButton from "@primitives/RetroButton.svelte";

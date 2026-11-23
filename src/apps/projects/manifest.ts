@@ -18,7 +18,7 @@ export default {
   },
   routes: async () => {
     const [{ PROJECTS }, { projectLd }] = await Promise.all([
-      import("@content/projects"),
+      import("virtual:content/projects"),
       import("@lib/structured-data"),
     ]);
     return PROJECTS.map((p) => ({

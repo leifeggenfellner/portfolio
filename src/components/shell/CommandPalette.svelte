@@ -1,7 +1,7 @@
 <script lang="ts">
   import { fuzzyMatch } from "@lib/fuzzy";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
-  import { PROJECTS } from "@content/projects";
+  import { PROJECTS } from "virtual:content/projects";
   import { paletteItems, searchPalette } from "@lib/palette";
   import type { PaletteApp, PaletteItem } from "@lib/palette";
   import { onMount, tick } from "svelte";
