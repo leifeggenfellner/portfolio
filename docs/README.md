@@ -15,7 +15,6 @@ should be either fixed in code or proposed as an ADR.
 | 04  | [Testing strategy](./04-testing-strategy.md)                     | QA       |
 | 05  | [Performance + accessibility](./05-performance-a11y.md)          | Platform |
 | 06  | [Development workflow](./06-workflow.md)                         | Platform |
-| 07  | [Roadmap](./07-roadmap.md)                                       | PM       |
 | 08  | [Conventions](./08-conventions.md)                               | All      |
 
 ADRs live in [./adrs/](./adrs/). New non-trivial choices land as

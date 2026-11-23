@@ -25,21 +25,22 @@ Coding conventions, one screen.
 
 ## Component architecture
 
-- Compound > prop-bloat. (`<RetroCard>` + `RetroCard.Title`.)
+- Snippets > prop-bloat for slotted chrome.
 - Variant > boolean flags. (`variant="primary"` not `primary`.)
 - Controlled > uncontrolled for anything the parent might care
   about (windows are controlled by the manager).
 - Each primitive has a one-paragraph JSDoc at the top covering
   purpose, composition, and a11y.
-- Side-effects are isolated to `useEffect` and clean themselves
-  up. Always.
+- `$effect` only for real side effects (listeners, timers, DOM), and
+  it returns its cleanup. State derived from state is `$derived`.
 
-## Hooks
+## Shared state
 
-- One concern per hook. If a hook returns more than ~4 things,
-  split it.
-- Hooks live in `src/lib/hooks/` and are SSR-safe (guard with
-  `useEffect`).
+- Shared state lives in the kernel (`src/lib/os/`): rune classes from
+  `getOs()`, never module-level singletons.
+- Anything that reads the browser (storage, viewport, time) renders
+  the same on the server and the first client render, and updates
+  after mount.
 
 ## Styling
 

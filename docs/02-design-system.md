@@ -24,12 +24,11 @@ The reusable kit. Presentational, variant- or compound-driven,
 zero portfolio content.
 
 - `RetroButton` — variant: default|primary|ghost|icon, size: sm|md|lg|icon
-- `RetroCard` — compound `RetroCard.Title` / `RetroCard.Body`
 - `WindowHeader` — title bar with system buttons
 - `RetroWindow` — draggable / focusable / resizable frame
-- `GroupBox` — fieldset-style sunk frame
-- `Tabs` — ARIA tablist with roving tabindex
-- `Tooltip` — hover/focus yellow note
+- `ContextMenu` — right-click menu with roving focus
+- `Icon` — UI icons inlined at build time (`pnpm icons`)
+- `PixelArt` — sprites drawn from character grids
 - `ContextMenu` + `useContextMenu`
 - `Modal` — focus-trapped dialog
 - `DesktopIcon`
@@ -74,9 +73,9 @@ StartMenu, Dock, CommandPalette, AppErrorBoundary.
 
 - Themes are activated by `[data-theme="light|dark"]` on `<html>`.
 - CRT intensity by `[data-crt="off|subtle|full"]`.
-- Accent swap by `[data-accent="default|magenta|cyan|amber"]`.
-- All three are persisted to `localStorage` by the Tweaks panel
-  (TODO).
+- Every setting and its attribute is listed in
+  [inventory.md](./inventory.md); the Settings app changes them and
+  they persist in `localStorage`.
 
 ## Anti-patterns
 
