@@ -47,7 +47,7 @@
           `tech: ${p.tech.join(", ")}`,
           ...(p.url ? [`live: ${p.url}`] : []),
           ...(p.repo ? [`repo: ${p.repo}`] : []),
-          `page: ${new URL(`${import.meta.env.BASE_URL}projects/${p.slug}/`, window.location.origin)}`,
+          `page: ${new URL(`${import.meta.env.BASE_URL}projects/${p.slug}/`, import.meta.env.SITE)}`,
         ],
         "projects",
       );
@@ -82,8 +82,12 @@
 
   const root = buildFs();
 
-  let nextId = 0;
-  let entries = $state<Entry[]>([]);
+  let nextId = 2;
+  // The banner is there from the first render, so the Terminal's page shows it without JS.
+  let entries = $state<Entry[]>([
+    { id: 0, text: "RETRO//OS terminal. retro-sh, read-only filesystem.", tone: "accent" },
+    { id: 1, text: "type 'help' to list commands, or try 'cat about.txt'.", tone: "dim" },
+  ]);
   let cwd = $state<string[]>([...HOME]);
   let input = $state("");
   let history = $state<string[]>([]);
@@ -233,10 +237,6 @@
   };
 
   onMount(() => {
-    print([
-      { text: "RETRO//OS terminal. retro-sh, read-only filesystem.", tone: "accent" },
-      { text: "type 'help' to list commands, or try 'cat about.txt'.", tone: "dim" },
-    ]);
     inputEl?.focus({ preventScroll: true });
   });
 

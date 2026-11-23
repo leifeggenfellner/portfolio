@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { AppProps } from "@lib/app-shell";
   import { cx } from "@lib/cx";
+  import { onMount } from "svelte";
   import { getOs } from "@lib/os/context";
   import { inTextField } from "@lib/os/keymap.svelte";
   import { bindingFor } from "@lib/os/shortcuts";
@@ -44,7 +45,9 @@
   let flagMode = $state(false);
   let startedAt = 0;
   let seconds = $state(0);
-  let best = $state<number | null>(readBest());
+  // Read after mount: storage isn't there on the server, and both renders must agree.
+  let best = $state<number | null>(null);
+  onMount(() => (best = readBest()));
   let gridEl = $state<HTMLElement>();
 
   const face = $derived(

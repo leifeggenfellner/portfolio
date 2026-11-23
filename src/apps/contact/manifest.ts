@@ -2,7 +2,7 @@ import icon from "@/assets/icons/apps/pixel/contact.svg?url";
 import type { AppManifest } from "@lib/app-shell";
 
 export default {
-  kind: "svelte",
+  route: "/contact/",
   id: "contact",
   order: 4,
   title: "Contact",

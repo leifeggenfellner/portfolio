@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { openDesktop } from "./helpers";
 import type { Page } from "@playwright/test";
 
-const icon = (page: Page, name: string) => page.locator("main ul").getByRole("button", { name });
+const icon = (page: Page, name: string) => page.locator("main ul").getByRole("link", { name });
 const taskbar = (page: Page) => page.getByRole("navigation", { name: "Taskbar" });
 
 test.describe("desktop shell", () => {

@@ -1,0 +1,39 @@
+---
+/**
+ * Every app's page: the desktop with that app's window open, server-rendered
+ * with its real content (`/terminal/`, `/projects/retro-os/`, …). Generated
+ * from the app manifests; adding an app adds its pages.
+ */
+import "@apps/server";
+import { APPS } from "@apps/registry";
+import type { AppArgs } from "@lib/app-shell";
+import Os from "@shell/Os.svelte";
+import RootLayout from "@/layouts/RootLayout.astro";
+
+interface Props {
+  appId: string;
+  args?: AppArgs;
+  title: string;
+  description?: string;
+}
+
+export async function getStaticPaths() {
+  const pages = [];
+  for (const app of APPS) {
+    pages.push({ path: app.route, props: { appId: app.id, title: app.title } });
+    for (const route of (await app.routes?.()) ?? []) {
+      pages.push({
+        path: route.path,
+        props: { appId: app.id, args: route.args, title: route.title, description: route.description },
+      });
+    }
+  }
+  return pages.map(({ path, props }) => ({ params: { app: path.slice(1, -1) }, props }));
+}
+
+const { appId, args, title, description } = Astro.props;
+---
+
+<RootLayout title={`${title} · RETRO//OS`} description={description}>
+  <Os client:desktop initial={{ appId, args }} />
+</RootLayout>

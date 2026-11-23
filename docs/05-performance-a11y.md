@@ -26,13 +26,11 @@ Enforced in CI:
   (`lighthouserc.mobile.json`, `lighthouserc.desktop.json`).
   Results go in the job summary; the full reports are uploaded as
   an artifact.
-- **Mobile LCP in CI is a 3 s guard, not the 2.5 s target.** The
-  LCP element is the boot splash heading, which appears once the
-  desktop island hydrates, so simulated slow 4G puts it near
-  2.5 s, and shared CI runners measure about 0.7 s slower than a
-  laptop (2.52 s against 1.8 s for the same build). A 2.5 s gate
-  there would fail at random; 3 s still catches a real
-  regression.
+- **Mobile LCP in CI is gated at the 2.5 s target.** The desktop
+  is server-rendered (ADR 0006), so the LCP element is in the
+  first HTML instead of appearing once the island hydrates. It was
+  a 3 s guard while the desktop was client-only and measured about
+  2.5 s on shared CI runners.
 
 The image budget and real-device INP are still checked by hand.
 

@@ -31,7 +31,8 @@ test.describe("degauss", () => {
 });
 
 test.describe("screensaver", () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, isMobile }) => {
+    test.skip(isMobile, "phones have no screensaver; they stay lightweight");
     await page.clock.install();
   });
 

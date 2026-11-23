@@ -15,7 +15,7 @@ const COMMANDS = [
 ];
 
 export default {
-  kind: "svelte",
+  route: "/terminal/",
   id: "terminal",
   order: 2,
   title: "Terminal",

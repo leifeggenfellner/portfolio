@@ -18,11 +18,19 @@ export default defineConfig({
   base: BASE,
   output: "static",
   trailingSlash: "ignore",
-  // Astro only collects CSS for components rendered during SSR, so scoped
-  // <style> blocks in components that first appear after hydration (menus,
-  // windows) were dropped from builds. Injecting component CSS via JS ships
-  // it with whichever side renders the component.
-  integrations: [svelte({ emitCss: false }), mdx(), sitemap()],
+  integrations: [
+    svelte(),
+    mdx(),
+    sitemap(),
+    {
+      // client:desktop — hydrate once an app route's app has loaded (src/directives/desktop.ts).
+      name: "desktop-directive",
+      hooks: {
+        "astro:config:setup": ({ addClientDirective }) =>
+          addClientDirective({ name: "desktop", entrypoint: "./src/directives/desktop.ts" }),
+      },
+    },
+  ],
   vite: {
     plugins: [tailwindcss()],
     define: {
