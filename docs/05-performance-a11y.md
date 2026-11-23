@@ -43,7 +43,7 @@ The image budget and real-device INP are still checked by hand.
 - All Svelte apps are dynamic imports — Terminal is not downloaded until
   Terminal is opened.
 - No third-party scripts. Fonts are self-fetched from Google
-  Fonts (or self-hosted later — see roadmap).
+  Fonts, self-hosted by Astro's font provider.
 
 ## Image strategy
 

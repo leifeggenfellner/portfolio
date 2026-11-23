@@ -7,9 +7,11 @@
 ## Project shape
 
 - **Stack:** Astro 6 + Svelte 5 (runes) + TypeScript (strict) +
-  Tailwind v4 + Svelte stores. Static export to GitHub Pages.
-  See ADR 0004 for why Svelte replaced React, and ADR 0006 for
-  the target architecture (route-first desktop, OS kernel).
+  Tailwind v4. Static export to GitHub Pages.
+- **Architecture:** route-first (every app is a server-rendered
+  URL) with an OS kernel of rune classes in context
+  (`src/lib/os/`); apps are folders in `src/apps/`. See
+  `docs/01-architecture.md` and ADR 0006.
 - **Identity:** vaporwave retro-OS. Magenta/cyan title bars,
   chunky bevels, CRT scanlines, ~4s cinematic boot.
 - **Single source of design truth:** `retro-os/` mockups.
