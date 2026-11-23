@@ -1,6 +1,8 @@
 # ADR 0004 — Svelte 5 over React for the desktop island
 
-- **Status:** Accepted (2026-06-01)
+- **Status:** Accepted (2026-06-01); the single client-only
+  island, the stores and the `<template>` injection of static apps
+  are superseded by ADR 0006.
 - **Supersedes:** the React parts of ADR 0003 (window manager
   remains; its host framework changes).
 

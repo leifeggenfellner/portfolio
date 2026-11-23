@@ -2,6 +2,8 @@
 
 - **Status:** Accepted (2026-05-29); the Zustand part is
   superseded by ADR 0004, and the store is now a Svelte store.
+  The store itself is superseded by ADR 0006 (a `WindowManager`
+  rune class in the OS kernel).
 
 ## Decision
 

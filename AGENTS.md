@@ -8,7 +8,8 @@
 
 - **Stack:** Astro 6 + Svelte 5 (runes) + TypeScript (strict) +
   Tailwind v4 + Svelte stores. Static export to GitHub Pages.
-  See ADR 0004 for why Svelte replaced React.
+  See ADR 0004 for why Svelte replaced React, and ADR 0006 for
+  the target architecture (route-first desktop, OS kernel).
 - **Identity:** vaporwave retro-OS. Magenta/cyan title bars,
   chunky bevels, CRT scanlines, ~4s cinematic boot.
 - **Single source of design truth:** `retro-os/` mockups.
