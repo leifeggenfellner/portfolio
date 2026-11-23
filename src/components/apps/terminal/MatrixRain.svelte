@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { stopOnInput } from "@lib/stop-on-input";
   import { onMount } from "svelte";
 
   interface Props {
@@ -59,21 +60,14 @@
     raf = requestAnimationFrame(frame);
 
     // The key that stops the rain is swallowed, so it doesn't also type into the prompt.
-    const stop = (e: Event) => {
-      e.preventDefault();
-      e.stopPropagation();
-      onDone();
-    };
-    window.addEventListener("keydown", stop, { capture: true, once: true });
-    window.addEventListener("pointerdown", stop, { capture: true, once: true });
+    const stopListening = stopOnInput(onDone);
     const observer = new ResizeObserver(resize);
     observer.observe(el);
 
     return () => {
       cancelAnimationFrame(raf);
       observer.disconnect();
-      window.removeEventListener("keydown", stop, { capture: true });
-      window.removeEventListener("pointerdown", stop, { capture: true });
+      stopListening();
     };
   });
 </script>

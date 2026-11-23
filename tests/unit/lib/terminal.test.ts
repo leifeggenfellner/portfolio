@@ -137,8 +137,11 @@ describe("terminal shell", () => {
   });
 
   it("asks the terminal for the matrix effect", () => {
-    expect(execute("matrix", context()).effect).toBe("matrix");
-    expect(execute("cmatrix", context()).effect).toBe("matrix");
+    expect(execute("matrix", context()).effect).toEqual({ name: "matrix" });
+    expect(execute("cmatrix", context()).effect).toEqual({ name: "matrix" });
+    expect(execute("pipes", context()).effect).toEqual({ name: "pipes", count: 4 });
+    expect(execute("pipes 7", context()).effect).toEqual({ name: "pipes", count: 7 });
+    expect(execute("pipes 99", context()).lines[0]).toEqual({ text: "usage: pipes [1-8]", tone: "err" });
   });
 
   it("prints a manual page for every listed command", () => {
