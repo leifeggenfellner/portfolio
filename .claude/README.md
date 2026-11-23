@@ -1,4 +1,4 @@
-# Claude Code — agents & skills
+# Claude Code — skills
 
 This directory powers the AI development workflow for the
 Retro portfolio.
@@ -7,28 +7,23 @@ Retro portfolio.
 
 ```
 .claude/
-├── agents/      # specialist personas, invoked per task
 ├── skills/      # reusable playbooks, one folder each: <name>/SKILL.md
-└── templates/   # starting points for new agents and skills
+└── templates/   # starting point for new skills
 ```
 
-Each **agent** is a Markdown file with YAML frontmatter
-(`name`, `description`, `tools`, `model`). Each **skill** is a
-folder holding a `SKILL.md` playbook (frontmatter `name`,
-`description`) that a human or an agent can follow step-by-step.
-Claude Code only discovers skills in that folder layout, and
-matches tasks to them by `description`. Templates live outside
-`agents/` and `skills/` so they are not loaded as real ones.
+Each **skill** is a folder holding a `SKILL.md` playbook
+(frontmatter `name`, `description`) that a human or an agent can
+follow step-by-step. Claude Code only discovers skills in that
+folder layout, and matches tasks to them by `description`. The
+template lives outside `skills/` so it is not loaded as a real one.
 
 ## How to use
 
-- In Claude Code, type `@<agent-name>` to scope a request to
-  that agent (e.g. `@retro-os-designer add a tray clock`).
-- Or invoke a skill: `/review-pr`. Claude also loads a skill on
-  its own when a task matches its `description`.
+- Invoke a skill directly: `/review-pr`.
+- Claude also loads a skill on its own when a task matches its
+  `description`.
 
-## Adding agents / skills
+## Adding a skill
 
-1. Copy `templates/agent.md` to `agents/<name>.md`, or
-   `templates/skill.md` to `skills/<name>/SKILL.md`.
-2. Keep them surgical — one job, one persona.
+1. Copy `templates/skill.md` to `skills/<name>/SKILL.md`.
+2. Keep it surgical — one job per skill.
