@@ -31,7 +31,7 @@
 
   let { deepLink = false }: Props = $props();
 
-  const { windows, settings, keymap, boot, viewport, launcher, announcer, navigation } = getOs();
+  const { windows, settings, keymap, boot, viewport, launcher, announcer, navigation, updates } = getOs();
 
   let icons = $state<ReturnType<typeof DesktopIcons>>();
   let menu = $state<ReturnType<typeof DesktopMenu>>();
@@ -180,6 +180,7 @@
     menuItems={START_MENU_ITEMS}
     onToggleWindow={handleTaskbarToggle}
     onMenuSelect={handleStartSelect}
+    onUpdate={updates.ready ? () => updates.apply() : undefined}
   />
 </div>
 

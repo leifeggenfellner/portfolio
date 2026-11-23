@@ -53,6 +53,12 @@ export default [
 
   js.configs.recommended,
 
+  // The service worker template; the build fills in __PRECACHE__.
+  {
+    files: ["src/pwa/*.js"],
+    languageOptions: { globals: { ...globals.serviceworker, __PRECACHE__: "readonly" } },
+  },
+
   // Node scripts run from package.json and CI.
   {
     files: ["scripts/**/*.mjs"],

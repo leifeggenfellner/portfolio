@@ -116,3 +116,13 @@ for the same reason.
 - A failed app import is logged by the Launcher; the window doesn't open.
 - The Terminal's hidden `panic` command crashes it on purpose; the e2e
   suite uses it to exercise the boundary.
+
+## Offline
+
+A hand-written service worker (`src/pwa/sw.js`, filled in at build
+time by the `service-worker` integration in `astro.config.ts`)
+precaches every page and asset. After one visit the site works
+offline: hashed assets come from the cache first, pages are served
+stale-while-revalidate. A new build waits until the visitor presses
+"Update ready" in the taskbar (the kernel's `Updates` service), so
+nothing changes under an open desktop. Not registered in `dev`.
