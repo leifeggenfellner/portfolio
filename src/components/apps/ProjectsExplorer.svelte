@@ -3,6 +3,7 @@
   import folderIcon from "@/assets/icons/apps/pixel/projects.svg?url";
   import { PROJECTS } from "@content/projects";
   import type { AppProps } from "@lib/app-shell";
+  import { intents } from "@lib/store/intents";
   import { cx } from "@lib/cx";
   import RetroButton from "@primitives/RetroButton.svelte";
 
@@ -70,6 +71,14 @@
     selected = null;
     content?.scrollTo({ top: 0 });
   }
+
+  // The command palette can ask for a project; show it, opened or already open.
+  $effect(() =>
+    intents.subscribe(() => {
+      const slug = intents.take("project");
+      if (slug && PROJECTS.some((p) => p.slug === slug)) go({ project: slug });
+    }),
+  );
 
   function goBack() {
     const previous = back.at(-1);
