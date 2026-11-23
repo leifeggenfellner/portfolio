@@ -1,8 +1,7 @@
 <script lang="ts">
   import { cx } from "@lib/cx";
-  import { durationMs, easing, prefersReducedMotion } from "@lib/motion";
+  import { durationMs, easing, prefersReducedMotion, motion } from "@lib/motion";
   import { tick } from "svelte";
-  import { expoOut } from "svelte/easing";
   import WindowHeader from "./WindowHeader.svelte";
   import type { Snippet } from "svelte";
   import type { TransitionConfig } from "svelte/transition";
@@ -160,27 +159,23 @@
 
   // Grow out of the icon or taskbar button that opened the window.
   function windowIn(node: Element): TransitionConfig {
-    if (prefersReducedMotion()) return { duration: 0 };
     const { dx, dy, scale } = towards(node, originFor?.());
-    return {
-      duration: durationMs("--dur-3", 240),
-      easing: expoOut,
+    return motion(node, {
+      duration: ["--dur-3", 240],
       css: (t, u) =>
         `transform: translate(${dx * u}px, ${dy * u}px) scale(${scale + (1 - scale) * t}); opacity: ${Math.min(1, t * 2)};`,
-    };
+    });
   }
 
   // Exits are faster than entrances: shrink into the taskbar when minimised,
   // otherwise a short fade and settle.
   function windowOut(node: Element): TransitionConfig {
-    if (prefersReducedMotion()) return { duration: 0 };
     const toTaskbar = minimized ? minimizeTargetFor?.() : null;
     const { dx, dy, scale } = toTaskbar ? towards(node, toTaskbar) : { dx: 0, dy: 0, scale: 0.97 };
-    return {
-      duration: durationMs("--dur-2", 160),
-      easing: expoOut,
+    return motion(node, {
+      duration: ["--dur-2", 160],
       css: (t, u) => `transform: translate(${dx * u}px, ${dy * u}px) scale(${scale + (1 - scale) * t}); opacity: ${t};`,
-    };
+    });
   }
 
   // Maximise and restore animate the frame from its old box to its new one

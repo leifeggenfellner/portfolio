@@ -1,9 +1,8 @@
 <script lang="ts">
   import type { IconName } from "@lib/icons";
   import Icon from "@primitives/Icon.svelte";
-  import { durationMs, prefersReducedMotion } from "@lib/motion";
+  import { motion } from "@lib/motion";
   import { onMount } from "svelte";
-  import { expoOut } from "svelte/easing";
   import type { TransitionConfig } from "svelte/transition";
 
   export interface StartMenuItem {
@@ -86,13 +85,11 @@
   }
 
   // Rises out of the taskbar; leaves faster than it arrives.
-  function menuMotion(_node: Element, { leaving }: { leaving: boolean }): TransitionConfig {
-    if (prefersReducedMotion()) return { duration: 0 };
-    return {
-      duration: leaving ? durationMs("--dur-1", 80) : durationMs("--dur-2", 160),
-      easing: expoOut,
+  function menuMotion(node: Element, { leaving }: { leaving: boolean }): TransitionConfig {
+    return motion(node, {
+      duration: leaving ? ["--dur-1", 80] : ["--dur-2", 160],
       css: (t, u) => `transform: translateY(${u * 8}px); opacity: ${t};`,
-    };
+    });
   }
 
   onMount(() => {
