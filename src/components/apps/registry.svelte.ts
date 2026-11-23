@@ -5,28 +5,7 @@ import projectsIcon from "@/assets/icons/apps/pixel/projects.svg?url";
 import settingsIcon from "@/assets/icons/apps/pixel/settings.svg?url";
 import skillsIcon from "@/assets/icons/apps/pixel/skills.svg?url";
 import terminalIcon from "@/assets/icons/apps/pixel/terminal.svg?url";
-import type { AppProps } from "@lib/app-shell";
-import type { Component } from "svelte";
-
-interface AppCommon {
-  id: string;
-  title: string;
-  icon: string;
-  defaults: { x: number; y: number; w: number; h: number };
-}
-
-/** Static app — pre-rendered Astro HTML, injected via {@html}. Zero JS. */
-export interface StaticApp extends AppCommon {
-  kind: "static";
-}
-
-/** Interactive app — Svelte component, dynamic-imported on first open. */
-export interface SvelteApp extends AppCommon {
-  kind: "svelte";
-  load: () => Promise<{ default: Component<AppProps> }>;
-}
-
-export type AppManifest = StaticApp | SvelteApp;
+import type { AppManifest } from "@lib/app-shell";
 
 export const APPS: AppManifest[] = [
   {
