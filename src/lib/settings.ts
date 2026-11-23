@@ -2,6 +2,8 @@ export type Theme = "light" | "dark";
 export type CrtMode = "off" | "subtle" | "full";
 export type GridSpeed = "paused" | "slow" | "normal" | "fast";
 export type IconSize = "small" | "medium" | "large";
+/** The desktop's pixel-art cursors, or the platform's own. */
+export type CursorStyle = "retro" | "system";
 /** Minutes of inactivity before the screensaver starts, or never. */
 export type ScreensaverDelay = "never" | "1" | "3" | "10";
 
@@ -12,6 +14,7 @@ export type Settings = {
   gridSpeed: GridSpeed;
   iconSize: IconSize;
   screensaver: ScreensaverDelay;
+  cursors: CursorStyle;
 };
 
 export const THEMES: readonly Theme[] = ["light", "dark"];
@@ -19,6 +22,7 @@ export const CRT_MODES: readonly CrtMode[] = ["off", "subtle", "full"];
 export const GRID_SPEEDS: readonly GridSpeed[] = ["paused", "slow", "normal", "fast"];
 export const ICON_SIZES: readonly IconSize[] = ["small", "medium", "large"];
 export const SCREENSAVER_DELAYS: readonly ScreensaverDelay[] = ["never", "1", "3", "10"];
+export const CURSOR_STYLES: readonly CursorStyle[] = ["retro", "system"];
 
 export const SETTINGS_STORAGE_KEY = "retro-os:settings";
 
@@ -29,6 +33,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = {
   gridSpeed: "normal",
   iconSize: "medium",
   screensaver: "3",
+  cursors: "retro",
 };
 
 const ROOT_ATTRIBUTE_RULES = [
@@ -36,6 +41,7 @@ const ROOT_ATTRIBUTE_RULES = [
   { key: "crt", attribute: "data-crt", allowed: CRT_MODES },
   { key: "gridSpeed", attribute: "data-grid-speed", allowed: GRID_SPEEDS },
   { key: "iconSize", attribute: "data-icon-size", allowed: ICON_SIZES },
+  { key: "cursors", attribute: "data-cursors", allowed: CURSOR_STYLES },
 ] as const;
 
 function isAllowedValue<T extends string>(value: unknown, allowed: readonly T[]): value is T {
@@ -94,6 +100,11 @@ export function parseSettings(raw: string | null): Settings {
   const screensaver = parsed.screensaver;
   if (isAllowedValue(screensaver, SCREENSAVER_DELAYS)) {
     next.screensaver = screensaver;
+  }
+
+  const cursors = parsed.cursors;
+  if (isAllowedValue(cursors, CURSOR_STYLES)) {
+    next.cursors = cursors;
   }
 
   return next;

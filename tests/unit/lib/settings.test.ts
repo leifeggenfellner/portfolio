@@ -32,11 +32,12 @@ describe("settings contract", () => {
     expect(parseSettings('"x"')).toEqual(DEFAULT_SETTINGS);
   });
 
-  it("always returns exactly six keys", () => {
+  it("always returns exactly the known keys", () => {
     const parsed = parseSettings('{"theme":"dark","extra":"drop-me"}');
     expect(Object.keys(parsed).sort()).toEqual([
       "bootAnimation",
       "crt",
+      "cursors",
       "gridSpeed",
       "iconSize",
       "screensaver",
@@ -51,7 +52,13 @@ describe("settings contract", () => {
     expect(screensaverDelayMs("never")).toBeNull();
   });
 
-  it("applySettingsToRoot sets exactly the four mapped attributes", () => {
+  it("parses the cursor style, defaulting to the pixel-art cursors", () => {
+    expect(DEFAULT_SETTINGS.cursors).toBe("retro");
+    expect(parseSettings('{"cursors":"system"}').cursors).toBe("system");
+    expect(parseSettings('{"cursors":"huge"}').cursors).toBe("retro");
+  });
+
+  it("applySettingsToRoot sets exactly the mapped attributes", () => {
     const root = document.createElement("div");
     const value: Settings = {
       bootAnimation: false,
@@ -60,12 +67,14 @@ describe("settings contract", () => {
       gridSpeed: "fast",
       iconSize: "large",
       screensaver: "3",
+      cursors: "system",
     };
 
     applySettingsToRoot(root, value);
 
     const names = root.getAttributeNames().sort();
-    expect(names).toEqual(["data-crt", "data-grid-speed", "data-icon-size", "data-theme"]);
+    expect(names).toEqual(["data-crt", "data-cursors", "data-grid-speed", "data-icon-size", "data-theme"]);
+    expect(root.getAttribute("data-cursors")).toBe("system");
     expect(root.getAttribute("data-theme")).toBe("dark");
     expect(root.getAttribute("data-crt")).toBe("subtle");
     expect(root.getAttribute("data-grid-speed")).toBe("fast");
