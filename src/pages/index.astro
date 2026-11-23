@@ -1,6 +1,6 @@
 ---
 /**
- * Home — the desktop IS the hero. We hydrate the Desktop island
+ * Home — the desktop IS the hero. We hydrate the desktop island
  * with `client:load` because the boot animation and interactivity
  * are immediate.
  *
@@ -11,12 +11,12 @@
  */
 import About from "@apps/About.astro";
 import SkillsMatrix from "@apps/SkillsMatrix.astro";
-import Desktop from "@shell/Desktop.svelte";
+import Os from "@shell/Os.svelte";
 import RootLayout from "@/layouts/RootLayout.astro";
 ---
 
 <RootLayout>
-  <Desktop client:load />
+  <Os client:load />
 
   <template data-static-app="about"><About /></template>
   <template data-static-app="skills"><SkillsMatrix /></template>

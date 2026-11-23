@@ -1,13 +1,13 @@
 <script lang="ts">
   import { cx } from "@lib/cx";
-  import type { WindowState } from "@lib/store/window-manager";
+  import type { AppWindow } from "@lib/os/window-manager.svelte";
   import RetroButton from "@primitives/RetroButton.svelte";
   import { onMount } from "svelte";
   import StartMenu from "./StartMenu.svelte";
   import type { StartMenuItem } from "./StartMenu.svelte";
 
   interface Props {
-    windows: WindowState[];
+    windows: readonly AppWindow[];
     activeId: string | null;
     menuItems: StartMenuItem[];
     mobile?: boolean;
