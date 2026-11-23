@@ -129,6 +129,10 @@ body {
   text-rendering: optimizeLegibility;
   overflow: hidden; /* the desktop owns the viewport */
 }
+/* Pages outside the desktop scroll like any document. */
+body[data-document] {
+  overflow: auto;
+}
 ::selection {
   background: var(--selection-bg);
   color: var(--selection-text);

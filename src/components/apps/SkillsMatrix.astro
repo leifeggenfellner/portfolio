@@ -4,14 +4,21 @@
  * the claim can be checked. Rendered at build time from `@content/skills`.
  */
 import { SKILL_GROUPS } from "@content/skills";
+
+interface Props {
+  /** On the plain page: part of the document flow, not a scrolling window body. */
+  standalone?: boolean;
+}
+
+const { standalone = false } = Astro.props;
 ---
 
 <!-- tabindex: the list can outgrow the window, and keyboard users need to scroll it. -->
 <div
-  class="text-text retro-scroll focus-ring flex h-full flex-col gap-3 overflow-y-auto p-4"
-  role="region"
-  aria-label="Skills"
-  tabindex="0"
+  class:list={["text-text flex flex-col gap-3", !standalone && "retro-scroll focus-ring h-full overflow-y-auto p-4"]}
+  role={standalone ? undefined : "region"}
+  aria-label={standalone ? undefined : "Skills"}
+  tabindex={standalone ? undefined : 0}
 >
   <p class="text-14 max-w-[60ch] text-pretty">No percentages here. Each skill points to where I have used it.</p>
   {

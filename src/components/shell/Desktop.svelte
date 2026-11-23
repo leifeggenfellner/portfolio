@@ -99,11 +99,13 @@
   const START_MENU_ITEMS: StartMenuItem[] = [
     ...APPS.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
     { id: "help", label: "Help", icon: "pixelarticons:info-box", iconify: true, separatorBefore: true },
+    { id: "plain", label: "View as plain page", icon: "pixelarticons:article", iconify: true },
   ];
 
   function handleStartSelect(id: string, origin: DOMRect) {
     if (id.startsWith("open:")) void launch(id.replace("open:", ""), origin);
     else if (id === "help") void showHelpNote();
+    else if (id === "plain") window.location.assign(`${import.meta.env.BASE_URL}about/`);
   }
 
   function handleTaskbarToggle(id: string) {

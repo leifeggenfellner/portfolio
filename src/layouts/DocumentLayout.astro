@@ -1,0 +1,80 @@
+---
+/**
+ * Pages outside the desktop (project case studies, writing, the plain
+ * version): one "window" on the synthwave wallpaper, but a normal document
+ * underneath, with real headings and no window manager. The wallpaper is
+ * server-rendered without hydration, so these pages ship no JavaScript.
+ */
+import Wallpaper from "@effects/Wallpaper.svelte";
+import RootLayout from "./RootLayout.astro";
+
+interface Props {
+  /** Page title; " · RETRO//OS" is appended. */
+  title: string;
+  description: string;
+  /** Social preview image, absolute or root-relative. */
+  image?: string;
+  /** Shown in the decorative title bar, e.g. "retro-os.prj". */
+  windowTitle: string;
+  icon?: string;
+}
+
+const { title, description, image, windowTitle, icon } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const here = Astro.url.pathname;
+
+const NAV = [
+  { href: base, label: "Desktop" },
+  { href: `${base}projects/`, label: "Projects" },
+  { href: `${base}posts/`, label: "Writing" },
+  { href: `${base}about/`, label: "About" },
+];
+
+// Body text colour: the link colour is too faint on the raised surface.
+const LINK_CLASS = "focus-ring text-text underline underline-offset-3";
+const TITLE_BAR_CLASS = [
+  "font-chrome text-15 flex h-7 items-center gap-1.5 px-1.5",
+  "bg-[linear-gradient(90deg,var(--title-active-from),var(--title-active-to))] text-(--title-active-text)",
+  "[text-shadow:1px_1px_0_rgba(0,0,0,0.35)]",
+].join(" ");
+---
+
+<RootLayout title={`${title} · RETRO//OS`} description={description} image={image} document>
+  <div class="bg-desktop relative min-h-dvh">
+    <div class="fixed inset-0"><Wallpaper /></div>
+    <div class="relative mx-auto flex max-w-3xl flex-col gap-3 px-4 py-6 sm:py-10">
+      <nav aria-label="Site" class="bevel-out bg-surface text-14 text-text px-3 py-1.5">
+        <ul class="flex flex-wrap gap-x-4 gap-y-1">
+          {
+            NAV.map((item) => {
+              const current = item.href === here || (item.href !== base && here.startsWith(item.href));
+              return (
+                <li>
+                  <a class={LINK_CLASS} href={item.href} aria-current={current ? "page" : undefined}>
+                    {item.label === "Desktop" ? "← Desktop" : item.label}
+                  </a>
+                </li>
+              );
+            })
+          }
+          <li class="ml-auto"><a class={LINK_CLASS} href={`${base}rss.xml`}>RSS</a></li>
+        </ul>
+      </nav>
+      <div class="bevel-out bg-surface shadow-window p-0.75">
+        <div class={TITLE_BAR_CLASS} aria-hidden="true">
+          {
+            icon && (
+              <span class="bevel-in flex h-5 w-5 shrink-0 items-center justify-center bg-(--title-icon-bg)">
+                <img src={icon} alt="" width="16" height="16" class="pixelated h-4 w-4" />
+              </span>
+            )
+          }
+          <span class="truncate">{windowTitle}</span>
+        </div>
+        <main class="bevel-in bg-surface-3 text-text mt-0.5 px-5 py-6 sm:px-8">
+          <slot />
+        </main>
+      </div>
+    </div>
+  </div>
+</RootLayout>
