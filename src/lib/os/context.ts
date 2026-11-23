@@ -7,6 +7,7 @@ import { getContext, setContext } from "svelte";
 import { Boot } from "./boot.svelte";
 import { Keymap } from "./keymap.svelte";
 import { Launcher } from "./launcher.svelte";
+import { Navigation } from "./navigation.svelte";
 import { SettingsService } from "./settings.svelte";
 import { Viewport } from "./viewport.svelte";
 import { WindowManager } from "./window-manager.svelte";
@@ -19,6 +20,7 @@ export interface Os {
   boot: Boot;
   viewport: Viewport;
   launcher: Launcher;
+  navigation: Navigation;
 }
 
 const KEY = Symbol("os");
@@ -35,7 +37,15 @@ export function createOs(apps: readonly AppManifest[] = [], initial?: InitialWin
   const viewport = new Viewport();
   const launcher = new Launcher(apps, windows, viewport);
   if (initial) launcher.openInitial(initial.appId, initial.args);
-  return { windows, settings: new SettingsService(), keymap: new Keymap(), boot: new Boot(), viewport, launcher };
+  return {
+    windows,
+    settings: new SettingsService(),
+    keymap: new Keymap(),
+    boot: new Boot(),
+    viewport,
+    launcher,
+    navigation: new Navigation(windows, launcher, import.meta.env.BASE_URL),
+  };
 }
 
 export function setOs(os: Os): Os {

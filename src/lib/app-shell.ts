@@ -52,6 +52,14 @@ export interface AppManifest {
   label?: string;
   /** The app's page, e.g. `/terminal/`: the desktop with this window open. */
   route: `/${string}/`;
+  /**
+   * Pages under `route` that carry launch arguments, e.g. `/projects/<slug>/`:
+   * `toArgs` reads the part after `route` (without slashes), `fromArgs` writes it.
+   */
+  subpath?: {
+    toArgs: (rest: string) => AppArgs | undefined;
+    fromArgs: (args: AppArgs) => string | undefined;
+  };
   /** More pages that open the app with arguments, e.g. one per project. Async so its data stays out of the desktop's bundle. */
   routes?: () => Promise<readonly AppRoute[]>;
   defaults: { x: number; y: number; w: number; h: number };

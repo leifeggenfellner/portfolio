@@ -10,6 +10,7 @@
  */
 import { Font } from "astro:assets";
 import { DEFAULT_SETTINGS, rootAttributes, SETTINGS_BOOTSTRAP_SCRIPT } from "@lib/settings";
+import { HOME_TITLE } from "@lib/site";
 import "@styles/globals.css";
 
 interface Props {
@@ -23,7 +24,7 @@ interface Props {
 }
 
 const {
-  title = "Leif Eggenfellner — RETRO//OS",
+  title = HOME_TITLE,
   description = "Full-stack developer in Tromsø. This portfolio is a working retro desktop: a real terminal, a file explorer, Minesweeper and a synthwave horizon.",
   image,
   document = false,
