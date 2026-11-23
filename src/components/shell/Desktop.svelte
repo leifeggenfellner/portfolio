@@ -15,9 +15,11 @@
   import { wallpaperCovered } from "@lib/horizon";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
+  import type { PaletteItem } from "@lib/palette";
   import { applySettingsToRoot, screensaverDelayMs } from "@lib/settings";
   import type { Settings } from "@lib/settings";
   import { settings } from "@lib/store/settings";
+  import { intents } from "@lib/store/intents";
   import { windowManager } from "@lib/store/window-manager";
   import { cx } from "@lib/cx";
   import ContextMenu from "@primitives/ContextMenu.svelte";
@@ -66,6 +68,12 @@
   let degaussRing = $state<HTMLElement>();
   let lastTheme: Settings["theme"] | null = null;
   let screensaverOn = $state(false);
+  let paletteOpen = $state(false);
+  // Bumped on every open. Reopening while the last palette is still fading
+  // out would otherwise revive that one, with its old query and no focus.
+  let paletteSession = $state(0);
+  // Where focus was when the palette opened, to go back to when it closes.
+  let paletteReturn: HTMLElement | null = null;
 
   // Where each window should grow from next time it appears: the icon or
   // taskbar button that summoned it. Read once by the window's intro.
@@ -99,12 +107,14 @@
   const START_MENU_ITEMS: StartMenuItem[] = [
     ...APPS.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
     { id: "help", label: "Help", icon: "pixelarticons:info-box", iconify: true, separatorBefore: true },
+    { id: "palette", label: "Command palette  Ctrl+K", icon: "pixelarticons:search", iconify: true },
     { id: "plain", label: "View as plain page", icon: "pixelarticons:article", iconify: true },
   ];
 
   function handleStartSelect(id: string, origin: DOMRect) {
     if (id.startsWith("open:")) void launch(id.replace("open:", ""), origin);
     else if (id === "help") void showHelpNote();
+    else if (id === "palette") void openPalette();
     else if (id === "plain") window.location.assign(`${import.meta.env.BASE_URL}about/`);
   }
 
@@ -209,6 +219,67 @@
     }
     return shell;
   }
+
+  // Loaded on first use, like the apps, so the desktop's first paint doesn't carry it.
+  let CommandPalette = $state<typeof import("./CommandPalette.svelte").default>();
+
+  async function openPalette() {
+    if (paletteOpen) return;
+    CommandPalette ??= (await import("./CommandPalette.svelte")).default;
+    const current = document.activeElement;
+    paletteReturn = current instanceof HTMLElement && current !== document.body ? current : null;
+    paletteSession += 1;
+    paletteOpen = true;
+  }
+
+  function closePalette() {
+    paletteOpen = false;
+    const back = paletteReturn;
+    paletteReturn = null;
+    if (back?.isConnected) back.focus({ preventScroll: true });
+  }
+
+  /** Open (or bring forward) an app's window and put focus where it works. */
+  async function launchAndFocus(appId: string) {
+    await launch(appId);
+    await tick();
+    const win = document.querySelector<HTMLElement>(`[data-window-id="${appId}"]`);
+    if (win) focusTargetFor(win).focus({ preventScroll: true });
+  }
+
+  function runPaletteItem(item: PaletteItem) {
+    const { action } = item;
+    if (action.kind === "setting") {
+      if (action.key === "theme") settings.set("theme", action.value);
+      else if (action.key === "crt") settings.set("crt", action.value);
+      else settings.set("gridSpeed", action.value);
+      closePalette();
+      return;
+    }
+    paletteOpen = false;
+    paletteReturn = null;
+    if (action.kind === "app") void launchAndFocus(action.appId);
+    else if (action.kind === "project") {
+      intents.showProject(action.slug);
+      void launchAndFocus("projects");
+    } else {
+      intents.runInTerminal(action.command);
+      void launchAndFocus("terminal");
+    }
+  }
+
+  // Ctrl+K (Cmd+K on a Mac) toggles the palette anywhere on the desktop.
+  $effect(() => {
+    if (phase !== "desktop") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "k" || !(e.ctrlKey || e.metaKey) || e.altKey || screensaverOn) return;
+      e.preventDefault();
+      if (paletteOpen) closePalette();
+      else void openPalette();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   // A mouse click selects and a double-click opens, as on a period desktop.
   // Enter/Space fire a click with detail 0, so the keyboard opens in one press;
@@ -538,6 +609,12 @@
       onMenuSelect={handleStartSelect}
     />
   </div>
+
+  {#if paletteOpen && CommandPalette}
+    {#key paletteSession}
+      <CommandPalette apps={APP_LIST} onRun={runPaletteItem} onClose={closePalette} />
+    {/key}
+  {/if}
 
   {#if screensaverOn}
     <Screensaver />

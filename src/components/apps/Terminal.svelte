@@ -3,6 +3,7 @@
   import { PROJECTS } from "@content/projects";
   import { SKILL_GROUPS } from "@content/skills";
   import type { AppProps } from "@lib/app-shell";
+  import { intents } from "@lib/store/intents";
   import { settings } from "@lib/store/settings";
   import { dir, file } from "@lib/terminal/fs";
   import type { FsNode } from "@lib/terminal/fs";
@@ -237,6 +238,13 @@
       { text: "type 'help' to list commands, or try 'cat about.txt'.", tone: "dim" },
     ]);
     inputEl?.focus({ preventScroll: true });
+    // The command palette can ask for a command; run it as if typed.
+    return intents.subscribe(() => {
+      const command = intents.take("terminal");
+      if (!command) return;
+      input = command;
+      submit();
+    });
   });
 </script>
 
