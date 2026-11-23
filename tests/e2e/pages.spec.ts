@@ -37,6 +37,16 @@ test.describe("without JavaScript", () => {
       ).toBeVisible();
       await expect(page).toHaveTitle(`${project.name} · RETRO//OS`);
       expect(await page.locator('meta[name="description"]').getAttribute("content")).toContain(project.tagline);
+      const ld = await page.locator('script[type="application/ld+json"]').textContent();
+      expect(JSON.parse(ld ?? "[]")).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ "@type": "Person" }),
+          expect.objectContaining({
+            "@type": project.repo ? "SoftwareSourceCode" : "CreativeWork",
+            name: project.name,
+          }),
+        ]),
+      );
     }
   });
 

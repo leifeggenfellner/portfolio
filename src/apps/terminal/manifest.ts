@@ -19,6 +19,7 @@ export default {
   id: "terminal",
   order: 2,
   title: "Terminal",
+  description: "A working terminal on a retro desktop: cat the CV, ls the projects, run neofetch, matrix or pipes.",
   icon,
   defaults: { x: 220, y: 90, w: 720, h: 460 },
   load: () => import("./App.svelte"),
