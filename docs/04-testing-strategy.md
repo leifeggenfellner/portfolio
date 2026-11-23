@@ -70,16 +70,13 @@
   pixels. `BootSequence` exposes lifecycle via `onDone`; tests
   drive timers with `vi.useFakeTimers()`.
 
-## Coverage goals
+## Coverage
 
-| Area            | Lines          | Branches |
-| --------------- | -------------- | -------- |
-| `src/lib/**`    | 90%            | 85%      |
-| `primitives/**` | 80%            | 75%      |
-| Apps            | best-effort    | —        |
-| Shell wiring    | covered by E2E | —        |
-
-Thresholds enforced in `vitest.config.ts`.
+No coverage targets. Tests exist for code with real logic or a real
+failure mode, and for the flows that would break the site; a number
+would only reward tests of things that can't meaningfully fail.
+`pnpm test:cov` still reports coverage, as a way to spot risky
+logic that has no test yet.
 
 ## CI expectations
 
