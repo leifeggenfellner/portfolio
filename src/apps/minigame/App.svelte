@@ -200,7 +200,8 @@
 >
   <div class="grid w-max gap-3">
     <div class="bevel-in bg-surface flex items-center justify-between gap-4 p-2">
-      <span class={LED_CLASS} role="status" aria-label={`${minesLeft(game)} mines left`}>
+      <!-- Not a live region: it changes on every flag; the status line below reports the game. -->
+      <span class={LED_CLASS} role="img" aria-label={`${minesLeft(game)} mines left`}>
         <span class="absolute inset-x-1.5 text-(--led-ghost)" aria-hidden="true">888</span>
         <span class="relative" aria-hidden="true">{led(minesLeft(game))}</span>
       </span>

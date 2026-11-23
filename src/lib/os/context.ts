@@ -4,6 +4,7 @@
  * every mount (and every test) gets its own.
  */
 import { getContext, setContext } from "svelte";
+import { Announcer } from "./announcer.svelte";
 import { Boot } from "./boot.svelte";
 import { Keymap } from "./keymap.svelte";
 import { Launcher } from "./launcher.svelte";
@@ -14,6 +15,7 @@ import { WindowManager } from "./window-manager.svelte";
 import type { AppArgs, AppManifest } from "@lib/app-shell";
 
 export interface Os {
+  announcer: Announcer;
   windows: WindowManager;
   settings: SettingsService;
   keymap: Keymap;
@@ -33,11 +35,13 @@ export interface InitialWindow {
 
 /** `apps` come from the caller so the kernel never imports the app layer above it. */
 export function createOs(apps: readonly AppManifest[] = [], initial?: InitialWindow): Os {
-  const windows = new WindowManager();
+  const announcer = new Announcer();
+  const windows = new WindowManager((message) => announcer.announce(message));
   const viewport = new Viewport();
   const launcher = new Launcher(apps, windows, viewport);
   if (initial) launcher.openInitial(initial.appId, initial.args);
   return {
+    announcer,
     windows,
     settings: new SettingsService(),
     keymap: new Keymap(),

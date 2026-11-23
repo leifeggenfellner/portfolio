@@ -68,12 +68,22 @@ export class AppWindow {
   }
 }
 
+/** Says what happened to a window, for screen readers (the kernel's Announcer). */
+type Announce = (message: string) => void;
+
 export class WindowManager {
   /** Open windows in the order they were opened. */
   windows = $state<AppWindow[]>([]);
   /** Window ids, bottom to top. */
   #stack = $state<string[]>([]);
+  #announce: Announce;
+
+  constructor(announce: Announce = () => {}) {
+    this.#announce = announce;
+  }
+
   /** The last element focused inside each window's body, to give focus back to. */
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- read when a window activates, never rendered
   #focusMemory = new Map<string, HTMLElement>();
 
   readonly activeId: string | null = $derived(
@@ -97,12 +107,16 @@ export class WindowManager {
   /** Open a window, or bring an open one forward without moving it (new arguments still reach it). */
   open(init: OpenWindow): void {
     const existing = this.get(init.id);
-    if (!existing) this.windows.push(new AppWindow(init));
-    else if (init.args) existing.args = init.args;
+    if (!existing) {
+      this.windows.push(new AppWindow(init));
+      this.#announce(`${init.title} opened`);
+    } else if (init.args) existing.args = init.args;
     this.focus(init.id);
   }
 
   close(id: string): void {
+    const win = this.get(id);
+    if (win) this.#announce(`${win.title} closed`);
     this.windows = this.windows.filter((w) => w.id !== id);
     this.#stack = this.#stack.filter((x) => x !== id);
     this.#focusMemory.delete(id);
@@ -118,7 +132,9 @@ export class WindowManager {
 
   minimize(id: string): void {
     const win = this.get(id);
-    if (win) win.minimized = true;
+    if (!win || win.minimized) return;
+    win.minimized = true;
+    this.#announce(`${win.title} minimised`);
   }
 
   /** Taskbar button: minimise the active window, otherwise bring the window forward. */
@@ -139,14 +155,18 @@ export class WindowManager {
 
   maximize(id: string): void {
     const win = this.get(id);
-    if (win && win.layout.kind !== "maximized") win.layout = { kind: "maximized", previous: win.layout };
+    if (!win || win.layout.kind === "maximized") return;
+    win.layout = { kind: "maximized", previous: win.layout };
+    this.#announce(`${win.title} maximised`);
   }
 
   toggleMax(id: string): void {
     const win = this.get(id);
     if (!win) return;
-    if (win.layout.kind === "maximized") win.layout = win.layout.previous;
-    else this.maximize(id);
+    if (win.layout.kind === "maximized") {
+      win.layout = win.layout.previous;
+      this.#announce(`${win.title} restored`);
+    } else this.maximize(id);
   }
 
   /** Snap to half of `area`, remembering the floating box from before the first snap. */
@@ -156,6 +176,7 @@ export class WindowManager {
     const restore = win.floatingBox;
     win.box = snapBox(side, area);
     win.layout = { kind: "snapped", side, restore };
+    this.#announce(`${win.title} snapped to the ${side} half`);
   }
 
   /**
@@ -167,10 +188,11 @@ export class WindowManager {
     if (!win || win.layout.kind === "floating") return false;
     if (win.layout.kind === "maximized") {
       win.layout = win.layout.previous;
-      return true;
+    } else {
+      win.box = { ...win.layout.restore, ...at };
+      win.layout = { kind: "floating" };
     }
-    win.box = { ...win.layout.restore, ...at };
-    win.layout = { kind: "floating" };
+    this.#announce(`${win.title} restored`);
     return true;
   }
 
