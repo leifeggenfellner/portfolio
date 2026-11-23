@@ -12,6 +12,7 @@
   import { FIRST_SPLASH_MS, hasVisited, markVisited, RETURN_SPLASH_MS } from "@lib/boot";
   import { degauss } from "@lib/degauss";
   import { isDrafting, watchIdle } from "@lib/idle";
+  import { wallpaperCovered } from "@lib/horizon";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import { applySettingsToRoot, screensaverDelayMs } from "@lib/settings";
@@ -427,7 +428,7 @@
     onpointerdowncapture={handleWindowPointerDown}
     onfocusin={handleWindowFocusIn}
   >
-    <Wallpaper />
+    <Wallpaper covered={screensaverOn || wallpaperCovered(wmState.windows, isMobile)} />
     {#if !isMobile}
       <aside class={SYS_BADGE_CLASS} aria-label="System information">
         <p class="font-chrome text-[28px] leading-none tracking-[0.02em]">

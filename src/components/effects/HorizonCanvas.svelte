@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    horizonBudget,
     columnBases,
     columnSpacing,
     columnXAt,
@@ -16,9 +17,11 @@
   interface Props {
     /** Draw the floor in from the horizon over this many ms (the boot "power on"). */
     powerOnMs?: number;
+    /** Something covers the floor completely; stop drawing until it doesn't. */
+    hidden?: boolean;
   }
 
-  let { powerOnMs = 0 }: Props = $props();
+  let { powerOnMs = 0, hidden = false }: Props = $props();
 
   let canvas = $state<HTMLCanvasElement>();
   let running = $state(false);
@@ -28,6 +31,13 @@
   const FALLBACK_HAZE = "#e83fb0";
   const FALLBACK_FLOOR = "#2a1a4a";
   const PHASE_ATTR_INTERVAL_MS = 250;
+
+  // Set once mounted; re-run whenever `hidden` changes.
+  let restart: (() => void) | null = null;
+  $effect(() => {
+    void hidden;
+    restart?.();
+  });
 
   onMount(() => {
     const el = canvas;
@@ -45,6 +55,12 @@
     let phase = 0;
     let lastTime = performance.now();
     let lastPhaseAttr = 0;
+    let lastDraw = -Infinity;
+    const budget = horizonBudget({
+      coarsePointer: window.matchMedia("(pointer: coarse)").matches,
+      cores: navigator.hardwareConcurrency,
+    });
+    const frameIntervalMs = 1000 / budget.fps;
     const powerStart = performance.now();
     const powerDuration = prefersReducedMotion() ? 0 : powerOnMs;
 
@@ -59,7 +75,7 @@
 
     function resize() {
       const rect = el!.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, budget.maxDpr);
       width = rect.width;
       height = rect.height;
       el!.width = Math.max(1, Math.round(width * dpr));
@@ -131,6 +147,7 @@
 
     function shouldRun(): boolean {
       return (
+        !hidden &&
         !document.hidden &&
         !prefersReducedMotion() &&
         document.documentElement.getAttribute("data-grid-speed") !== "paused"
@@ -140,7 +157,12 @@
     function frame(now: number) {
       phase = (phase + (now - lastTime) / durationMs) % 1;
       lastTime = now;
-      draw(now);
+      // Half-rate budgets skip frames; the phase still follows the clock.
+      // The 1ms slack keeps a 60Hz display at an even 30.
+      if (now - lastDraw >= frameIntervalMs - 1) {
+        draw(now);
+        lastDraw = now;
+      }
       if (now - lastPhaseAttr > PHASE_ATTR_INTERVAL_MS) {
         el!.dataset.phase = phase.toFixed(3);
         lastPhaseAttr = now;
@@ -161,6 +183,7 @@
 
     resize();
     sync();
+    restart = sync;
 
     const resizeObserver = new ResizeObserver(() => {
       resize();
@@ -177,6 +200,7 @@
     document.addEventListener("visibilitychange", sync);
 
     return () => {
+      restart = null;
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       attrObserver.disconnect();
