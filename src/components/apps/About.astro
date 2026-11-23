@@ -5,6 +5,13 @@
  */
 import { PROFILE } from "@content/profile";
 
+interface Props {
+  /** On the plain page: part of the document flow, not a scrolling window body. */
+  standalone?: boolean;
+}
+
+const { standalone = false } = Astro.props;
+
 const TIMELINE = [
   { heading: "Work", entries: PROFILE.experience },
   { heading: "Education", entries: PROFILE.education },
@@ -13,9 +20,9 @@ const TIMELINE = [
 
 <!-- tabindex: the bio can outgrow the window, and keyboard users need to scroll it. -->
 <article
-  class="text-text font-body retro-scroll focus-ring h-full overflow-y-auto px-5 py-4"
+  class:list={["text-text font-body", !standalone && "retro-scroll focus-ring h-full overflow-y-auto px-5 py-4"]}
   aria-label="About me"
-  tabindex="0"
+  tabindex={standalone ? undefined : 0}
 >
   <header class="border-bevel-shadow flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b pb-3">
     <h1 class="font-chrome text-32 leading-none">{PROFILE.name}</h1>

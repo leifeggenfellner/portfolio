@@ -57,6 +57,12 @@
       <li>The taskbar brings back anything you minimise.</li>
       <li><kbd class={KEY_CLASS}>Esc</kbd> skips the boot and closes windows.</li>
     {/if}
+    <li>
+      Rather skip the desktop? <a
+        class="focus-ring underline underline-offset-3"
+        href={`${import.meta.env.BASE_URL}about/`}>View it as a plain page</a
+      >.
+    </li>
   </ul>
 
   <button

@@ -94,6 +94,7 @@
     "focus-ring no-select text-12 flex w-22 flex-col items-center gap-1 border border-dotted border-transparent px-0.5 py-1.5 text-center leading-tight break-words";
   const TREE_CLASS = "focus-ring no-select text-13 flex w-full items-center gap-1.5 px-1 py-0.5 text-left";
   const LINK_BUTTON = "bevel-out focus-ring bg-surface text-14 inline-flex min-h-7 items-center px-4 font-semibold";
+  const BASE = import.meta.env.BASE_URL;
 </script>
 
 <div class="text-text flex h-full min-h-0 flex-col">
@@ -156,16 +157,15 @@
                 {/each}
               </ul>
             </fieldset>
-            {#if project.url || project.repo}
-              <div class="flex flex-wrap gap-2">
-                {#if project.url}
-                  <a class={LINK_BUTTON} href={project.url} target="_blank" rel="noopener">Live site</a>
-                {/if}
-                {#if project.repo}
-                  <a class={LINK_BUTTON} href={project.repo} target="_blank" rel="noopener">Source</a>
-                {/if}
-              </div>
-            {/if}
+            <div class="flex flex-wrap gap-2">
+              <a class={LINK_BUTTON} href={`${BASE}projects/${project.slug}/`}>Case study</a>
+              {#if project.url}
+                <a class={LINK_BUTTON} href={project.url} target="_blank" rel="noopener">Live site</a>
+              {/if}
+              {#if project.repo}
+                <a class={LINK_BUTTON} href={project.repo} target="_blank" rel="noopener">Source</a>
+              {/if}
+            </div>
           </div>
         </article>
       {:else}

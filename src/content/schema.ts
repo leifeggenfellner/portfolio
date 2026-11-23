@@ -16,6 +16,9 @@ export const projectSchema = z.object({
   url: z.url().optional(),
   featured: z.boolean().default(false),
   summary: z.string(),
+  /** Cover image under public/, e.g. "/projects/retro-os.png": shown on the project page and used as its social preview (1200x630). */
+  cover: z.string().startsWith("/").optional(),
+  coverAlt: z.string().optional(),
 });
 
 export type Project = z.infer<typeof projectSchema>;

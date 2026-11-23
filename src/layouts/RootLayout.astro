@@ -19,6 +19,8 @@ interface Props {
   crt?: "off" | "subtle" | "full";
   accent?: "default" | "magenta" | "cyan" | "amber";
   image?: string;
+  /** A scrolling document page rather than the full-viewport desktop. */
+  document?: boolean;
 }
 
 const {
@@ -28,6 +30,7 @@ const {
   crt = DEFAULT_SETTINGS.crt,
   accent = "default",
   image,
+  document = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
@@ -70,9 +73,16 @@ const ogImageAlt = "The RETRO//OS desktop: pixel icons over a synthwave sunset a
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
 
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="RETRO//OS writing"
+      href={`${import.meta.env.BASE_URL}rss.xml`}
+    />
+
     <meta name="generator" content={Astro.generator} />
   </head>
-  <body>
+  <body data-document={document ? "" : undefined}>
     <slot />
   </body>
 </html>
