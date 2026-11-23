@@ -36,8 +36,8 @@ for the About and Posts routes is wasted bytes.
 ## Where Astro could bite us
 
 - The window manager + terminal must live inside a single
-  island so they share store state (Svelte since ADR 0004). Cross-island state requires
-  discipline. **Mitigation:** the Desktop is one island.
+  island so they share state. **Mitigation:** the desktop is one
+  island with an OS kernel in context (ADR 0006).
 - `client:load` for the Desktop trades island-architecture
   savings for immediate hydration. That is intentional — the
   desktop _is_ the hero. Everything **outside** the desktop

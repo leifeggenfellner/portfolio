@@ -58,14 +58,14 @@ retro-os/         design source-of-truth mockups (not shipped)
 src/
   pages/          Astro routes
   layouts/        RootLayout.astro
-  styles/         tokens.css → globals.css (@theme) → effects.css
-  lib/            pure logic: stores, terminal shell, minesweeper, motion
+  styles/         tokens.css → theme, chrome, effects, cursors (globals.css)
+  lib/            pure logic; lib/os/ is the kernel (window manager, keymap, …)
+  apps/<id>/      one folder per app: manifest, App.svelte, logic
   components/
-    primitives/   RetroButton, RetroCard, RetroWindow, WindowHeader, …
-    effects/      Wallpaper, HorizonCanvas, CrtLayer, BootSequence, Screensaver
-    apps/         About, ProjectsExplorer, Terminal, SkillsMatrix, …
-    shell/        Desktop, Taskbar, StartMenu, HelpNote
-  content/        profile, skills, projects (JSON) + posts (MDX)
+    primitives/   RetroWindow, WindowHeader, RetroButton, ContextMenu, Icon, …
+    effects/      Wallpaper, OutrunScene, CrtLayer, BootSequence, Screensaver
+    shell/        Os (island root), Desktop, WindowLayer, Taskbar, StartMenu, …
+  content/        profile, skills, projects (JSON) + posts (MDX), schemas
 tests/
   unit/           Vitest
   e2e/            Playwright (+ axe)
@@ -85,7 +85,8 @@ Start at [`docs/README.md`](./docs/README.md). Highlights:
 - [04 — Testing strategy](./docs/04-testing-strategy.md)
 - [05 — Performance + accessibility](./docs/05-performance-a11y.md)
 - [06 — Development workflow](./docs/06-workflow.md)
-- [07 — Roadmap](./docs/07-roadmap.md)
+- [Inventory](./docs/inventory.md) and [keyboard](./docs/keyboard.md) — generated from code
+- Roadmap: the [issues](https://github.com/leifeggenfellner/portfolio/issues)
 - [08 — Conventions](./docs/08-conventions.md)
 
 ## AI skills
