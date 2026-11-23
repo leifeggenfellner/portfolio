@@ -5,6 +5,7 @@
  */
 import { CRT_MODES, GRID_SPEEDS, THEMES } from "@lib/settings";
 import { formatPath, listDir, nodeAt, resolvePath } from "./fs";
+import { FORTUNES, monitorSays, TRAIN } from "./toys";
 import type { FsDir } from "./fs";
 import type { CrtMode, GridSpeed, Theme } from "@lib/settings";
 
@@ -40,17 +41,23 @@ export interface ShellContext {
   neofetch: readonly (readonly [string, string])[];
   actions: ShellActions;
   now(): Date;
+  /** A number in [0, 1), as Math.random; injected so tests can pin it. */
+  random(): number;
 }
 
 export interface ShellResult {
   lines: Line[];
   cwd?: string[];
   clear?: boolean;
+  /** A visual effect for the terminal to play, such as the `matrix` rain. */
+  effect?: "matrix";
 }
 
 interface Command {
   usage: string;
   summary: string;
+  /** The longer description `man` prints. */
+  manual: readonly string[];
   run(args: string[], ctx: ShellContext): ShellResult;
 }
 
@@ -79,6 +86,10 @@ const COMMANDS: Record<string, Command> = {
   help: {
     usage: "help",
     summary: "list commands",
+    manual: [
+      "List every command with a one-line summary. Hidden commands are",
+      "not listed; finding them is the point.",
+    ],
     run: () => ({
       lines: [
         ...Object.values(COMMANDS).map(({ usage, summary }) => ({ text: `  ${usage.padEnd(22)}${summary}` })),
@@ -89,6 +100,10 @@ const COMMANDS: Record<string, Command> = {
   ls: {
     usage: "ls [path]",
     summary: "list a directory",
+    manual: [
+      "List the entries of a directory, or of the current one. Directories",
+      "end in a slash. Paths may be relative, absolute, or start with ~.",
+    ],
     run: (args, ctx) => {
       const path = resolvePath(ctx.cwd, ctx.home, args[0] ?? ".");
       const node = nodeAt(ctx.root, path);
@@ -101,6 +116,7 @@ const COMMANDS: Record<string, Command> = {
   cd: {
     usage: "cd [path]",
     summary: "change directory",
+    manual: ["Change the current directory. With no argument, go home (~).", "'..' goes up one level."],
     run: (args, ctx) => {
       const path = resolvePath(ctx.cwd, ctx.home, args[0] ?? "~");
       const node = nodeAt(ctx.root, path);
@@ -112,11 +128,13 @@ const COMMANDS: Record<string, Command> = {
   pwd: {
     usage: "pwd",
     summary: "print the current directory",
+    manual: ["Print the full path of the current directory."],
     run: (_args, ctx) => out(`/${ctx.cwd.join("/")}`),
   },
   cat: {
     usage: "cat <file>",
     summary: "print a file",
+    manual: ["Print one or more files. Project files (.prj) end with a link to", "their case-study page."],
     run: (args, ctx) => {
       if (!args.length) return err("usage: cat <file>");
       const lines: Line[] = [];
@@ -132,6 +150,10 @@ const COMMANDS: Record<string, Command> = {
   open: {
     usage: "open <app|file>",
     summary: "open an app window",
+    manual: [
+      "Open a desktop app by id or title, or a file that belongs to an",
+      "app, such as games/minesweeper.exe. Tab completes app ids.",
+    ],
     run: (args, ctx) => {
       const target = args[0];
       if (!target) return err(`usage: open <${ctx.apps.map((app) => app.id).join("|")}>`);
@@ -152,11 +174,13 @@ const COMMANDS: Record<string, Command> = {
   whoami: {
     usage: "whoami",
     summary: "who built this",
+    manual: ["Who built this site, in one line."],
     run: (_args, ctx) => out(...ctx.whoami),
   },
   neofetch: {
     usage: "neofetch",
     summary: "system summary",
+    manual: ["A summary of this system: theme, screen size, uptime and stack."],
     run: (_args, ctx) => {
       const title = `${ctx.user}@${ctx.host}`;
       return {
@@ -171,41 +195,92 @@ const COMMANDS: Record<string, Command> = {
   theme: {
     usage: "theme <light|dark>",
     summary: "switch the theme",
+    manual: ["Switch between the light and dark theme. The choice is saved, as", "it is in Settings."],
     run: settingCommand("theme", THEMES, (actions, value) => actions.setTheme(value)),
   },
   crt: {
     usage: "crt <off|subtle|full>",
     summary: "scanline strength",
+    manual: ["Set the strength of the CRT scanlines: off, subtle or full."],
     run: settingCommand("crt", CRT_MODES, (actions, value) => actions.setCrt(value)),
   },
   grid: {
     usage: "grid <paused|slow|…>",
     summary: "horizon grid speed",
+    manual: ["Set how fast the horizon grid scrolls, or pause it."],
     run: settingCommand("grid", GRID_SPEEDS, (actions, value) => actions.setGridSpeed(value)),
   },
   history: {
     usage: "history",
     summary: "previous commands",
+    manual: [
+      "List the commands typed in this session, oldest first. Up and",
+      "down arrows walk the same list at the prompt.",
+    ],
     run: (_args, ctx) => out(...ctx.history.map((cmd, i) => `${String(i + 1).padStart(4)}  ${cmd}`)),
   },
   echo: {
     usage: "echo <text>",
     summary: "print text",
+    manual: ["Print its arguments, separated by single spaces."],
     run: (args) => out(args.join(" ")),
   },
   date: {
     usage: "date",
     summary: "current date and time",
+    manual: ["Print the current date and time."],
     run: (_args, ctx) => out(ctx.now().toString()),
   },
   clear: {
     usage: "clear",
     summary: "clear the screen",
+    manual: ["Clear the screen. Ctrl+L does the same."],
     run: () => ({ lines: [], clear: true }),
+  },
+  fortune: {
+    usage: "fortune",
+    summary: "a random line of wisdom",
+    manual: ["Print a random line of questionable wisdom."],
+    run: (_args, ctx) => out(FORTUNES[Math.floor(ctx.random() * FORTUNES.length)] ?? ""),
+  },
+  cowsay: {
+    usage: "cowsay <text>",
+    summary: "the monitor says it",
+    manual: ["Have the monitor say something. Long text wraps in its bubble."],
+    run: (args) => out(...monitorSays(args.join(" ") || "moo? wrong animal.")),
+  },
+  matrix: {
+    usage: "matrix",
+    summary: "digital rain; any key stops it",
+    manual: [
+      "Digital rain in the terminal, until any key is pressed. Skipped",
+      "when the system asks for reduced motion.",
+    ],
+    run: () => ({ lines: [{ text: "wake up. (any key stops the rain)", tone: "dim" }], effect: "matrix" }),
+  },
+  man: {
+    usage: "man <command>",
+    summary: "the manual for a command",
+    manual: ["Show the manual page for a command. You are reading one."],
+    run: (args) => {
+      const name = args[0]?.toLowerCase();
+      if (!name) return err("what manual page do you want? try 'man ls'");
+      const command = COMMANDS[name];
+      if (!command) return err(`no manual entry for ${args[0]}`);
+      return {
+        lines: [
+          { text: `${name.toUpperCase()}(1)`, tone: "accent" },
+          { text: `usage: ${command.usage}` },
+          { text: "" },
+          ...command.manual.map((text) => ({ text })),
+        ],
+      };
+    },
   },
   exit: {
     usage: "exit",
     summary: "close the terminal",
+    manual: ["Close the terminal window."],
     run: (_args, ctx) => {
       ctx.actions.exit();
       return { lines: [] };
@@ -223,9 +298,22 @@ const HIDDEN: Record<string, string> = {
 
 /** Hidden commands that act: they run like any other, but `help` and Tab don't know them. */
 const HIDDEN_COMMANDS: Record<string, Command> = {
+  sl: {
+    usage: "sl",
+    summary: "a train",
+    manual: [],
+    run: () => out(...TRAIN),
+  },
+  cmatrix: {
+    usage: "cmatrix",
+    summary: "digital rain",
+    manual: [],
+    run: () => ({ lines: [], effect: "matrix" }),
+  },
   panic: {
     usage: "panic",
     summary: "crash the terminal",
+    manual: [],
     run: (_args, ctx) => {
       ctx.actions.panic();
       return err("kernel panic - not syncing: you asked for it");
@@ -288,6 +376,8 @@ export function complete(input: string, ctx: ShellContext): { input: string; opt
     candidates = [...CRT_MODES];
   } else if (command === "grid") {
     candidates = [...GRID_SPEEDS];
+  } else if (command === "man") {
+    candidates = [...COMMAND_NAMES];
   } else {
     const slash = partial.lastIndexOf("/");
     base = slash >= 0 ? partial.slice(0, slash + 1) : "";
