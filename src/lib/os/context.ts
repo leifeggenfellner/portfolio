@@ -6,9 +6,11 @@
 import { getContext, setContext } from "svelte";
 import { Boot } from "./boot.svelte";
 import { Keymap } from "./keymap.svelte";
+import { Launcher } from "./launcher.svelte";
 import { SettingsService } from "./settings.svelte";
 import { Viewport } from "./viewport.svelte";
 import { WindowManager } from "./window-manager.svelte";
+import type { AppManifest } from "@lib/app-shell";
 
 export interface Os {
   windows: WindowManager;
@@ -16,17 +18,22 @@ export interface Os {
   keymap: Keymap;
   boot: Boot;
   viewport: Viewport;
+  launcher: Launcher;
 }
 
 const KEY = Symbol("os");
 
-export function createOs(): Os {
+/** `apps` come from the caller so the kernel never imports the app layer above it. */
+export function createOs(apps: readonly AppManifest[] = []): Os {
+  const windows = new WindowManager();
+  const viewport = new Viewport();
   return {
-    windows: new WindowManager(),
+    windows,
     settings: new SettingsService(),
     keymap: new Keymap(),
     boot: new Boot(),
-    viewport: new Viewport(),
+    viewport,
+    launcher: new Launcher(apps, windows, viewport),
   };
 }
 
