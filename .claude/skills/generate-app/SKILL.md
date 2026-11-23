@@ -1,6 +1,6 @@
 ---
 name: generate-app
-description: Scaffold a new desktop "app" window end-to-end (component + registry entry + tests).
+description: Add a new desktop app window end-to-end (component + registry entry + E2E test). Use when adding anything that opens in its own window, static or interactive.
 ---
 
 # Skill — generate a new app

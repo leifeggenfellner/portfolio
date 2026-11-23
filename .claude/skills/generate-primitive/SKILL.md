@@ -1,6 +1,6 @@
 ---
 name: generate-primitive
-description: Scaffold a new primitive component end-to-end (component + JSDoc + tests + barrel export).
+description: Scaffold a new primitive in src/components/primitives (component + tests + barrel export). Use when adding a reusable chrome piece like a button, menu or window part.
 ---
 
 # Skill — generate a new primitive
@@ -30,7 +30,8 @@ When the user asks for a new primitive (e.g. `Tooltip`,
    - ARIA attribute assertions
    - disabled / variant paths
 5. Run `pnpm test --run` and `pnpm typecheck`.
-6. If the component introduces motion → run `animation-review`.
+6. Any motion uses `--dur-*` / `--ease-*` tokens, animates only
+   `transform` / `opacity`, and collapses under `prefers-reduced-motion`.
 7. If the component introduces a new color/shadow → add the token
    to `tokens.css` first (`docs/03-tailwind-tokens.md`).
 

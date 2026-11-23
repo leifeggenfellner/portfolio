@@ -91,11 +91,9 @@ Start at [`docs/README.md`](./docs/README.md). Highlights:
 ## AI skills
 
 Skills (reusable playbooks for Claude Code) live in [`.claude/skills/`](./.claude/skills/):
-`generate-primitive`, `generate-app`, `review-pr`,
-`enforce-architecture`, `generate-tests`, `accessibility-audit`,
-`animation-review`, `responsive-audit`, `tailwind-token-usage`,
-`refactor`, `file-structure-enforcement`, `design-system-compliance`,
-`performance-audit`, `three-asset-pipeline`, `three-best-practices` (vendored).
+`review-pr`, `generate-app`, `generate-primitive`, `generate-tests`,
+`accessibility-audit`, `responsive-audit`, `performance-audit`,
+`three-asset-pipeline`, `three-best-practices` (vendored).
 
 ## Deployment
 
