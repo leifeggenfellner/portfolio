@@ -1,6 +1,6 @@
 <script lang="ts">
   // Me.txt: the bio, from `@content/profile`.
-  import { PROFILE } from "@content/profile";
+  import { PROFILE } from "virtual:content/profile";
   import type { AppProps } from "@lib/app-shell";
 
   // Me.txt needs nothing from the shell.

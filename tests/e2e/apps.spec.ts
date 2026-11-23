@@ -1,8 +1,13 @@
+import { readFileSync } from "node:fs";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { PROFILE } from "../../src/content/profile";
 import { openApp, openDesktop } from "./helpers";
+import type { Profile } from "../../src/content/schema";
 import type { Locator } from "@playwright/test";
+
+const PROFILE = (
+  JSON.parse(readFileSync(new URL("../../src/content/profile.json", import.meta.url), "utf8")) as { me: Profile }
+).me;
 
 test.beforeEach(async ({ page }) => {
   await openDesktop(page);

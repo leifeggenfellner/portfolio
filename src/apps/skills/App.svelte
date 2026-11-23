@@ -1,6 +1,6 @@
 <script lang="ts">
   // Skills Matrix: no self-ratings. Each skill names where it can be seen, so the claim can be checked.
-  import { SKILL_GROUPS } from "@content/skills";
+  import { SKILL_GROUPS } from "virtual:content/skills";
   import type { AppProps } from "@lib/app-shell";
 
   // Skills needs nothing from the shell.

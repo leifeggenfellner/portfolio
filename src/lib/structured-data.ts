@@ -3,8 +3,7 @@
  * and each post. Pages pass these to RootLayout, which writes them into a
  * `<script type="application/ld+json">`.
  */
-import type { Profile } from "@content/profile";
-import type { Project } from "@content/schema";
+import type { Profile, Project } from "@content/schema";
 
 type JsonLd = Record<string, unknown>;
 
