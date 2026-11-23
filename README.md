@@ -112,7 +112,8 @@ Skills (reusable playbooks) live in [`.claude/skills/`](./.claude/skills/):
 `generate-primitive`, `generate-app`, `review-pr`,
 `enforce-architecture`, `generate-tests`, `accessibility-audit`,
 `animation-review`, `responsive-audit`, `tailwind-token-usage`,
-`refactor`, `file-structure-enforcement`, `design-system-compliance`.
+`refactor`, `file-structure-enforcement`, `design-system-compliance`,
+`three-asset-pipeline`, `three-best-practices` (vendored).
 
 ## Deployment
 
