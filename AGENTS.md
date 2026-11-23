@@ -39,11 +39,8 @@
 
 ## Skills catalog
 
-`generate-primitive`, `generate-app`, `review-pr`,
-`enforce-architecture`, `generate-tests`,
-`accessibility-audit`, `animation-review`,
-`responsive-audit`, `tailwind-token-usage`, `refactor`,
-`file-structure-enforcement`, `design-system-compliance`,
+`review-pr`, `generate-app`, `generate-primitive`,
+`generate-tests`, `accessibility-audit`, `responsive-audit`,
 `performance-audit`, `three-asset-pipeline`, `three-best-practices` (vendored).
 
 See [`.claude/skills/`](./.claude/skills/) for full text.

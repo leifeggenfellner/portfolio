@@ -51,9 +51,8 @@ PR template lives at `.github/pull_request_template.md`.
 
 1. Self-review the diff before requesting review.
 2. Run the **skills** relevant to the change (see `.claude/skills/`):
-   - UI work → `design-system-compliance`, `responsive-audit`
-   - State / layering → `enforce-architecture`
-   - Visual motion → `animation-review`
+   - Any change → `review-pr` (tokens, mockups, motion, scope)
+   - Layout → `responsive-audit`
    - New primitive → `accessibility-audit`, `generate-tests`
    - New app, dependency or 3D → `performance-audit`
 3. Address skill findings in the same PR.
