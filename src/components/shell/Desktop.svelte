@@ -44,9 +44,9 @@
   let lastTheme: Theme | null = null;
 
   const START_MENU_ITEMS: StartMenuItem[] = [
-    ...launcher.apps.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
-    { id: "help", label: "Help", icon: "pixelarticons:info-box", iconify: true, separatorBefore: true },
-    { id: "palette", label: "Command palette  Ctrl+K", icon: "pixelarticons:search", iconify: true },
+    ...launcher.apps.map((a) => ({ id: `open:${a.id}`, label: a.title, image: a.icon })),
+    { id: "help", label: "Help", icon: "pixelarticons:info-box", separatorBefore: true },
+    { id: "palette", label: "Command palette  Ctrl+K", icon: "pixelarticons:search" },
   ];
 
   function handleStartSelect(id: string, origin: DOMRect) {
