@@ -56,6 +56,7 @@
       <li>Right-click the desktop for more.</li>
       <li>The taskbar brings back anything you minimise.</li>
       <li><kbd class={KEY_CLASS}>Esc</kbd> skips the boot and closes windows.</li>
+      <li><kbd class={KEY_CLASS}>Ctrl</kbd> + <kbd class={KEY_CLASS}>K</kbd> finds anything.</li>
     {/if}
     <li>
       Rather skip the desktop? <a
