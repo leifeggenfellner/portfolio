@@ -1,127 +1,58 @@
 <script lang="ts">
-  import type { Component } from "svelte";
   import { onMount, tick } from "svelte";
-  import { APPS } from "@apps/registry.svelte";
   import BootSequence from "@effects/BootSequence.svelte";
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
-  import Screensaver from "@effects/Screensaver.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
-  import type { AppProps, AppShell } from "@lib/app-shell";
-  import { APP_VERSION, BUILD_DATE } from "@lib/build-info";
   import { FIRST_SPLASH_MS, RETURN_SPLASH_MS } from "@lib/boot";
   import { degauss } from "@lib/degauss";
-  import { isDrafting, watchIdle } from "@lib/idle";
+  import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import { wallpaperCovered } from "@lib/horizon";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
-  import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
-  import type { PaletteItem } from "@lib/palette";
   import { getOs } from "@lib/os/context";
-  import { inTextField } from "@lib/os/keymap.svelte";
-  import { applySettingsToRoot, screensaverDelayMs } from "@lib/settings";
-  import type { Settings } from "@lib/settings";
-  import { intents } from "@lib/store/intents";
-  import { cx } from "@lib/cx";
-  import ContextMenu from "@primitives/ContextMenu.svelte";
-  import type { MenuEntry } from "@primitives/ContextMenu.svelte";
-  import RetroWindow from "@primitives/RetroWindow.svelte";
-  import { clampWindowPosition, fitWindowToViewport, snapBox, snapZoneAt, unsnapX } from "@lib/window-bounds";
-  import type { SnapZone } from "@lib/window-bounds";
-  import AppFrame from "./AppFrame.svelte";
+  import { applySettingsToRoot } from "@lib/settings";
+  import type { Theme } from "@lib/settings";
+  import DesktopIcons from "./DesktopIcons.svelte";
+  import DesktopMenu from "./DesktopMenu.svelte";
   import HelpNote from "./HelpNote.svelte";
+  import PaletteHost from "./PaletteHost.svelte";
+  import ScreensaverHost from "./ScreensaverHost.svelte";
   import type { StartMenuItem } from "./StartMenu.svelte";
+  import SystemBadge from "./SystemBadge.svelte";
   import Taskbar from "./Taskbar.svelte";
+  import WindowLayer from "./WindowLayer.svelte";
 
-  const MAIN_CLASS = "relative h-screen w-screen overflow-hidden bg-desktop";
-  const ICON_GRID_BASE = "absolute top-4 z-(--z-desktop) [--focus-ring-color:var(--desktop-text)]";
-  const ICON_GRID_DESKTOP =
-    "left-4 flex max-h-[calc(100dvh-2rem-var(--taskbar-height))] flex-col flex-wrap content-start gap-3";
-  const ICON_GRID_MOBILE = "left-3 right-3 grid grid-cols-4 gap-3";
-  const ICON_BUTTON_BASE = "focus-ring icon-label text-12 flex flex-col items-center gap-1 p-1 text-white";
-  const ICON_BUTTON_DESKTOP = "w-19";
-  const ICON_BUTTON_MOBILE = "w-full";
-  const ICON_IMG_CLASS = "icon-glow h-(--desktop-icon-size) w-(--desktop-icon-size) object-contain";
-  const SYS_BADGE_CLASS = [
-    "pointer-events-none absolute top-3.5 right-4 z-(--z-desktop)",
-    "text-right text-white/85",
-    "[text-shadow:0_0_14px_color-mix(in_srgb,var(--magenta)_60%,transparent)]",
-  ].join(" ");
+  const { windows, settings, keymap, boot, viewport, launcher } = getOs();
 
-  const { windows: windowManager, settings, keymap, boot, viewport } = getOs();
-  const prefs = $derived(settings.current);
-  const phase = $derived(boot.phase);
-  const isMobile = $derived(viewport.mobile);
-  const viewportWidth = $derived(viewport.width);
-  const viewportHeight = $derived(viewport.height);
-  const taskbarHeight = $derived(viewport.taskbarHeight);
-  let settingsReady = $state(false);
-  let selectedIcon = $state<string | null>(null);
-  let helpNoteOpen = $state(false);
+  let icons = $state<ReturnType<typeof DesktopIcons>>();
+  let menu = $state<ReturnType<typeof DesktopMenu>>();
+  let palette = $state<ReturnType<typeof PaletteHost>>();
   let helpNote = $state<ReturnType<typeof HelpNote>>();
-  let iconList = $state<HTMLElement>();
+  let helpNoteOpen = $state(false);
+  let screensaverOn = $state(false);
+  let settingsReady = $state(false);
   let mainEl = $state<HTMLElement>();
   let degaussRing = $state<HTMLElement>();
-  let lastTheme: Settings["theme"] | null = null;
-  let screensaverOn = $state(false);
-  let paletteOpen = $state(false);
-  // Bumped on every open. Reopening while the last palette is still fading
-  // out would otherwise revive that one, with its old query and no focus.
-  let paletteSession = $state(0);
-  // Where focus was when the palette opened, to go back to when it closes.
-  let paletteReturn: HTMLElement | null = null;
-  // Apps whose code is downloading on first open; the busy cursor shows meanwhile.
-  let loadingApps = $state(0);
-
-  // Where each window should grow from next time it appears: the icon or
-  // taskbar button that summoned it. Read once by the window's intro.
-  const origins = new Map<string, DOMRect>();
-
-  let svelteComponents = $state<Record<string, Component<AppProps>>>({});
-  let staticHtml = $state<Record<string, string>>({});
-
-  // Context menu state
-  let ctxMenu = $state<{ x: number; y: number } | null>(null);
-
-  const themeLabel = $derived(prefs.theme.toUpperCase());
-
-  const DESKTOP_MENU_ITEMS = $derived<MenuEntry[]>([
-    ...APPS.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: "pixelarticons:folder" })),
-    { separator: true as const },
-    {
-      id: "theme:toggle",
-      label: prefs.theme === "dark" ? "Light Theme" : "Dark Theme",
-      icon: prefs.theme === "dark" ? "lucide:sun" : "lucide:moon",
-    },
-    { id: "cascade", label: "Cascade Windows", icon: "pixelarticons:layout" },
-  ]);
-
-  function handleDesktopContext(e: MouseEvent) {
-    e.preventDefault();
-    ctxMenu = { x: e.clientX, y: e.clientY };
-  }
+  let lastTheme: Theme | null = null;
 
   const START_MENU_ITEMS: StartMenuItem[] = [
-    ...APPS.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
+    ...launcher.apps.map((a) => ({ id: `open:${a.id}`, label: a.title, icon: a.icon })),
     { id: "help", label: "Help", icon: "pixelarticons:info-box", iconify: true, separatorBefore: true },
     { id: "palette", label: "Command palette  Ctrl+K", icon: "pixelarticons:search", iconify: true },
     { id: "plain", label: "View as plain page", icon: "pixelarticons:article", iconify: true },
   ];
 
   function handleStartSelect(id: string, origin: DOMRect) {
-    if (id.startsWith("open:")) void launch(id.replace("open:", ""), origin);
+    if (id.startsWith("open:")) void launcher.open(id.slice("open:".length), origin);
     else if (id === "help") void showHelpNote();
-    else if (id === "palette") void openPalette();
+    else if (id === "palette") void palette?.open();
     else if (id === "plain") window.location.assign(`${import.meta.env.BASE_URL}about/`);
   }
 
   function handleTaskbarToggle(id: string) {
     const button = document.querySelector<HTMLElement>(`[data-taskbar-window="${id}"]`);
-    if (button) origins.set(id, button.getBoundingClientRect());
-    windowManager.toggleFromTaskbar(id);
-  }
-
-  function taskbarButtonRect(id: string): DOMRect | null {
-    return document.querySelector(`[data-taskbar-window="${id}"]`)?.getBoundingClientRect() ?? null;
+    if (button) launcher.setOrigin(id, button.getBoundingClientRect());
+    windows.toggleFromTaskbar(id);
   }
 
   async function showHelpNote() {
@@ -133,324 +64,16 @@
   function closeHelpNote() {
     dismissHelpNote();
     helpNoteOpen = false;
-    iconList?.querySelector<HTMLElement>("button")?.focus();
+    icons?.focusFirst();
   }
-
-  function handleMenuSelect(id: string) {
-    if (id.startsWith("open:")) {
-      void launch(id.replace("open:", ""));
-    } else if (id === "theme:toggle") {
-      settings.set("theme", prefs.theme === "dark" ? "light" : "dark");
-    } else if (id === "cascade") {
-      windowManager.cascade();
-    }
-  }
-
-  function readStaticTemplate(appId: string): string {
-    if (staticHtml[appId]) return staticHtml[appId]!;
-    const tpl = document.querySelector<HTMLTemplateElement>(`template[data-static-app="${appId}"]`);
-    const html = tpl?.innerHTML ?? "";
-    staticHtml = { ...staticHtml, [appId]: html };
-    return html;
-  }
-
-  async function ensureSvelteLoaded(appId: string, load: () => Promise<{ default: Component<AppProps> }>) {
-    const cached = svelteComponents[appId];
-    if (cached) return cached;
-    loadingApps += 1;
-    try {
-      const mod = await load();
-      svelteComponents = { ...svelteComponents, [appId]: mod.default };
-      return mod.default;
-    } catch (error) {
-      console.error(`Failed to load app "${appId}"`, error);
-      return null;
-    } finally {
-      loadingApps -= 1;
-    }
-  }
-
-  async function launch(appId: string, origin?: DOMRect) {
-    const app = APPS.find((a) => a.id === appId);
-    if (!app) return;
-    if (origin) origins.set(app.id, origin);
-    if (app.kind === "svelte") {
-      const component = await ensureSvelteLoaded(app.id, app.load);
-      if (!component) return;
-    } else {
-      readStaticTemplate(app.id);
-    }
-    // Read the viewport live: a resize event may not have landed yet.
-    const box = isMobile
-      ? app.defaults
-      : fitWindowToViewport(app.defaults, { width: window.innerWidth, height: window.innerHeight - taskbarHeight });
-    windowManager.open({ id: app.id, appId: app.id, title: app.title, icon: app.icon, box });
-  }
-
-  // One shell per window, so apps receive a stable prop.
-  const APP_LIST = APPS.map((a) => ({ id: a.id, title: a.title, icon: a.icon }));
-  const shells = new Map<string, AppShell>();
-  function shellFor(windowId: string): AppShell {
-    let shell = shells.get(windowId);
-    if (!shell) {
-      shell = {
-        apps: APP_LIST,
-        open: (appId) => void launch(appId),
-        close: () => windowManager.close(windowId),
-      };
-      shells.set(windowId, shell);
-    }
-    return shell;
-  }
-
-  // Loaded on first use, like the apps, so the desktop's first paint doesn't carry it.
-  let CommandPalette = $state<typeof import("./CommandPalette.svelte").default>();
-
-  async function openPalette() {
-    if (paletteOpen) return;
-    CommandPalette ??= (await import("./CommandPalette.svelte")).default;
-    const current = document.activeElement;
-    paletteReturn = current instanceof HTMLElement && current !== document.body ? current : null;
-    paletteSession += 1;
-    paletteOpen = true;
-  }
-
-  function closePalette() {
-    paletteOpen = false;
-    const back = paletteReturn;
-    paletteReturn = null;
-    if (back?.isConnected) back.focus({ preventScroll: true });
-  }
-
-  /** Open (or bring forward) an app's window and put focus where it works. */
-  async function launchAndFocus(appId: string) {
-    await launch(appId);
-    await tick();
-    const win = document.querySelector<HTMLElement>(`[data-window-id="${appId}"]`);
-    if (win) focusTargetFor(win).focus({ preventScroll: true });
-  }
-
-  function runPaletteItem(item: PaletteItem) {
-    const { action } = item;
-    if (action.kind === "setting") {
-      if (action.key === "theme") settings.set("theme", action.value);
-      else if (action.key === "crt") settings.set("crt", action.value);
-      else settings.set("gridSpeed", action.value);
-      closePalette();
-      return;
-    }
-    paletteOpen = false;
-    paletteReturn = null;
-    if (action.kind === "app") void launchAndFocus(action.appId);
-    else if (action.kind === "project") {
-      intents.showProject(action.slug);
-      void launchAndFocus("projects");
-    } else {
-      intents.runInTerminal(action.command);
-      void launchAndFocus("terminal");
-    }
-  }
-
-  $effect(() =>
-    keymap.bind({
-      id: "palette",
-      keys: ["Mod+K", "Mod+Shift+K"],
-      scope: "desktop",
-      description: "Open or close the command palette",
-      when: () => boot.phase === "desktop",
-      run: () => {
-        if (paletteOpen) closePalette();
-        else void openPalette();
-      },
-    }),
-  );
-
-  // A mouse click selects and a double-click opens, as on a period desktop.
-  // Enter/Space fire a click with detail 0, so the keyboard opens in one press;
-  // touch has no double-tap convention here, so a tap opens.
-  function handleIconClick(appId: string, e: MouseEvent & { currentTarget: HTMLElement }) {
-    selectedIcon = appId;
-    if (isMobile || e.detail === 0) void launch(appId, e.currentTarget.getBoundingClientRect());
-  }
-
-  function handleIconDoubleClick(appId: string, e: MouseEvent & { currentTarget: HTMLElement }) {
-    void launch(appId, e.currentTarget.getBoundingClientRect());
-  }
-
-  // Arrow keys walk the icon column; the selection follows focus.
-  function handleIconKeydown(e: KeyboardEvent) {
-    const buttons = [...(iconList?.querySelectorAll<HTMLElement>("button[data-app-id]") ?? [])];
-    const index = buttons.indexOf(document.activeElement as HTMLElement);
-    if (index < 0) return;
-    const next = {
-      ArrowDown: index + 1,
-      ArrowRight: index + 1,
-      ArrowUp: index - 1,
-      ArrowLeft: index - 1,
-      Home: 0,
-      End: buttons.length - 1,
-    }[e.key];
-    if (next === undefined) return;
-    e.preventDefault();
-    const target = buttons[Math.min(Math.max(next, 0), buttons.length - 1)];
-    target?.focus();
-    selectedIcon = target?.dataset.appId ?? selectedIcon;
-  }
-
-  function handleDesktopPointerDown(e: PointerEvent) {
-    if (!(e.target as Element).closest("button[data-app-id]")) selectedIcon = null;
-  }
-
-  // ---- Snapping (desktop only; mobile windows are already full screen) ----
-  let snapPreview = $state<SnapZone | null>(null);
-
-  function desktopArea() {
-    return { width: window.innerWidth, height: window.innerHeight - taskbarHeight };
-  }
-
-  /** Dragging a snapped window out of its half gives it back its old size, under the pointer. */
-  function handleDragStart(id: string, clientX: number) {
-    const win = windowManager.get(id);
-    if (!win?.snapped) return;
-    windowManager.restore(id, { x: unsnapX(clientX, win.box, win.floatingBox.w), y: win.box.y });
-  }
-
-  function handleDragMove(clientX: number, clientY: number) {
-    snapPreview = isMobile ? null : snapZoneAt(clientX, clientY, desktopArea());
-  }
-
-  function handleDragEnd(id: string, clientX: number, clientY: number) {
-    snapPreview = null;
-    if (isMobile) return;
-    const zone = snapZoneAt(clientX, clientY, desktopArea());
-    if (zone === "max") windowManager.maximize(id);
-    else if (zone) windowManager.snap(id, zone, desktopArea());
-  }
-
-  /** Arrow keys on a title bar, or Alt+Shift+arrow: snap left/right, maximise, restore. */
-  function handleSnapKey(id: string, direction: "left" | "right" | "up" | "down") {
-    if (!isMobile) windowManager.snapKey(id, direction, desktopArea());
-  }
-
-  // Alt+Shift+arrow snaps the active window, unless focus is in a text field,
-  // where that combination selects text on a Mac.
-  const SNAP_KEYS = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down" } as const;
-  $effect(() =>
-    keymap.bind({
-      id: "snap",
-      keys: Object.keys(SNAP_KEYS).map((key) => `Alt+Shift+${key}`),
-      scope: "window",
-      description: "Snap the active window left or right, maximise, restore",
-      when: (e) => boot.phase === "desktop" && windowManager.activeId !== null && !inTextField(e),
-      run: (e) => handleSnapKey(windowManager.activeId ?? "", SNAP_KEYS[e.key as keyof typeof SNAP_KEYS]),
-    }),
-  );
-
-  // Just under the dragged (top) window, above the rest.
-  const snapPreviewZ = $derived(windowManager.topZ - 1);
-
-  const snapPreviewBox = $derived.by(() => {
-    if (!snapPreview) return null;
-    const area = { width: viewportWidth, height: viewportHeight - taskbarHeight };
-    return snapPreview === "max" ? { x: 0, y: 0, w: area.width, h: area.height } : snapBox(snapPreview, area);
-  });
-
-  function moveWindow(id: string, width: number, x: number, y: number) {
-    const next = clampWindowPosition(x, y, width, {
-      width: viewportWidth,
-      height: viewportHeight - taskbarHeight,
-    });
-    windowManager.move(id, next.x, next.y);
-  }
-
-  // Focus memory: the window manager keeps the last element focused inside
-  // each window's body, so a window that becomes active again hands focus
-  // back to where it was. Header buttons aren't remembered; restoring onto
-  // "minimise" helps nobody.
-  // Set by a pointer press on a window's title bar or frame, not its body or
-  // buttons. Only that focus is passed on: the app owns clicks in its body (the
-  // Terminal lets them select text), and Tab onto the title bar must stay put.
-  let pressedChrome = false;
-
-  /** Where focus goes when a window activates: where it was, else the app's `data-autofocus`, else the frame. */
-  function focusTargetFor(win: HTMLElement): HTMLElement {
-    const remembered = windowManager.rememberedFocus(win.dataset.windowId ?? "");
-    if (remembered && win.contains(remembered)) return remembered;
-    return win.querySelector<HTMLElement>("[data-window-body] [data-autofocus]") ?? win;
-  }
-
-  function handleWindowPointerDown(e: PointerEvent) {
-    const target = e.target as Element;
-    pressedChrome = Boolean(target.closest("[data-window-id]")) && !target.closest("[data-window-body], button");
-    // Focus from this press is dispatched in the same task; clear afterwards.
-    window.setTimeout(() => (pressedChrome = false));
-  }
-
-  function handleWindowFocusIn(e: FocusEvent) {
-    const target = e.target as HTMLElement;
-    const win = target.closest<HTMLElement>("[data-window-id]");
-    if (!win) return;
-    if (target.closest("[data-window-body]")) {
-      windowManager.rememberFocus(win.dataset.windowId ?? "", target);
-      return;
-    }
-    // A click on the title bar or edge: pass focus on to where the window was working.
-    if (pressedChrome) {
-      const next = focusTargetFor(win);
-      if (next !== win) next.focus({ preventScroll: true });
-    }
-  }
-
-  // Keyboard focus follows the active window, so opening, restoring or
-  // closing a window never strands focus on something that disappeared.
-  let lastActiveId: string | null = null;
-  $effect(() => {
-    const id = windowManager.activeId;
-    if (id === lastActiveId) return;
-    lastActiveId = id;
-    void tick().then(() => {
-      const current = document.activeElement;
-      if (id) {
-        const win = document.querySelector<HTMLElement>(`[data-window-id="${id}"]`);
-        if (win && !win.contains(current)) focusTargetFor(win).focus({ preventScroll: true });
-      } else if (!current || current === document.body || current.closest("[data-window-id]")) {
-        document.querySelector<HTMLElement>('nav[aria-label="Taskbar"] button')?.focus();
-      }
-    });
-  });
 
   $effect(() => {
-    if (!settingsReady) {
-      return;
-    }
-
+    if (!settingsReady) return;
+    const prefs = settings.current;
     applySettingsToRoot(document.documentElement, prefs);
     // Degauss on a theme switch, but not when settings first load.
     if (lastTheme && lastTheme !== prefs.theme && mainEl && degaussRing) void degauss(mainEl, degaussRing);
     lastTheme = prefs.theme;
-  });
-
-  // Screensaver: only on the desktop, and never over a half-written draft.
-  $effect(() => {
-    const timeoutMs = screensaverDelayMs(prefs.screensaver);
-    if (timeoutMs === null || phase !== "desktop") return;
-    const stop = watchIdle({
-      timeoutMs,
-      onIdle: () => (screensaverOn = true),
-      onActive: () => (screensaverOn = false),
-      canIdle: () => !isDrafting(),
-    });
-    return () => {
-      stop();
-      screensaverOn = false;
-    };
-  });
-
-  // The key that wakes the screen is swallowed, as on a real machine, so it
-  // can't also close a window or type into the terminal.
-  $effect(() => {
-    if (!screensaverOn) return;
-    return keymap.bind({ id: "screensaver", keys: ["*"], scope: "modal", run: () => {} });
   });
 
   // One skip binding for every boot phase, so a key pressed at any point
@@ -479,166 +102,55 @@
   });
 </script>
 
-{#if phase === "pending"}
+{#if boot.phase === "pending"}
   <div class="bg-boot-bg fixed inset-0 z-(--z-boot)" aria-hidden="true"></div>
-{:else if phase === "bios"}
+{:else if boot.phase === "bios"}
   <BootSequence onDone={() => boot.biosDone()} onSkip={() => boot.finish()} />
 {/if}
 
-{#if phase === "splash" || phase === "leaving"}
+{#if boot.phase === "splash" || boot.phase === "leaving"}
   <LoadingSplash
     durationMs={boot.returning ? RETURN_SPLASH_MS : FIRST_SPLASH_MS}
     sunRise={!boot.returning}
-    leaving={phase === "leaving"}
+    leaving={boot.phase === "leaving"}
     onDone={leaveSplash}
   />
 {/if}
 
 <!-- The desktop mounts under the splash so the splash can dissolve into it. -->
-{#if phase === "splash" || phase === "leaving" || phase === "desktop"}
+{#if boot.phase !== "pending" && boot.phase !== "bios"}
   <main
     bind:this={mainEl}
-    class={MAIN_CLASS}
-    inert={phase !== "desktop"}
-    aria-busy={loadingApps > 0 || undefined}
-    oncontextmenu={handleDesktopContext}
-    onpointerdown={handleDesktopPointerDown}
-    onpointerdowncapture={handleWindowPointerDown}
-    onfocusin={handleWindowFocusIn}
+    class="bg-desktop relative h-screen w-screen overflow-hidden"
+    inert={boot.phase !== "desktop"}
+    aria-busy={launcher.loading > 0 || undefined}
+    oncontextmenu={(e) => menu?.openAt(e)}
   >
-    <Wallpaper covered={screensaverOn || wallpaperCovered(windowManager.windows, isMobile)} />
-    {#if !isMobile}
-      <aside class={SYS_BADGE_CLASS} aria-label="System information">
-        <p class="font-chrome text-[28px] leading-none tracking-[0.02em]">
-          RETRO<span class="text-cyan">//OS</span>
-        </p>
-        <p class="font-mono mt-1 text-[13px] opacity-80">v{APP_VERSION} · {themeLabel}</p>
-        <p class="font-mono text-[12px] opacity-70">build {BUILD_DATE}</p>
-      </aside>
+    <Wallpaper covered={screensaverOn || wallpaperCovered(windows.windows, viewport.mobile)} />
+    {#if !viewport.mobile}
+      <SystemBadge />
     {/if}
-
-    <ul
-      bind:this={iconList}
-      aria-label="Desktop"
-      class={cx(ICON_GRID_BASE, isMobile ? ICON_GRID_MOBILE : ICON_GRID_DESKTOP)}
-    >
-      {#each APPS as a (a.id)}
-        <li>
-          <button
-            type="button"
-            data-app-id={a.id}
-            data-selected={selectedIcon === a.id}
-            ondblclick={(e) => handleIconDoubleClick(a.id, e)}
-            onclick={(e) => handleIconClick(a.id, e)}
-            onfocus={() => (selectedIcon = a.id)}
-            onkeydown={handleIconKeydown}
-            class={cx(ICON_BUTTON_BASE, isMobile ? ICON_BUTTON_MOBILE : ICON_BUTTON_DESKTOP)}
-          >
-            <img
-              src={a.icon}
-              alt=""
-              aria-hidden="true"
-              class={ICON_IMG_CLASS}
-              width="32"
-              height="32"
-              decoding="async"
-            />
-            <span>{a.title.split(" ")[0]}</span>
-          </button>
-        </li>
-      {/each}
-    </ul>
-
+    <DesktopIcons bind:this={icons} />
     {#if helpNoteOpen}
-      <HelpNote bind:this={helpNote} mobile={isMobile} onDismiss={closeHelpNote} />
+      <HelpNote bind:this={helpNote} mobile={viewport.mobile} onDismiss={closeHelpNote} />
     {/if}
-
-    {#each windowManager.windows as w (w.id)}
-      {@const app = APPS.find((a) => a.id === w.appId)}
-      {#if app}
-        <RetroWindow
-          id={w.id}
-          title={w.title}
-          icon={w.icon}
-          active={windowManager.activeId === w.id}
-          z={windowManager.z(w.id)}
-          minimized={w.minimized}
-          x={isMobile ? 0 : w.box.x}
-          y={isMobile ? 0 : w.box.y}
-          w={isMobile ? viewportWidth : w.box.w}
-          h={isMobile ? viewportHeight - taskbarHeight : w.box.h}
-          maximized={isMobile ? true : w.maximized}
-          resizable={!isMobile}
-          originFor={() => origins.get(w.id) ?? null}
-          minimizeTargetFor={() => taskbarButtonRect(w.id)}
-          onFocus={() => windowManager.focus(w.id)}
-          onDragStart={(x) => handleDragStart(w.id, x)}
-          onDragMove={handleDragMove}
-          onDragEnd={(x, y) => handleDragEnd(w.id, x, y)}
-          onSnapKey={(direction) => handleSnapKey(w.id, direction)}
-          onMove={(x, y) => moveWindow(w.id, w.box.w, x, y)}
-          onResize={(ww, hh) => windowManager.resize(w.id, ww, hh)}
-          onMin={() => windowManager.minimize(w.id)}
-          onMax={() => windowManager.toggleMax(w.id)}
-          onClose={() => windowManager.close(w.id)}
-        >
-          <AppFrame appId={w.appId} title={w.title} onClose={() => windowManager.close(w.id)}>
-            {#if app.kind === "static"}
-              {@html staticHtml[w.appId] ?? ""}
-            {:else if svelteComponents[w.appId]}
-              {@const AppComp = svelteComponents[w.appId]}
-              <AppComp shell={shellFor(w.id)} />
-            {/if}
-          </AppFrame>
-        </RetroWindow>
-      {/if}
-    {/each}
-
-    {#if snapPreviewBox}
-      <div
-        class="snap-preview pointer-events-none absolute"
-        style:z-index={snapPreviewZ}
-        style:left="{snapPreviewBox.x}px"
-        style:top="{snapPreviewBox.y}px"
-        style:width="{snapPreviewBox.w}px"
-        style:height="{snapPreviewBox.h}px"
-        aria-hidden="true"
-        data-snap-preview={snapPreview}
-      ></div>
-    {/if}
-
+    <WindowLayer />
     <CrtLayer />
     <div bind:this={degaussRing} class="degauss-ring" aria-hidden="true"></div>
-
-    {#if ctxMenu}
-      <ContextMenu
-        items={DESKTOP_MENU_ITEMS}
-        x={ctxMenu.x}
-        y={ctxMenu.y}
-        onSelect={handleMenuSelect}
-        onClose={() => (ctxMenu = null)}
-      />
-    {/if}
+    <DesktopMenu bind:this={menu} />
   </main>
 
-  <div class="contents" inert={phase !== "desktop"}>
+  <div class="contents" inert={boot.phase !== "desktop"}>
     <Taskbar
-      windows={windowManager.windows}
-      activeId={windowManager.activeId}
+      windows={windows.windows}
+      activeId={windows.activeId}
       menuItems={START_MENU_ITEMS}
-      mobile={isMobile}
+      mobile={viewport.mobile}
       onToggleWindow={handleTaskbarToggle}
       onMenuSelect={handleStartSelect}
     />
   </div>
 
-  {#if paletteOpen && CommandPalette}
-    {#key paletteSession}
-      <CommandPalette apps={APP_LIST} onRun={runPaletteItem} onClose={closePalette} />
-    {/key}
-  {/if}
-
-  {#if screensaverOn}
-    <Screensaver />
-  {/if}
+  <PaletteHost bind:this={palette} />
+  <ScreensaverHost bind:on={screensaverOn} />
 {/if}
