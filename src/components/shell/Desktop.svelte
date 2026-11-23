@@ -135,12 +135,12 @@
   aria-busy={launcher.loading > 0 || undefined}
   oncontextmenu={(e) => menu?.openAt(e)}
 >
-  <Wallpaper covered={screensaverOn || wallpaperCovered(windows.windows, viewport.mobile)} />
-  {#if !viewport.mobile}
-    <SystemBadge />
-  {/if}
+  <!-- Paused under the BIOS: it can't be seen, and a throttled phone needs the CPU for the boot. -->
+  <Wallpaper covered={boot.phase === "bios" || screensaverOn || wallpaperCovered(windows.windows, viewport.mobile)} />
+  <SystemBadge />
   <DesktopIcons bind:this={icons} />
-  {#if helpNoteOpen}
+  <!-- After the boot: nothing under the boot screens should fetch or paint first. -->
+  {#if helpNoteOpen && boot.phase === "desktop"}
     <HelpNote bind:this={helpNote} mobile={viewport.mobile} onDismiss={closeHelpNote} />
   {/if}
   <WindowLayer />
@@ -154,7 +154,6 @@
     windows={windows.windows}
     activeId={windows.activeId}
     menuItems={START_MENU_ITEMS}
-    mobile={viewport.mobile}
     onToggleWindow={handleTaskbarToggle}
     onMenuSelect={handleStartSelect}
   />
