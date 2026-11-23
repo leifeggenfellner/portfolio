@@ -1,7 +1,7 @@
 <script lang="ts">
   import diskIcon from "@/assets/icons/files/disk.svg?url";
   import folderIcon from "@/assets/icons/apps/pixel/projects.svg?url";
-  import { PROJECTS } from "@content/projects";
+  import { PROJECTS } from "virtual:content/projects";
   import type { AppProps } from "@lib/app-shell";
   import { cx } from "@lib/cx";
   import RetroButton from "@primitives/RetroButton.svelte";

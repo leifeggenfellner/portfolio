@@ -1,14 +1,10 @@
 /**
- * Content collections — typed at build time.
- *
- * Astro 6 requires explicit loaders for each collection.
- * `projects` uses the glob loader for JSON files.
- * `posts` uses the glob loader for MDX files.
+ * Content collections, validated at build time against src/content/schema.ts.
+ * The browser gets the same data through src/content/vite-plugin.ts.
  */
-import { glob } from "astro/loaders";
+import { file, glob } from "astro/loaders";
 import { defineCollection } from "astro:content";
-import { z } from "zod";
-import { projectSchema } from "./content/schema";
+import { postSchema, profileSchema, projectSchema, skillGroupSchema } from "./content/schema";
 
 const projects = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/content/projects" }),
@@ -17,13 +13,11 @@ const projects = defineCollection({
 
 const posts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/posts" }),
-  schema: z.object({
-    title: z.string(),
-    date: z.coerce.date(),
-    description: z.string().optional(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-  }),
+  schema: postSchema,
 });
 
-export const collections = { projects, posts };
+const profile = defineCollection({ loader: file("src/content/profile.json"), schema: profileSchema });
+
+const skills = defineCollection({ loader: file("src/content/skills.json"), schema: skillGroupSchema });
+
+export const collections = { projects, posts, profile, skills };

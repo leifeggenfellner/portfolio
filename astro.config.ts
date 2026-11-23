@@ -4,6 +4,7 @@ import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
 import pkg from "./package.json" with { type: "json" };
+import { contentData } from "./src/content/vite-plugin";
 
 // The site lives at the root of its own domain. SITE_URL and BASE_PATH
 // override this, e.g. to serve from https://<user>.github.io/<repo>/
@@ -32,7 +33,7 @@ export default defineConfig({
     },
   ],
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), contentData()],
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
       __BUILD_DATE__: JSON.stringify(BUILD_DATE),

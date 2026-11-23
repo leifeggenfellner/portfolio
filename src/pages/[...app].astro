@@ -6,7 +6,7 @@
  */
 import "@apps/server";
 import { APPS } from "@apps/registry";
-import { PROFILE } from "@content/profile";
+import { getEntry } from "astro:content";
 import type { AppArgs, AppRoute } from "@lib/app-shell";
 import { pageTitle } from "@lib/site";
 import { personLd } from "@lib/structured-data";
@@ -39,13 +39,14 @@ export async function getStaticPaths() {
 const { appId, args, title, description, image, jsonLd } = Astro.props;
 const site = new URL(import.meta.env.BASE_URL, Astro.site);
 const page = new URL(Astro.url.pathname, Astro.site);
+const profile = (await getEntry("profile", "me"))!.data;
 ---
 
 <RootLayout
   title={pageTitle(title)}
   description={description}
   image={image}
-  jsonLd={[personLd(PROFILE, site), ...(jsonLd ? [jsonLd(page, site)] : [])]}
+  jsonLd={[personLd(profile, site), ...(jsonLd ? [jsonLd(page, site)] : [])]}
 >
   <Os client:desktop initial={{ appId, args }} />
 </RootLayout>

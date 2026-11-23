@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { PROFILE } from "@content/profile";
-  import { PROJECTS } from "@content/projects";
-  import { SKILL_GROUPS } from "@content/skills";
+  import { PROFILE } from "virtual:content/profile";
+  import { PROJECTS } from "virtual:content/projects";
+  import { SKILL_GROUPS } from "virtual:content/skills";
   import type { AppProps } from "@lib/app-shell";
   import { getOs } from "@lib/os/context";
   import { dir, file } from "./fs";
