@@ -18,7 +18,7 @@ const BASE = process.env.BASE_PATH || "/";
 const BUILD_DATE = new Date().toISOString().slice(0, 10).replaceAll("-", ".");
 
 // The one inline script we write by hand (RootLayout); Astro hashes its own.
-const BOOTSTRAP_HASH = `sha256-${createHash("sha256").update(SETTINGS_BOOTSTRAP_SCRIPT).digest("base64")}`;
+const BOOTSTRAP_HASH: `sha256-${string}` = `sha256-${createHash("sha256").update(SETTINGS_BOOTSTRAP_SCRIPT).digest("base64")}`;
 
 export default defineConfig({
   site: SITE,
