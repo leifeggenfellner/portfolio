@@ -119,6 +119,16 @@
   --crash-bg: #1d2a9e;
   --crash-fg: #f2f0ff;
 
+  /* ---- cursors ---- */
+  /* Pixel-art cursors (scripts/build-cursors.mjs), each with its hotspot in
+     CSS px and a standard keyword to fall back on if the image fails. */
+  --cursor-default: url("../assets/cursors/arrow.svg") 0 0, default;
+  --cursor-pointer: url("../assets/cursors/hand.svg") 11 1, pointer;
+  --cursor-text: url("../assets/cursors/text.svg") 9 16, text;
+  --cursor-move: url("../assets/cursors/move.svg") 15 15, move;
+  --cursor-resize: url("../assets/cursors/resize.svg") 15 15, nwse-resize;
+  --cursor-busy: url("../assets/cursors/busy.svg") 11 15, progress;
+
   /* ---- selection / status ---- */
   --selection-bg: var(--accent);
   --selection-text: #04231b;

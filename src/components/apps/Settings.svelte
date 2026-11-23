@@ -51,6 +51,15 @@
         <span>{OPTION_LABELS.theme[theme]}</span>
       </label>
     {/each}
+    <label class={CONTROL_LABEL_CLASS}>
+      <input
+        class="accent-accent"
+        type="checkbox"
+        checked={$settings.cursors === "retro"}
+        onchange={(event) => settings.set("cursors", event.currentTarget.checked ? "retro" : "system")}
+      />
+      <span>Pixel-art cursors</span>
+    </label>
     <span class={SETTING_TITLE_CLASS}>CRT effect</span>
     {#each CRT_MODES as mode (mode)}
       <label class={CONTROL_LABEL_CLASS}>
