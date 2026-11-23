@@ -1,0 +1,4 @@
+/* Injected into visual.spec.ts screenshots: the wallpaper canvas is an effect, not chrome, and its frame varies. */
+main [data-horizon] {
+  visibility: hidden !important;
+}
