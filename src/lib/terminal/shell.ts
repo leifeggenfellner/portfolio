@@ -5,6 +5,7 @@
  */
 import { CRT_MODES, GRID_SPEEDS, THEMES } from "@lib/settings";
 import { formatPath, listDir, nodeAt, resolvePath } from "./fs";
+import { pipeCount } from "./pipes";
 import { FORTUNES, monitorSays, TRAIN } from "./toys";
 import type { FsDir } from "./fs";
 import type { CrtMode, GridSpeed, Theme } from "@lib/settings";
@@ -45,12 +46,14 @@ export interface ShellContext {
   random(): number;
 }
 
+/** A visual effect the terminal plays over its pane until a key stops it. */
+export type TerminalEffect = { name: "matrix" } | { name: "pipes"; count: number };
+
 export interface ShellResult {
   lines: Line[];
   cwd?: string[];
   clear?: boolean;
-  /** A visual effect for the terminal to play, such as the `matrix` rain. */
-  effect?: "matrix";
+  effect?: TerminalEffect;
 }
 
 interface Command {
@@ -256,7 +259,22 @@ const COMMANDS: Record<string, Command> = {
       "Digital rain in the terminal, until any key is pressed. Skipped",
       "when the system asks for reduced motion.",
     ],
-    run: () => ({ lines: [{ text: "wake up. (any key stops the rain)", tone: "dim" }], effect: "matrix" }),
+    run: () => ({ lines: [{ text: "wake up. (any key stops the rain)", tone: "dim" }], effect: { name: "matrix" } }),
+  },
+  pipes: {
+    usage: "pipes [1-8]",
+    summary: "pipes grow; any key stops them",
+    manual: [
+      "Pipes grow across the terminal, turning at random, each in its own",
+      "colour, until any key is pressed. The number sets how many grow at",
+      "once (1 to 8, default 4). Skipped when the system asks for reduced",
+      "motion.",
+    ],
+    run: (args) => {
+      const count = pipeCount(args[0]);
+      if (count === null) return err("usage: pipes [1-8]");
+      return { lines: [{ text: "plumbing... (any key stops it)", tone: "dim" }], effect: { name: "pipes", count } };
+    },
   },
   man: {
     usage: "man <command>",
@@ -308,7 +326,7 @@ const HIDDEN_COMMANDS: Record<string, Command> = {
     usage: "cmatrix",
     summary: "digital rain",
     manual: [],
-    run: () => ({ lines: [], effect: "matrix" }),
+    run: () => ({ lines: [], effect: { name: "matrix" } }),
   },
   panic: {
     usage: "panic",
