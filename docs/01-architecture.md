@@ -57,11 +57,14 @@ build their own with `createOs()` / `osContext()`.
 | ----------------- | -------------------------------------------------------------------- |
 | `WindowManager`   | open windows, stacking, active window, layout (floating, snapped,    |
 |                   | maximised), focus memory, announcements                              |
-| `Launcher`        | opening apps with typed `args`, loading app code, window origins     |
+| `Launcher`        | opening apps with typed `args`, loading and prefetching app code,    |
+|                   | window origins                                                       |
 | `Navigation`      | windows ↔ URLs: push on open, replace on focus or close, Back closes |
 | `Keymap`          | every shortcut, in scopes: modal > window > desktop > global         |
 | `SettingsService` | schema-driven settings, persisted, applied to `<html>`               |
 | `Boot`            | the boot phase machine, an overlay over the server-rendered desktop  |
+| `Loader`          | loading tasks run as live log lines, with a deadline; the BIOS log   |
+|                   | is its first user (tasks in `boot-tasks.ts`)                         |
 | `Viewport`        | size, taskbar height, phone, coarse pointer, reduced motion          |
 | `Announcer`       | the one polite live region                                           |
 

@@ -4,11 +4,12 @@
   import CrtLayer from "@effects/CrtLayer.svelte";
   import LoadingSplash from "@effects/LoadingSplash.svelte";
   import Wallpaper from "@effects/Wallpaper.svelte";
-  import { FIRST_SPLASH_MS, RETURN_SPLASH_MS } from "@lib/boot";
+  import { BIOS_DEADLINE_MS, FIRST_SPLASH_MS, RETURN_SPLASH_MS } from "@lib/boot";
   import { degauss } from "@lib/degauss";
   import { dismissHelpNote, isHelpNoteDismissed } from "@lib/help-note";
   import { wallpaperCovered } from "@lib/horizon";
   import { durationMs, prefersReducedMotion } from "@lib/motion";
+  import { bootTasks } from "@lib/os/boot-tasks";
   import { getOs } from "@lib/os/context";
   import { readSession, writeSession } from "@lib/os/session";
   import { bindingFor } from "@lib/os/shortcuts";
@@ -31,7 +32,7 @@
 
   let { deepLink = false }: Props = $props();
 
-  const { windows, settings, keymap, boot, viewport, launcher, announcer, navigation, updates } = getOs();
+  const { windows, settings, keymap, boot, viewport, launcher, loader, announcer, navigation, updates } = getOs();
 
   let icons = $state<ReturnType<typeof DesktopIcons>>();
   let menu = $state<ReturnType<typeof DesktopMenu>>();
@@ -125,6 +126,8 @@
     settingsReady = true;
     helpNoteOpen = !isHelpNoteDismissed();
     boot.start(settings.current.bootAnimation && !deepLink);
+    // The BIOS log is the real loader: what it prints is work being done.
+    if (boot.phase === "bios") void loader.run(bootTasks(launcher, { crt: settings.current.crt }), BIOS_DEADLINE_MS);
     if (settings.current.restoreSession) void restoreSession().finally(() => (sessionRestored = true));
     else sessionRestored = true;
   });
@@ -139,7 +142,12 @@
   <!-- Hidden unless the bootstrap script says a boot will play; never covers the page without JS. -->
   <div class="boot-cover bg-boot-bg fixed inset-0 z-(--z-boot)" aria-hidden="true"></div>
 {:else if boot.phase === "bios"}
-  <BootSequence onDone={() => boot.biosDone()} onSkip={() => boot.finish()} />
+  <BootSequence
+    lines={loader.lines}
+    settled={loader.settled}
+    onDone={() => boot.biosDone()}
+    onSkip={() => boot.finish()}
+  />
 {/if}
 
 {#if boot.phase === "splash" || boot.phase === "leaving"}

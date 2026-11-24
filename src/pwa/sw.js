@@ -14,8 +14,29 @@ const VERSION = "__VERSION__";
 const PRECACHE = __PRECACHE__;
 const CACHE = `retro-os-${VERSION}`;
 
+// Tell open pages how far the precache is, for the BIOS log on a first visit
+// (src/lib/os/boot-tasks.ts). They aren't controlled yet, hence includeUncontrolled.
+async function reportPrecache(done, total) {
+  const pages = await self.clients.matchAll({ includeUncontrolled: true, type: "window" });
+  for (const page of pages) page.postMessage({ type: "precache", done, total });
+}
+
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)));
+  const total = PRECACHE.length;
+  let done = 0;
+  // One add per file rather than addAll, to count them; any failure still fails the install.
+  event.waitUntil(
+    caches.open(CACHE).then((cache) =>
+      Promise.all(
+        PRECACHE.map((url) =>
+          cache.add(url).then(() => {
+            done += 1;
+            return reportPrecache(done, total);
+          }),
+        ),
+      ),
+    ),
+  );
 });
 
 self.addEventListener("activate", (event) => {

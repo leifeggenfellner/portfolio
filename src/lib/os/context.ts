@@ -8,6 +8,7 @@ import { Announcer } from "./announcer.svelte";
 import { Boot } from "./boot.svelte";
 import { Keymap } from "./keymap.svelte";
 import { Launcher } from "./launcher.svelte";
+import { Loader } from "./loader.svelte";
 import { Navigation } from "./navigation.svelte";
 import { SettingsService } from "./settings.svelte";
 import { Updates } from "./updates.svelte";
@@ -23,6 +24,7 @@ export interface Os {
   boot: Boot;
   viewport: Viewport;
   launcher: Launcher;
+  loader: Loader;
   navigation: Navigation;
   updates: Updates;
 }
@@ -50,6 +52,7 @@ export function createOs(apps: readonly AppManifest[] = [], initial?: InitialWin
     boot: new Boot(),
     viewport,
     launcher,
+    loader: new Loader(),
     navigation: new Navigation(windows, launcher, import.meta.env.BASE_URL),
     updates: new Updates(),
   };
