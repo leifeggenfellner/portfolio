@@ -31,6 +31,8 @@
   const headerClass = [
     "group no-select font-chrome flex h-7 cursor-move items-center gap-1.5 px-1 py-0.75 pl-1.5 pointer-coarse:h-12",
     "title-bar-inactive data-[active=true]:title-bar",
+    // A tab stop (arrows snap); the ring takes the bar's text colour to show on the gradient.
+    "focus-ring [--focus-ring-color:currentColor]",
   ].join(" ");
 
   const iconClass = [

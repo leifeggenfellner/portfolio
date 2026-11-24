@@ -2,7 +2,7 @@
 
 <!-- Generated from src/lib/os/shortcuts.ts by `pnpm docs:generate`. Do not edit. -->
 
-Every shortcut on the desktop (13 in all). On a Mac, Ctrl is Cmd. The Terminal's `man keys` prints the same list.
+Every shortcut on the desktop (14 in all). On a Mac, Ctrl is Cmd. The Terminal's `man keys` prints the same list.
 
 ## Desktop
 
@@ -35,6 +35,12 @@ Every shortcut on the desktop (13 in all). On a Mac, Ctrl is Cmd. The Terminal's
 | Keys   | What it does                         |
 | ------ | ------------------------------------ |
 | Arrows | Snap, maximise or restore the window |
+
+## Window resize handle
+
+| Keys   | What it does                                   |
+| ------ | ---------------------------------------------- |
+| Arrows | Resize the window; with Shift, in bigger steps |
 
 ## Terminal
 

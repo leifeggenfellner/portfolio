@@ -126,6 +126,25 @@
     window.removeEventListener("pointerup", stopResize);
   }
 
+  // The handle is a tab stop, so it has to work without a pointer too.
+  const RESIZE_STEP = 16;
+  const RESIZE_KEYS: Record<string, [number, number]> = {
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+  };
+
+  function resizeByKey(e: KeyboardEvent) {
+    const dir = RESIZE_KEYS[e.key];
+    // Alt+Shift+Arrow is the desktop's snap shortcut; let it through.
+    if (!dir || !winRef || e.altKey || e.ctrlKey || e.metaKey) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const step = e.shiftKey ? RESIZE_STEP * 4 : RESIZE_STEP;
+    onResize?.(Math.max(260, winRef.offsetWidth + dir[0] * step), Math.max(160, winRef.offsetHeight + dir[1] * step));
+  }
+
   function startResize(e: PointerEvent) {
     e.stopPropagation();
     onFocus?.();
@@ -271,7 +290,9 @@
       <button
         type="button"
         aria-label="Resize window"
+        aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown"
         onpointerdown={startResize}
+        onkeydown={resizeByKey}
         class="absolute right-0 bottom-0 h-4 w-4 cursor-nwse-resize border-0 bg-transparent p-0 bg-[repeating-linear-gradient(135deg,var(--bevel-shadow)_0_1px,transparent_1px_3px)]"
       ></button>
     {/if}

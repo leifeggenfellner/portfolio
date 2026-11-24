@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { openDesktop } from "./helpers";
+import { openApp, openDesktop } from "./helpers";
 
 const APPS = ["Me.txt — Notepad", "Projects", "Terminal", "Skills Matrix", "Contact", "Minesweeper", "Settings"];
 
@@ -29,4 +29,19 @@ test("a keyboard-only tour opens and closes every app", { tag: ["@webkit"] }, as
     await page.keyboard.press("Shift+Tab");
     await expect(page.locator("[data-app-id]:focus")).toHaveCount(1);
   }
+});
+
+// The resize handle is a tab stop; without a pointer it has to answer the arrows.
+test("the resize handle resizes the window from the keyboard", async ({ page }) => {
+  await openDesktop(page);
+  const win = await openApp(page, "about");
+  const handle = win.getByRole("button", { name: "Resize window" });
+  // Layout size, not the bounding box: the opening animation scales the window.
+  const size = () => win.evaluate((el: HTMLElement) => ({ width: el.offsetWidth, height: el.offsetHeight }));
+  const { width, height } = await size();
+  await handle.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Shift+ArrowDown");
+  await expect.poll(size).toEqual({ width: width + 16, height: height + 64 });
+  await expect(handle).toBeFocused();
 });

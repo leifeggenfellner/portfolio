@@ -79,16 +79,18 @@
 
 <div class="boot-frame">
   <div class="boot-bezel">
-    <div class="boot-screen boot-text-glow" role="status" aria-live="polite" aria-label="Booting RetroOS">
+    <div class="boot-screen boot-text-glow">
       <div class="boot-scanlines crt-scanlines" aria-hidden="true"></div>
       <div class="boot-vignette crt-vignette" aria-hidden="true"></div>
 
-      <header class="boot-header">
+      <!-- Decoration, not news: read aloud it was eight lines in under two
+           seconds. The splash after it announces the boot. -->
+      <header class="boot-header" aria-hidden="true">
         <span class="boot-host">RETRO BIOS v9.95.06</span>
         <span class="boot-meta">Build {BUILD_DATE} // 640K OK</span>
       </header>
 
-      <div class="boot-log retro-scroll">
+      <div class="boot-log retro-scroll" aria-hidden="true">
         {#each printed as line, i (i)}
           <div class="boot-line">
             <!-- eslint-disable-next-line svelte/no-at-html-tags -- the boot script's own fixed lines, highlighted; no user input -->
