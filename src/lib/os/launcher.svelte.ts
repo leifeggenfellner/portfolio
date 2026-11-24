@@ -113,6 +113,13 @@ export class Launcher {
     }
   }
 
+  /** Load an app's code before its first open, so it opens at once. No busy cursor: nothing is waiting on it. */
+  async prefetch(appId: string): Promise<void> {
+    const app = this.app(appId);
+    if (!app || this.component(appId)) return;
+    this.#components[appId] = (await app.load()).default;
+  }
+
   #parse(app: AppManifest, args: AppArgs | undefined): AppArgs | undefined {
     return args && app.parseArgs ? app.parseArgs(args) : undefined;
   }

@@ -1,80 +1,60 @@
 <script lang="ts">
+  import { bar, formatBytes, leader, overallPercent, STATUS_TEXT } from "@lib/boot-log";
+  import type { LogLine } from "@lib/boot-log";
   import { BUILD_DATE } from "@lib/build-info";
   import { onMount } from "svelte";
 
-  const LINES = [
-    "RETRO BIOS v9.95.06 — (c) Retro Systems",
-    "Detecting CPU.................. OK",
-    "Detecting RAM.................. 640K (the perfect amount)",
-    "Detecting GPU.................. CRT-mode enabled",
-    "Mounting /home/visitor......... OK",
-    "Loading kernel module: vaporwave.ko",
-    "Loading kernel module: window-mgr.ko",
-    "Starting RetroOS desktop environment...",
-  ];
-
   interface Props {
+    /** One line per loading task, live (the kernel's Loader). */
+    lines: readonly LogLine[];
+    /** The tasks the boot waits for are done, failed, or in the background. */
+    settled: boolean;
     /** The log finished printing; the boot moves on to the splash. */
     onDone: () => void;
     /** The visitor asked to skip; the shell jumps straight to the desktop. */
     onSkip: () => void;
   }
 
-  let { onDone, onSkip }: Props = $props();
+  let { lines, settled, onDone, onSkip }: Props = $props();
 
-  // Fast enough to read as a machine waking up, not a wait.
+  // Lines appear one at a time, fast enough to read as a machine waking up;
+  // each shows its task's live state, so real work can outlast its line.
   const LINE_INTERVAL_MS = 140;
   const FINAL_PAUSE_MS = 300;
+  const CLOSING_LINE = "Starting RetroOS desktop environment...";
 
-  let printed = $state<string[]>([]);
-  let done = false;
+  let shown = $state(0);
   let reduced = $state(false);
-  let progress = $derived(Math.round((printed.length / LINES.length) * 100));
+  // The closing line takes a beat of its own after the last task line.
+  const closing = $derived(settled && lines.length > 0 && shown > lines.length);
+  const visible = $derived(lines.slice(0, shown));
+  const progress = $derived(
+    closing ? 100 : overallPercent(lines.map((line, i) => (i < shown ? line : { ...line, status: "wait" }))),
+  );
 
-  // LINES is a static constant defined in this file, so this HTML formatting is safe.
-  function formatLine(line: string): string {
-    let out = line;
-    out = out.replace(
-      /^(Detecting [^.]*(?:\.{2,}|:)|Loading kernel module:|Mounting [^.]*(?:\.{2,}|:)|Starting [^.]*\.\.\.)/,
-      '<span class="boot-key">$1</span>',
-    );
-    out = out.replace(/\b(RETRO BIOS|RetroOS)\b/g, '<span class="boot-host">$1</span>');
-    out = out.replace(/\sOK$/, ' <span class="boot-ok">[OK]</span>');
-    return out;
-  }
-
-  function finish() {
-    if (done) return;
-    done = true;
-    onDone();
-  }
-
-  // Skip keys are handled by the shell, which owns every boot phase.
   onMount(() => {
     reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (reduced) {
-      printed = LINES;
-      const t = window.setTimeout(finish, 200);
-      return () => window.clearTimeout(t);
-    }
-
-    let i = 0;
-    let pause: number | undefined;
+    if (reduced) return;
     const step = window.setInterval(() => {
-      i += 1;
-      printed = LINES.slice(0, i);
-      if (i >= LINES.length) {
-        window.clearInterval(step);
-        pause = window.setTimeout(finish, FINAL_PAUSE_MS);
-      }
+      if (shown <= lines.length) shown += 1;
     }, LINE_INTERVAL_MS);
-
-    return () => {
-      window.clearInterval(step);
-      window.clearTimeout(pause);
-    };
+    return () => window.clearInterval(step);
   });
+
+  // Under reduced motion every line is there at once.
+  $effect(() => {
+    if (reduced) shown = lines.length + 1;
+  });
+
+  $effect(() => {
+    if (!closing) return;
+    const t = window.setTimeout(onDone, reduced ? 200 : FINAL_PAUSE_MS);
+    return () => window.clearTimeout(t);
+  });
+
+  function count(line: LogLine): string {
+    return `${line.done ?? 0}/${line.total ?? 0}`.padStart(7);
+  }
 </script>
 
 <div class="boot-frame">
@@ -83,21 +63,35 @@
       <div class="boot-scanlines crt-scanlines" aria-hidden="true"></div>
       <div class="boot-vignette crt-vignette" aria-hidden="true"></div>
 
-      <!-- Decoration, not news: read aloud it was eight lines in under two
-           seconds. The splash after it announces the boot. -->
+      <!-- Decoration, not news: read aloud it was a line every 140 ms. The
+           splash after it announces the boot. -->
       <header class="boot-header" aria-hidden="true">
         <span class="boot-host">RETRO BIOS v9.95.06</span>
         <span class="boot-meta">Build {BUILD_DATE} // 640K OK</span>
       </header>
 
       <div class="boot-log retro-scroll" aria-hidden="true">
-        {#each printed as line, i (i)}
-          <div class="boot-line">
-            <!-- eslint-disable-next-line svelte/no-at-html-tags -- the boot script's own fixed lines, highlighted; no user input -->
-            {@html formatLine(line)}{#if i === printed.length - 1}<span class={reduced ? "" : "boot-caret"}>▌</span
-              >{/if}
+        {#each visible as line, i (line.id)}
+          <div class="boot-line" data-boot-task={line.id} data-status={line.status}>
+            <span class="boot-key">{leader(line.label)}</span>
+            {#if line.note}
+              <span>{line.note}</span>
+            {:else if line.total !== undefined}
+              <span>{count(line)}</span><span class="boot-wide">{bar(line.done ?? 0, line.total)}</span>
+            {/if}
+            {#if line.bytes}<span class="boot-wide boot-size">{formatBytes(line.bytes)}</span>{/if}
+            {#if STATUS_TEXT[line.status]}
+              <span class="boot-status">[{STATUS_TEXT[line.status]}]</span>
+            {:else if i === visible.length - 1 && !closing}
+              <span class={reduced ? "" : "boot-caret"}>▌</span>
+            {/if}
           </div>
         {/each}
+        {#if closing}
+          <div class="boot-line">
+            <span class="boot-key">{CLOSING_LINE}</span><span class={reduced ? "" : "boot-caret"}>▌</span>
+          </div>
+        {/if}
       </div>
 
       <footer class="boot-footer">
@@ -227,8 +221,12 @@
     line-height: 1.35;
   }
 
+  /* A row of parts a character apart; the whitespace between them in the markup doesn't count. */
   .boot-line {
-    white-space: pre-wrap;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 1ch;
+    white-space: pre;
     animation: boot-line-in 220ms var(--ease-out) both;
   }
 
@@ -236,7 +234,7 @@
     animation: boot-cursor 1s steps(1, end) infinite;
   }
 
-  .boot-screen :global(.boot-key) {
+  .boot-key {
     color: color-mix(in srgb, var(--magenta) 72%, var(--boot-fg) 28%);
   }
 
@@ -244,8 +242,21 @@
     color: color-mix(in srgb, var(--cyan) 76%, var(--boot-fg) 24%);
   }
 
-  .boot-screen :global(.boot-ok) {
+  .boot-size {
+    color: var(--boot-muted);
+  }
+
+  .boot-line[data-status="ok"] .boot-status {
     color: var(--ok);
+  }
+
+  .boot-line[data-status="err"] .boot-status {
+    color: var(--err);
+  }
+
+  .boot-line[data-status="skip"] .boot-status,
+  .boot-line[data-status="bg"] .boot-status {
+    color: var(--boot-muted);
   }
 
   .boot-footer {
@@ -329,6 +340,11 @@
     .boot-log {
       font-size: var(--fs-16);
       line-height: 1.45;
+    }
+
+    /* The short format: label, count and status; no bar or size. */
+    .boot-wide {
+      display: none;
     }
 
     .boot-footer {
