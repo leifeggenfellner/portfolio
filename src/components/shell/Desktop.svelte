@@ -159,6 +159,8 @@
   aria-busy={launcher.loading > 0 || undefined}
   oncontextmenu={(e) => menu?.openAt(e)}
 >
+  <!-- Gives heading navigation somewhere to land; the badge is the visual title. -->
+  <h1 class="sr-only">Leif Eggenfellner's desktop</h1>
   <!-- Paused under the BIOS: it can't be seen, and a throttled phone needs the CPU for the boot. -->
   <Wallpaper covered={boot.phase === "bios" || screensaverOn || wallpaperCovered(windows.windows, viewport.mobile)} />
   <SystemBadge />

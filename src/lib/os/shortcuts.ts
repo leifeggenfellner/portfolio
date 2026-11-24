@@ -66,6 +66,12 @@ export const SHORTCUTS = {
     description: "Snap, maximise or restore the window",
     where: "Window title bar",
   },
+  windowResize: {
+    keys: ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"],
+    label: "Arrows",
+    description: "Resize the window; with Shift, in bigger steps",
+    where: "Window resize handle",
+  },
   terminalHistory: {
     keys: ["ArrowUp", "ArrowDown"],
     label: "Up / Down",

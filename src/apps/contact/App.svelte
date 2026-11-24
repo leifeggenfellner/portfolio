@@ -49,11 +49,13 @@
 <div class="text-text flex h-full min-h-0 flex-col gap-3 overflow-y-auto p-4">
   {#if PROFILE.email}
     <form class="flex flex-1 flex-col gap-3" novalidate onsubmit={send}>
-      <div class="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
+      <!-- minmax(0, 1fr): the fields shrink with the window instead of pushing past it at 400% zoom. -->
+      <div class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2">
         <span class={LABEL_CLASS}>To</span>
-        <div class="flex items-center gap-2">
+        <!-- Copy wraps under the name before the name truncates. -->
+        <div class="flex flex-wrap items-center gap-2">
           <!-- The name, not the address: the address goes in the mail app (and Copy), not on screen. -->
-          <span class="bevel-in-thin bg-surface-2 text-18 min-w-0 flex-1 truncate px-2 py-1 font-mono leading-tight">
+          <span class="bevel-in-thin bg-surface-2 text-18 min-w-0 flex-auto truncate px-2 py-1 font-mono leading-tight">
             {PROFILE.name}
           </span>
           <RetroButton size="sm" onclick={copyAddress}>{copied ? "Copied" : "Copy email"}</RetroButton>

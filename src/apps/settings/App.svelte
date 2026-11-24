@@ -52,20 +52,23 @@
             <span>{spec.label}</span>
           </label>
         {:else}
-          <span class={SETTING_TITLE_CLASS}>{spec.label}</span>
-          {#each spec.options as [value, label] (value)}
-            <label class={CONTROL_LABEL_CLASS}>
-              <input
-                class="accent-accent"
-                type="radio"
-                name="settings-{key}"
-                {value}
-                checked={settings.current[key] === value}
-                onchange={() => update(key, value)}
-              />
-              <span>{label}</span>
-            </label>
-          {/each}
+          <!-- Named group, so a screen reader says "CRT effect" before "Off". -->
+          <div class="flex flex-col gap-2" role="radiogroup" aria-labelledby="settings-{key}-title">
+            <span id="settings-{key}-title" class={SETTING_TITLE_CLASS}>{spec.label}</span>
+            {#each spec.options as [value, label] (value)}
+              <label class={CONTROL_LABEL_CLASS}>
+                <input
+                  class="accent-accent"
+                  type="radio"
+                  name="settings-{key}"
+                  {value}
+                  checked={settings.current[key] === value}
+                  onchange={() => update(key, value)}
+                />
+                <span>{label}</span>
+              </label>
+            {/each}
+          </div>
         {/if}
       {/each}
     </fieldset>
