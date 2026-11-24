@@ -7,6 +7,13 @@
   const COLORS = ["var(--magenta)", "var(--cyan)", "var(--accent)", "var(--face-fill)"];
   const SPEED_PX_PER_S = 110;
 
+  interface Props {
+    /** Woken: switching off like a tube before the host removes it. */
+    leaving?: boolean;
+  }
+
+  let { leaving = false }: Props = $props();
+
   let logo = $state<HTMLElement>();
   let colorIndex = $state(0);
   let still = $state(false);
@@ -49,7 +56,7 @@
   });
 </script>
 
-<div class="screensaver" data-screensaver aria-hidden="true">
+<div class={["screensaver", leaving && "crt-power-off"]} data-screensaver aria-hidden="true">
   <div class="outrun-sky"></div>
   <HorizonCanvas />
   <div class="outrun-horizon"></div>

@@ -103,9 +103,9 @@
     if (boot.phase !== "pending") delete document.documentElement.dataset.boot;
   });
 
-  // The splash fades over the already-mounted desktop; Boot removes it on a timer.
+  // The splash switches off like a tube over the already-mounted desktop; Boot removes it on a timer.
   function leaveSplash() {
-    boot.leaveSplash(prefersReducedMotion() ? 0 : durationMs("--dur-3", 240));
+    boot.leaveSplash(prefersReducedMotion() ? 0 : durationMs("--dur-crt-off", 420));
   }
 
   // "Reopen windows from my last visit": restore once, then keep it saved.
