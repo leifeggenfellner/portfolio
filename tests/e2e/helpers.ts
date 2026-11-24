@@ -31,6 +31,9 @@ export async function openDesktop(page: Page, { withNote = false, settings = {} 
   );
   await page.goto("/");
   await expect(page.getByRole("navigation", { name: "Taskbar" })).toBeVisible();
+  // The taskbar is server-rendered, so it shows before anything listens:
+  // a key pressed then is lost. Wait for the Desktop island to hydrate.
+  await expect(page.locator("astro-island[ssr]")).toHaveCount(0);
 }
 
 /** Open a desktop app from its icon with the keyboard, which works on every project. */
