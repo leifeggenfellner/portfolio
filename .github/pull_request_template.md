@@ -8,10 +8,6 @@
 
 <!-- Link the issue. The body of the commit goes in the commit, not here. -->
 
-## Screenshot / GIF
-
-<!-- Required for any visible UI change. -->
-
 ## Skill review
 
 <!-- Check the skills you ran (see .claude/skills). -->

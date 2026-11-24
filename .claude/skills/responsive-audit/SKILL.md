@@ -12,4 +12,4 @@ description: Check layout at phone, tablet and desktop widths, including the sin
    window + bottom dock with no drag/resize affordances.
 4. Confirm wallpaper + CRT layer still render correctly.
 5. Confirm focus order and reading order stay correct.
-6. File any issues with a screenshot per breakpoint.
+6. File any issues with the breakpoint and steps to reproduce.
