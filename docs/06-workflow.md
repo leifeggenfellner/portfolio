@@ -43,7 +43,6 @@ A PR must:
 3. Include test coverage for new behavior (or an explicit note
    for visual-only changes).
 4. Link the issue and the ADR (if architectural).
-5. Have a screenshot/GIF when it changes visible UI.
 
 PR template lives at `.github/pull_request_template.md`.
 
