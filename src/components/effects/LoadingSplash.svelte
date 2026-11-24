@@ -27,9 +27,8 @@
   role="status"
   aria-live="polite"
   aria-label={label}
-  class="outrun-splash-root"
+  class={["outrun-splash-root", leaving && "crt-power-off"]}
   data-sun-rise={sunRise ? "" : undefined}
-  data-leaving={leaving ? "" : undefined}
   style:--splash-ms={`${durationMs}ms`}
 >
   <OutrunScene gradientId="mountain-fade-splash" powerOnMs={Math.round(durationMs * 0.75)} />
@@ -105,12 +104,6 @@
     overflow: hidden;
     background: var(--boot-bg);
   }
-  .outrun-splash-root[data-leaving] {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--dur-3) var(--ease-out);
-  }
-
   .splash-overlay {
     position: absolute;
     inset: 0;

@@ -102,6 +102,8 @@
   --crt-scanline: rgba(0, 0, 0, 0.16);
   --crt-vignette: rgba(0, 0, 0, 0.28);
   --crt-glow: rgba(60, 255, 160, 0.025);
+  /* The bright line a tube collapses to when it switches off (.crt-power-off). */
+  --crt-off-line: #eafcff;
   /* An inactive window sits lower: a short hard shadow instead of --win-shadow. */
   --win-shadow-inactive: rgba(0, 0, 0, 0.18);
 
@@ -161,6 +163,7 @@
   --dur-4: 400ms;
   --dur-boot: 4000ms;
   --dur-degauss: 650ms;
+  --dur-crt-off: 420ms;
   --grid-scroll-duration: 8s;
   --grid-column-step: 96px;
   --grid-horizon-bottom: 33%;

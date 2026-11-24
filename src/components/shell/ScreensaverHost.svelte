@@ -1,6 +1,7 @@
 <script lang="ts">
   import Screensaver from "@effects/Screensaver.svelte";
   import { isDrafting, watchIdle } from "@lib/idle";
+  import { durationMs, prefersReducedMotion } from "@lib/motion";
   import { getOs } from "@lib/os/context";
   import { screensaverDelayMs } from "@lib/settings";
 
@@ -29,6 +30,32 @@
     };
   });
 
+  // On wake the screensaver switches off like a tube, then goes; the desktop
+  // is already live underneath. Removed on a timer, whatever the animation does.
+  let shown = $state(false);
+  let leaving = $state(false);
+  $effect(() => {
+    if (on) {
+      shown = true;
+      leaving = false;
+      return;
+    }
+    if (!shown) return;
+    if (prefersReducedMotion()) {
+      shown = false;
+      return;
+    }
+    leaving = true;
+    const t = setTimeout(
+      () => {
+        shown = false;
+        leaving = false;
+      },
+      durationMs("--dur-crt-off", 420),
+    );
+    return () => clearTimeout(t);
+  });
+
   // The key that wakes the screen is swallowed, as on a real machine, so it
   // can't also close a window or type into the terminal.
   $effect(() => {
@@ -36,6 +63,6 @@
   });
 </script>
 
-{#if on}
-  <Screensaver />
+{#if shown}
+  <Screensaver {leaving} />
 {/if}

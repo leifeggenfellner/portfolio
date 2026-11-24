@@ -64,6 +64,57 @@
   .icon-label[data-selected="true"] img {
     filter: drop-shadow(0 0 0 var(--selection-bg)) drop-shadow(1px 1px 0 var(--selection-bg));
   }
+  /* ---- CRT power-off ----
+     A full-screen layer leaving the way a tube switches off: the picture
+     squashes to a bright line, the line shrinks to a dot and goes. Transform
+     and opacity only; the line is the ::after layer fading in as it squashes.
+     Whatever shows the layer removes it on a timer of --dur-crt-off, so a
+     starved animation can't leave it up. Used by the boot splash and the screensaver. */
+  .crt-power-off {
+    pointer-events: none;
+    animation: crt-power-off var(--dur-crt-off) var(--ease-in-out) both;
+  }
+  .crt-power-off::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: var(--crt-off-line);
+    animation: crt-power-off-line var(--dur-crt-off) linear both;
+  }
+  @keyframes crt-power-off {
+    0% {
+      transform: scale(1, 1);
+      opacity: 1;
+    }
+    55% {
+      transform: scale(0.94, 0.004);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0, 0.004);
+      opacity: 0;
+    }
+  }
+  @keyframes crt-power-off-line {
+    0% {
+      opacity: 0;
+    }
+    50%,
+    100% {
+      opacity: 0.95;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .crt-power-off {
+      animation: none;
+      opacity: 0;
+    }
+    .crt-power-off::after {
+      display: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .icon-glow {
       filter: drop-shadow(0 0 2px color-mix(in srgb, var(--cyan) 30%, transparent));
